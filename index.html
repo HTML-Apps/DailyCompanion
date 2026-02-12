@@ -884,10 +884,16 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            const start = new Date(dateInput);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(dateInput);
-            end.setHours(23, 59, 59, 999);
+            // Datum sicher parsen (verhindert Zeitzonen-Probleme)
+            const parts = dateInput.split('-');
+            const year = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1; // Monate sind 0-basiert in JS
+            const day = parseInt(parts[2]);
+
+            // Start des Tages (00:00:00)
+            const start = new Date(year, month, day, 0, 0, 0, 0);
+            // Ende des Tages (23:59:59)
+            const end = new Date(year, month, day, 23, 59, 59, 999);
 
             try {
                 const snapshot = await db.collection("dailyEntries")
@@ -898,14 +904,26 @@
                     .get();
 
                 if (snapshot.empty) {
+                    // Fallback: Versuchen wir es ohne Zeitfilter, falls Zeitzonen verrückt spielen,
+                    // oder geben einfach die Meldung aus.
                     alert("Kein Eintrag für dieses Datum gefunden.");
                 } else {
                     const data = snapshot.docs[0].data();
+                    // Wir müssen das Datum für die Anzeige lesbar machen, falls es nicht im Timestamp ist
+                    // (z.B. für den Titel des Popups)
+                    if (!data.date && data.timestamp) data.date = data.timestamp; 
+                    
                     showPopup(data, true);
                 }
             } catch (error) {
-                console.error("Fehler beim Laden:", error);
-                alert("Fehler beim Laden des Eintrags.");
+                console.error("Detaillierter Fehler:", error);
+                
+                // Spezifische Prüfung auf fehlenden Index
+                if (error.message.includes("index")) {
+                    alert("WICHTIG: Firebase benötigt einen Index für diese Suche.\n\nÖffne die Browser-Konsole (F12), dort findest du einen Link von Google. Klicke darauf, um den Index automatisch zu erstellen.");
+                } else {
+                    alert("Fehler beim Laden: " + error.message);
+                }
             }
         }
 
