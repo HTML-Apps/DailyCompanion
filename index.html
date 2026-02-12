@@ -357,11 +357,11 @@
         }
 
         .btn-search {
-            background-color: #4facfe;
+            background-color: #000ca1;
         }
         
         .btn-stats {
-            background: linear-gradient(45deg, #FF9800 0%, #F76B1C 100%);
+            background: linear-gradient(45deg, #000ca1 0% 0%, #3c3e62 100%)
             width: 100%;
             font-size: 1.1em;
             padding: 12px;
@@ -679,7 +679,8 @@
                 <button type="button" class="notes-tag-button" data-tag="Vitamin D3">Vitamin D3</button>
                 <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
                 <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
-                <button type="button" class="notes-tag-button" data-tag="Creme Füße">Creme Füße</button>  
+                <button type="button" class="notes-tag-button" data-tag="Creme Füße">Creme Füße</button> 
+                <button type="button" class="notes-tag-button" data-tag="Biologika">Biologika</button>  
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
         </div>
@@ -1281,7 +1282,7 @@
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
-                    userInfoDiv.textContent = `Angemeldet: ${user.email}`;
+                    /*userInfoDiv.textContent = `Angemeldet: ${user.email}`;*/
                 } else {
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
