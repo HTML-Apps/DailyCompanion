@@ -5,21 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Daily Companion</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
         body {
             display: flex;
-            flex-direction: column; /* Setzt die Hauptachse auf Spalte */
+            flex-direction: column;
             justify-content: flex-start;
-            align-items: center; /* Zentriert den Inhalt horizontal */
-            min-height: 100vh; /* Mindesthöhe des Bodys auf 100% des Viewports */
+            align-items: center;
+            min-height: 100vh;
             margin: 0;
-            padding: 0; /* Padding vom Body entfernen, da es zum Scrollen führen kann */
+            padding: 0;
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0a0a1a 0%, #0d1226 100%);
             color: #FFFFFF;
-            overflow-y: auto; /* Body scrollt den gesamten Inhalt */
+            overflow-y: auto;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -30,15 +32,15 @@
         }
 
         .header-fixed {
-            position: sticky; /* Hält den Header am oberen Rand */
-            top: 0; /* Oben ausrichten */
+            position: sticky;
+            top: 0;
             width: 100%;
-            background: linear-gradient(135deg, #7878aa 0%, #0d1226 100%); /* Gleicher Hintergrund wie Body oder leicht angepasst */
-            padding: 10px 0; /* Padding für den Header */
-            z-index: 100; /* Stellt sicher, dass der Header über anderen Inhalten liegt */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Leichter Schatten für Tiefeneffekt */
-            text-align: center; /* Zentriert den Titel */
-            margin-bottom: 20px; /* Abstand zum scrollbaren Inhalt */
+            background: linear-gradient(135deg, #7878aa 0%, #0d1226 100%);
+            padding: 10px 0;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .header-fixed h1 {
@@ -47,26 +49,24 @@
             background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
             -webkit-background-clip: text;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            /*margin: 0;  Entfernt Standard-Margin von h1 */
         }
 
         .container {
             background: rgba(15, 15, 25, 0.95);
             border-radius: 25px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-            padding: 25px; /* Reduced padding */
+            padding: 25px;
             width: 98%;
             max-width: 450px;
             box-sizing: border-box;
             border: 0px solid rgba(30, 30, 45, 0.8);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            margin-top: 10px; /* Abstand nach oben, falls kein Sticky Header direkt darüber ist */
+            margin-top: 10px;
             margin-bottom: 10px;
-            flex-shrink: 0; /* Verhindert, dass der Container schrumpft */
+            flex-shrink: 0;
         }
 
-        /* Restlicher CSS-Code bleibt unverändert */
         .category-item {
             margin-bottom: 30px;
             background-color: rgba(25, 25, 45, 0.9);
@@ -84,7 +84,6 @@
             text-align: center;
         }
 
-        /* Zeitskala Styling mit Icons */
         .time-input-group {
             display: flex;
             flex-direction: row;
@@ -126,11 +125,10 @@
             filter: invert(1);
             cursor: pointer;
         }
-        .time-entry input[type="time"]::-moz-time-picker-indicator { /* Korrektur für Firefox Picker */
+        .time-entry input[type="time"]::-moz-time-picker-indicator {
             filter: invert(1);
             cursor: pointer;
         }
-
 
         .sleep-duration {
             font-size: 1.2em;
@@ -140,13 +138,12 @@
             font-weight: 600;
         }
 
-        /* Sport Checkboxen Styling & Schmerzmittel Checkboxen Styling (nutzen gleiche Klasse .sport-checkbox) */
         .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .notes-tags-group {
             display: flex;
             flex-direction: row;
-            flex-wrap: wrap; /* Erlaube Umbruch, falls nicht alle in eine Reihe passen */
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 8px; /* Reduzierter Abstand, um mehr in eine Reihe zu bekommen */
+            gap: 8px;
             margin-top: 15px;
         }
 
@@ -157,7 +154,7 @@
             justify-content: center;
             cursor: pointer;
             position: relative;
-            padding: 0 10px; /* Reduziertes Padding */
+            padding: 0 10px;
             background-color: #2a2a4a;
             border: 1px solid #45456a;
             border-radius: 10px;
@@ -165,28 +162,27 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             color: #FFFFFF;
             font-weight: 500;
-            min-width: 70px; /* Reduzierte Mindestbreite */
+            min-width: 70px;
             height: 30px;
             text-align: center;
-            font-size: 0.8em; /* Reduzierte Schriftgröße */
-            flex-shrink: 0; /* Verhindert das Schrumpfen bei kleinen Bildschirmen */
+            font-size: 0.8em;
+            flex-shrink: 0;
         }
 
-        /* NEU: Styling für Notiz-Tags */
         .notes-tag-button {
-            border-radius: 50px; /* Macht die Buttons rund */
-            min-width: 50px; /* Angepasste Mindestbreite für runde Buttons */
-            height: 50px; /* Angepasste Höhe für runde Buttons */
+            border-radius: 50px;
+            min-width: 50px;
+            height: 50px;
             font-size: 0.9em;
-            padding: 0 15px; /* Angepasstes Padding */
-            background-color: #3a3a5a; /* Etwas dunklerer Hintergrund für Tags */
+            padding: 0 15px;
+            background-color: #3a3a5a;
             border: 2px solid #5a5a7a;
         }
 
         .notes-tag-button.selected {
-            background-color: #00f2fe; /* Highlight Farbe für ausgewählte Tags */
+            background-color: #00f2fe;
             border-color: #4facfe;
-            color: #0a0a1a; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+            color: #0a0a1a;
             box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
@@ -214,13 +210,11 @@
             box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
-
         .sport-checkbox:hover, .notes-tag-button:hover {
             background-color: #3a3a5a;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
         }
 
-        /* RATING SKALA OPTIK */
         .rating-scale {
             display: flex;
             justify-content: center;
@@ -289,9 +283,8 @@
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
-        /* Styling für die Textarea */
         textarea {
-            width: calc(100% - 20px); /* 100% Breite minus Padding */
+            width: calc(100% - 20px);
             padding: 10px;
             margin-top: 10px;
             border-radius: 10px;
@@ -300,8 +293,8 @@
             color: #FFFFFF;
             font-family: 'Poppins', sans-serif;
             font-size: 1em;
-            resize: vertical; /* Nur vertikale Größenänderung zulassen */
-            min-height: 80px; /* Mindesthöhe für die Textarea */
+            resize: vertical;
+            min-height: 80px;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
         }
 
@@ -316,7 +309,7 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 30px;
+            margin-top: 20px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             border: 1px solid #ffffffff;
@@ -327,106 +320,112 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* Responsive Anpassungen */
-        @media (max-width: 480px) {
-            body {
-                padding: 0; /* Auch hier Padding entfernen */
-            }
-            .header-fixed {
-                padding: 8px 0; /* Angepasstes Padding für kleinen Bildschirmen */
-                margin-bottom: 15px;
-            }
-            .header-fixed h1 {
-                font-size: 2em;
-            }
-            .container {
-                padding: 15px;
-                width: 100%;
-                margin-top: 0; /* Abstand nach oben entfernen, da Header sticky ist */
-                margin-bottom: 5px;
-            }
-
-            /* Weitere responsive Anpassungen bleiben gleich */
-            .category-item {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-
-            .category-item label {
-                font-size: 1.3em;
-                margin-bottom: 15px;
-            }
-
-            .time-input-group {
-                flex-direction: row;
-                gap: 8px;
-                justify-content: center;
-            }
-
-            .time-entry {
-                font-size: 1.1em;
-            }
-            .time-entry input[type="time"] {
-                font-size: 0.9em;
-                padding: 6px 10px;
-                width: 90px;
-            }
-
-            .sleep-duration {
-                font-size: 1.1em;
-            }
-
-            .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .notes-tags-group {
-                gap: 5px; /* Noch kleinerer Abstand für sehr kleine Bildschirme */
-            }
-
-            .sport-checkbox {
-                padding: 0 8px; /* Noch kleineres Padding */
-                font-size: 0.75em; /* Noch kleinere Schriftgröße */
-                min-width: 60px; /* Noch kleinere Mindestbreite */
-                height: 28px;
-            }
-
-            /* NEU: Responsive für Notiz-Tags */
-            .notes-tag-button {
-                min-width: 40px;
-                height: 40px;
-            }
-
-            .sport-checkbox .icon {
-                font-size: 0.9em;
-            }
-
-            .rating-scale {
-                gap: 3px;
-                flex-wrap: nowrap;
-            }
-
-            .rating-box {
-                min-width: 28px;
-                height: 32px;
-                font-size: 0.9em;
-            }
-
-            .overall-average-display {
-                font-size: 1.8em;
-            }
-
-            textarea {
-                width: calc(100% - 20px);
-                font-size: 0.9em;
-                min-height: 60px;
-            }
-
-            .submit-button {
-                padding: 15px;
-                font-size: 1.3em;
-            }
+        /* NEU: Styling für History & Stats Controls */
+        .history-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
 
-        /* Popup Styles */
+        .history-search-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .date-input {
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            padding: 10px;
+            color: #FFFFFF;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            color-scheme: dark;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            font-weight: 600;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-search {
+            background-color: #4facfe;
+        }
+        
+        .btn-stats {
+            background: linear-gradient(45deg, #FF9800 0%, #F76B1C 100%);
+            width: 100%;
+            font-size: 1.1em;
+            padding: 12px;
+        }
+
+        .btn-search:hover, .btn-stats:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Chart Container in Popup */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .stat-highlight {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stat-highlight h4 {
+            margin: 0 0 5px 0;
+            color: #2ecc71;
+        }
+        .stat-highlight span {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+
+        @media (max-width: 480px) {
+            body { padding: 0; }
+            .header-fixed { padding: 8px 0; margin-bottom: 15px; }
+            .header-fixed h1 { font-size: 2em; }
+            .container { padding: 15px; width: 100%; margin-top: 0; margin-bottom: 5px; }
+            .category-item { padding: 15px; margin-bottom: 15px; }
+            .category-item label { font-size: 1.3em; margin-bottom: 15px; }
+            .time-input-group { flex-direction: row; gap: 8px; justify-content: center; }
+            .time-entry { font-size: 1.1em; }
+            .time-entry input[type="time"] { font-size: 0.9em; padding: 6px 10px; width: 90px; }
+            .sleep-duration { font-size: 1.1em; }
+            .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .notes-tags-group { gap: 5px; }
+            .sport-checkbox { padding: 0 8px; font-size: 0.75em; min-width: 60px; height: 28px; }
+            .notes-tag-button { min-width: 40px; height: 40px; }
+            .rating-scale { gap: 3px; }
+            .rating-box { min-width: 28px; height: 32px; font-size: 0.9em; }
+            .overall-average-display { font-size: 1.8em; }
+            textarea { width: calc(100% - 20px); font-size: 0.9em; min-height: 60px; }
+            .submit-button { padding: 15px; font-size: 1.3em; }
+            
+            /* Responsive Popup */
+            .popup { padding: 20px; width: 95%; }
+            .popup h2 { font-size: 1.7em; }
+            .chart-container { height: 250px; }
+        }
+
         .overlay {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -451,20 +450,14 @@
             color: #FFFFFF;
             position: relative;
             max-height: 80vh;
-            overflow-y: auto; /* Enable scrolling for content */
+            overflow-y: auto;
             border: 1px solid rgba(40, 40, 65, 0.9);
             animation: fadeInScale 0.3s ease-out forwards;
         }
 
         @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .popup h2 {
@@ -484,7 +477,7 @@
         }
 
         .popup-content strong {
-            color: #00f2fe; /* Highlight category names */
+            color: #00f2fe;
         }
 
         .close-btn {
@@ -500,25 +493,6 @@
         .close-btn:hover {
             color: #fff;
         }
-
-        /* Responsive for Popup */
-        @media (max-width: 480px) {
-            .popup {
-                padding: 20px;
-                width: 95%;
-            }
-            .popup h2 {
-                font-size: 1.7em;
-            }
-            .popup-content p {
-                font-size: 1em;
-            }
-            .close-btn {
-                font-size: 1.5em;
-                top: 10px;
-                right: 10px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -527,17 +501,17 @@
     </div>
 
     <button id="signInButton" style="
-        margin: 20px auto 10px auto; /* Zentriert den Button und gibt Abstand */
+        margin: 20px auto 10px auto;
         padding: 12px 25px;
         font-size: 1.2em;
         font-weight: 600;
         color: #fff;
-        background: linear-gradient(45deg, #007bff 0%, #00c7ff 100%); /* Blauer Farbverlauf */
+        background: linear-gradient(45deg, #007bff 0%, #00c7ff 100%);
         border: none;
         border-radius: 30px;
         cursor: pointer;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        display: block; /* Stellt sicher, dass der Margin:auto funktioniert */
+        display: block;
     ">Mit Google anmelden</button>
     <div id="userInfo" style="
         text-align: center;
@@ -545,6 +519,7 @@
         font-size: 0.9em;
         color: #aaa;
     ">Nicht angemeldet.</div>
+    
     <div class="container">
         <div class="category-item">
             <label>Schlafzeiten 😴</label>
@@ -632,15 +607,15 @@
                     <span class="icon">IBU 400</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedDiclo" data-painbox-type="active" data-painmed-name="Diclo">
+                    <input type="checkbox" id="painmedDiclo25" data-painbox-type="active" data-painmed-name="Diclo">
                     <span class="icon">Diclo 25</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedDiclo" data-painbox-type="active" data-painmed-name="Etoricoxib_60">
+                    <input type="checkbox" id="painmedEto60" data-painbox-type="active" data-painmed-name="Etoricoxib_60">
                     <span class="icon">Etori 60</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedDiclo" data-painbox-type="active" data-painmed-name="Etoricoxib_120">
+                    <input type="checkbox" id="painmedEto120" data-painbox-type="active" data-painmed-name="Etoricoxib_120">
                     <span class="icon">Etori 120</span>
                 </label>
                 <label class="sport-checkbox">
@@ -649,7 +624,6 @@
                 </label>
             </div>
         </div>
-
 
         <div class="category-item">
             <label for="mood-rating">Stimmung</label>
@@ -673,7 +647,8 @@
 
         <div class="category-item">
             <label for="lower-body-pain-rating">Schmerzen Unterkörper</label>
-            <div class="rating-scale" id="lower-body-pain-rating"></div> </div>
+            <div class="rating-scale" id="lower-body-pain-rating"></div>
+        </div>
 
         <div class="category-item">
             <label>Gesamttagesbilanz</label>
@@ -708,15 +683,45 @@
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
         </div>
+
+        <div class="category-item">
+            <label>Historie & Statistik 📊</label>
+            <div class="history-controls">
+                <div class="history-search-group">
+                    <input type="date" id="searchDate" class="date-input">
+                    <button class="action-button btn-search" id="searchBtn">Laden</button>
+                </div>
+                <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
+            </div>
+        </div>
+
         <button class="submit-button" id="submitBtn">Speichern</button>
     </div>
 
     <div class="overlay" id="popupOverlay">
         <div class="popup" id="dataPopup">
             <span class="close-btn" id="closePopupBtn">&times;</span>
-            <h2>Ihre Eingaben</h2>
+            <h2 id="popupTitle">Ihre Eingaben</h2>
             <div class="popup-content" id="popupContent">
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="statsOverlay">
+        <div class="popup" id="statsPopup" style="max-width: 500px;">
+            <span class="close-btn" id="closeStatsBtn">&times;</span>
+            <h2>Statistiken</h2>
+            <div class="popup-content">
+                <div id="bestDayDisplay" class="stat-highlight">
+                    <h4>Bester Tag (Max Score)</h4>
+                    <span id="bestDayDate">Lädt...</span><br>
+                    <span id="bestDayScore">--</span>
                 </div>
+                <p style="text-align:center; font-size:0.9em; margin-bottom:5px;">Top 5 vs. Flop 5 Tage</p>
+                <div class="chart-container">
+                    <canvas id="statsChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -725,27 +730,25 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-            apiKey: "AIzaSyDNx8HzHvGb7aBOsopIWz8-KWD3cnoNqWg", // ERSETZE DIES
-            authDomain: "daily-companion-24975.firebaseapp.com", // ERSETZE DIES
-            projectId: "daily-companion-24975", // ERSETZE DIES
-            storageBucket: "daily-companion-24975.firebasestorage.app", // ERSETZE DIES
-            messagingSenderId: "330854991329", // ERSETZE DIES
-            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", // ERSETZE DIES (optional, wenn du Analytics hast)
-            measurementId: "G-52MKKC9GCS" // ERSETZE DIES (optional, wenn du Analytics hast)
+            apiKey: "AIzaSyDNx8HzHvGb7aBOsopIWz8-KWD3cnoNqWg", 
+            authDomain: "daily-companion-24975.firebaseapp.com", 
+            projectId: "daily-companion-24975", 
+            storageBucket: "daily-companion-24975.firebasestorage.app", 
+            messagingSenderId: "330854991329", 
+            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", 
+            measurementId: "G-52MKKC9GCS" 
         };
 
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+        
+        let statsChartInstance = null; // Globale Variable für das Chart
 
-        // Funktion zum Generieren der Rating-Felder (1-10)
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
-            if (!container) return; // Wichtig: Beende die Funktion, wenn der Container nicht gefunden wird
+            if (!container) return;
 
             for (let i = 1; i <= 10; i++) {
                 const box = document.createElement('div');
@@ -762,7 +765,6 @@
             }
         }
 
-        // Funktion zur Berechnung der Schlafdauer
         function calculateSleepDuration() {
             const wakeUpTimeInput = document.getElementById('wakeUpTime');
             const bedTimeInput = document.getElementById('bedTime');
@@ -797,9 +799,8 @@
             }
         }
 
-        // Funktion zur Berechnung des Gesamtdurchschnitts
         function calculateOverallAverage() {
-            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating']; // KORREKTUR: lower-body-pain-rating hinzugefügt
+            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating']; 
             let totalRating = 0;
             let ratingCount = 0;
 
@@ -820,10 +821,19 @@
             }
         }
 
-        // Funktion zum Anzeigen des Popups mit Daten
-        function showPopup(data) {
+        function showPopup(data, isHistory = false) {
             const popupOverlay = document.getElementById('popupOverlay');
             const popupContent = document.getElementById('popupContent');
+            const popupTitle = document.getElementById('popupTitle');
+
+            // Titel anpassen, wenn es ein historischer Eintrag ist
+            if(isHistory && data.date) {
+                // Firestore Timestamp zu Datum konvertieren
+                let dateObj = data.date.toDate ? data.date.toDate() : new Date(data.date);
+                popupTitle.innerText = `Eintrag vom ${dateObj.toLocaleDateString('de-DE')}`;
+            } else {
+                popupTitle.innerText = "Ihre Eingaben (Heute)";
+            }
 
             let popupContentHtml = '<h3>Tagesbilanz:</h3>';
             popupContentHtml += `<p><strong>Aufstehen:</strong> ${data.wakeUpTime || 'Nicht angegeben'}</p>`;
@@ -834,12 +844,8 @@
             popupContentHtml += `<p><strong>Sport:</strong> ${sportsText}</p>`;
 
             popupContentHtml += `<p><strong>Dehnübungen:</strong> ${data.stretchingStatus || 'Nicht angegeben'}</p>`;
-
-            // Display for Gluten
             popupContentHtml += `<p><strong>Gluten:</strong> ${data.glutenStatus || 'Nicht angegeben'}</p>`;
-            // Display for Milk
             popupContentHtml += `<p><strong>Milch:</strong> ${data.milkStatus || 'Nicht angegeben'}</p>`;
-
 
             const painmedsText = data.selectedPainmeds && data.selectedPainmeds.length > 0 ? data.selectedPainmeds.join(', ') : 'Keine Auswahl';
             popupContentHtml += `<p><strong>Schmerzmittel:</strong> ${painmedsText}</p>`;
@@ -853,20 +859,176 @@
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
             
-            // NEU: Anzeige für Notiz-Tags
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
 
             popupContentHtml += `<p><strong>Anmerkungen:</strong> ${data.notes || 'Keine Anmerkungen'}</p>`;
 
-
             popupContent.innerHTML = popupContentHtml;
             popupOverlay.style.display = 'flex';
         }
 
-        // Funktion zum Schließen des Popups
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        // NEU: Funktionen für Statistik und Suche
+        function closeStatsPopup() {
+            document.getElementById('statsOverlay').style.display = 'none';
+        }
+
+        async function loadEntryByDate() {
+            const dateInput = document.getElementById('searchDate').value;
+            const user = auth.currentUser;
+
+            if (!user) { alert("Bitte anmelden."); return; }
+            if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
+
+            const start = new Date(dateInput);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(dateInput);
+            end.setHours(23, 59, 59, 999);
+
+            try {
+                const snapshot = await db.collection("dailyEntries")
+                    .where("userId", "==", user.uid)
+                    .where("date", ">=", start)
+                    .where("date", "<=", end)
+                    .limit(1)
+                    .get();
+
+                if (snapshot.empty) {
+                    alert("Kein Eintrag für dieses Datum gefunden.");
+                } else {
+                    const data = snapshot.docs[0].data();
+                    showPopup(data, true);
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden:", error);
+                alert("Fehler beim Laden des Eintrags.");
+            }
+        }
+
+        async function loadStatistics() {
+            const user = auth.currentUser;
+            if (!user) { alert("Bitte anmelden."); return; }
+
+            document.getElementById('statsOverlay').style.display = 'flex';
+            document.getElementById('bestDayDate').innerText = "Lade Daten...";
+
+            try {
+                // Wir laden alle Einträge des Users, um lokal zu sortieren
+                // (Bei sehr vielen Daten wäre eine serverseitige Aggregation besser, aber für diese App ok)
+                const snapshot = await db.collection("dailyEntries")
+                    .where("userId", "==", user.uid)
+                    .get();
+
+                if (snapshot.empty) {
+                    document.getElementById('bestDayDate').innerText = "Keine Daten";
+                    return;
+                }
+
+                let entries = [];
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    if (d.overallAverage !== null && d.overallAverage !== undefined) {
+                        entries.push({
+                            date: d.date.toDate(),
+                            score: parseFloat(d.overallAverage)
+                        });
+                    }
+                });
+
+                if (entries.length === 0) {
+                    document.getElementById('bestDayDate').innerText = "Keine bewerteten Tage";
+                    return;
+                }
+
+                // Sortieren nach Score absteigend
+                entries.sort((a, b) => b.score - a.score);
+
+                // Bester Tag
+                const best = entries[0];
+                document.getElementById('bestDayDate').innerText = best.date.toLocaleDateString('de-DE');
+                document.getElementById('bestDayScore').innerText = best.score + " / 10";
+
+                // Top 5 und Flop 5
+                const top5 = entries.slice(0, 5);
+                const flop5 = entries.slice().sort((a, b) => a.score - b.score).slice(0, 5); // Kleinste zuerst
+
+                renderChart(top5, flop5);
+
+            } catch (error) {
+                console.error("Stats Error:", error);
+                document.getElementById('bestDayDate').innerText = "Fehler";
+            }
+        }
+
+        function renderChart(top5, flop5) {
+            const ctx = document.getElementById('statsChart').getContext('2d');
+
+            // Daten aufbereiten
+            // Wir kombinieren Top 5 und Flop 5 für eine Übersicht, oder zeigen sie gruppiert
+            // Einfachheitshalber: Top 5 links, Flop 5 rechts (als separate Balken)
+            
+            // Labels formatieren
+            const topLabels = top5.map(e => "🏆 " + e.date.toLocaleDateString('de-DE').slice(0, 5));
+            const topData = top5.map(e => e.score);
+            
+            const flopLabels = flop5.map(e => "⚠️ " + e.date.toLocaleDateString('de-DE').slice(0, 5));
+            const flopData = flop5.map(e => e.score);
+
+            const allLabels = [...topLabels, ...flopLabels];
+            const allData = [...topData, ...flopData];
+            
+            // Farben: Grün für Top, Rot für Flop
+            const bgColors = [
+                ...topData.map(() => 'rgba(46, 204, 113, 0.7)'),
+                ...flopData.map(() => 'rgba(231, 76, 60, 0.7)')
+            ];
+
+            if (statsChartInstance) {
+                statsChartInstance.destroy();
+            }
+
+            statsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allLabels,
+                    datasets: [{
+                        label: 'Tagesbilanz Score',
+                        data: allData,
+                        backgroundColor: bgColors,
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#ccc' }
+                        },
+                        x: {
+                            ticks: { color: '#ccc', font: {size: 10} }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Score: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -874,20 +1036,43 @@
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
             generateRatingBoxes('upper-body-pain-rating');
-            generateRatingBoxes('lower-body-pain-rating'); // KORREKTUR: ID hier korrigiert
-
+            generateRatingBoxes('lower-body-pain-rating'); 
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
 
-            // Event-Listener für Sport-Checkboxen (Mehrfachauswahl, "Kein Sport" ist exklusiv)
+            // Checkbox Logik (Sport, Dehnen, etc.)
+            const setupExclusiveGroup = (groupClass) => {
+                const checkboxes = document.querySelectorAll(`.${groupClass} .sport-checkbox input[type="checkbox"]`);
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', (event) => {
+                        const label = event.target.closest('.sport-checkbox');
+                        if (event.target.checked) {
+                            label.classList.add('selected');
+                            checkboxes.forEach(cb => {
+                                if (cb !== event.target) {
+                                    cb.checked = false;
+                                    cb.closest('.sport-checkbox').classList.remove('selected');
+                                }
+                            });
+                        } else {
+                            label.classList.remove('selected');
+                        }
+                    });
+                });
+            };
+
+            setupExclusiveGroup('stretching-options-group');
+            setupExclusiveGroup('gluten-options-group');
+            setupExclusiveGroup('milk-options-group');
+
+            // Sport Logik (Mixed)
             const sportCheckboxes = document.querySelectorAll('.sport-options-group input[type="checkbox"]');
             sportCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
                     const label = event.target.closest('.sport-checkbox');
                     if (event.target.checked) {
                         label.classList.add('selected');
-                        // Wenn "Kein Sport" gewählt wird, alle anderen abwählen
                         if (event.target.id === 'sportNone') {
                             sportCheckboxes.forEach(cb => {
                                 if (cb !== event.target) {
@@ -895,7 +1080,7 @@
                                     cb.closest('.sport-checkbox').classList.remove('selected');
                                 }
                             });
-                        } else { // Wenn ein spezifischer Sport gewählt wird, "Kein Sport" abwählen
+                        } else {
                             const sportNoneCheckbox = document.getElementById('sportNone');
                             if (sportNoneCheckbox && sportNoneCheckbox.checked) {
                                 sportNoneCheckbox.checked = false;
@@ -908,66 +1093,7 @@
                 });
             });
 
-
-            // Event-Listener für Dehnübungen-Checkboxen (Exklusiv-Auswahl)
-            const stretchingCheckboxes = document.querySelectorAll('.stretching-options-group .sport-checkbox input[type="checkbox"]');
-            stretchingCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', (event) => {
-                    const label = event.target.closest('.sport-checkbox');
-                    if (event.target.checked) {
-                        label.classList.add('selected');
-                        stretchingCheckboxes.forEach(cb => {
-                            if (cb !== event.target) {
-                                cb.checked = false;
-                                cb.closest('.sport-checkbox').classList.remove('selected');
-                            }
-                        });
-                    } else {
-                        label.classList.remove('selected');
-                    }
-                });
-            });
-
-            // Event-Listener for Gluten Checkboxes (Exclusive selection)
-            const glutenCheckboxes = document.querySelectorAll('.gluten-options-group .sport-checkbox input[type="checkbox"]');
-            glutenCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', (event) => {
-                    const label = event.target.closest('.sport-checkbox');
-                    if (event.target.checked) {
-                        label.classList.add('selected');
-                        glutenCheckboxes.forEach(cb => {
-                            if (cb !== event.target) {
-                                cb.checked = false;
-                                cb.closest('.sport-checkbox').classList.remove('selected');
-                            }
-                        });
-                    } else {
-                        label.classList.remove('selected');
-                    }
-                });
-            });
-
-            // Event-Listener for Milk Checkboxes (Exclusive selection)
-            const milkCheckboxes = document.querySelectorAll('.milk-options-group .sport-checkbox input[type="checkbox"]');
-            milkCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', (event) => {
-                    const label = event.target.closest('.sport-checkbox');
-                    if (event.target.checked) {
-                        label.classList.add('selected');
-                        milkCheckboxes.forEach(cb => {
-                            if (cb !== event.target) {
-                                cb.checked = false;
-                                cb.closest('.sport-checkbox').classList.remove('selected');
-                            }
-                        });
-                    } else {
-                        label.classList.remove('selected');
-                    }
-                });
-            });
-
-
-            // Event-Listener für Schmerzmittel-Checkboxen (Exklusiv-Auswahl bei "Keine")
+            // Painmeds Logic
             const painmedCheckboxes = document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]');
             painmedCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -994,14 +1120,12 @@
                 });
             });
 
-            // NEU: Event-Listener für Notes-Tags
             const notesTagButtons = document.querySelectorAll('.notes-tag-button');
             notesTagButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     button.classList.toggle('selected');
                 });
             });
-
 
             calculateOverallAverage();
 
@@ -1012,13 +1136,11 @@
                     return;
                 }
 
-                // DEINE UID HIER EINFÜGEN
                 const YOUR_UID = "VgrOSS05xEPvvFUXQdybgQTCbX52";
                 if (user.uid !== YOUR_UID) {
                     alert('Sie sind nicht berechtigt, Daten zu speichern. Bitte verwenden Sie das korrekte Konto.');
                     return;
                 }
-
 
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
@@ -1033,18 +1155,12 @@
                     selectedSports = activeSports.map(cb => cb.dataset.sportName);
                 }
 
-
                 const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
-
-                // Get selected Gluten status
                 const selectedGluten = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const glutenStatus = selectedGluten ? selectedGluten.dataset.glutenName : null;
-
-                // Get selected Milk status
                 const selectedMilk = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
-
 
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
                                           .map(cb => cb.dataset.painmedName);
@@ -1055,10 +1171,8 @@
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
 
-                // NEU: Ausgewählte Notiz-Tags erfassen
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
                     .map(button => button.dataset.tag);
-
 
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
@@ -1120,9 +1234,16 @@
                 }
             });
 
-            // HINZUGEFÜGT: Anmelde-Logik für den Button
+            // Event Listeners für neue Statistik & Search Features
+            document.getElementById('searchBtn').addEventListener('click', loadEntryByDate);
+            document.getElementById('statsBtn').addEventListener('click', loadStatistics);
+            document.getElementById('closeStatsBtn').addEventListener('click', closeStatsPopup);
+            document.getElementById('statsOverlay').addEventListener('click', (event) => {
+                if(event.target.id === 'statsOverlay') closeStatsPopup();
+            });
+
             const signInButton = document.getElementById('signInButton');
-            const userInfoDiv = document.getElementById('userInfo'); // Hole das userInfo Div
+            const userInfoDiv = document.getElementById('userInfo'); 
 
             if (signInButton) {
                 signInButton.addEventListener('click', () => {
@@ -1130,9 +1251,7 @@
                     auth.signInWithPopup(provider)
                         .then((result) => {
                             const user = result.user;
-                            console.log('Angemeldet als:', user.displayName, 'UID:', user.uid);
                             alert(`Erfolgreich angemeldet als ${user.displayName}!`);
-                            userInfoDiv.textContent = `Angemeldet als: ${user.displayName}`;
                             signInButton.style.display = 'none';
                         }).catch((error) => {
                             console.error('Fehler bei der Google-Anmeldung:', error);
@@ -1141,14 +1260,11 @@
                 });
             }
 
-            // Überprüfen, ob ein Benutzer bereits angemeldet ist
             auth.onAuthStateChanged((user) => {
                 if (user) {
-                    console.log('Benutzer ist bereits angemeldet:', user.displayName, 'UID:', user.uid);
-                    userInfoDiv.textContent = `Angemeldet als: ${user.displayName}`;
                     if (signInButton) signInButton.style.display = 'none';
+                    userInfoDiv.textContent = `Angemeldet: ${user.email}`;
                 } else {
-                    console.log('Kein Benutzer angemeldet.');
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
                 }
