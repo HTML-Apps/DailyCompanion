@@ -361,7 +361,7 @@
         }
         
         .btn-stats {
-            background: linear-gradient(45deg, #000ca1 0% 0%, #3c3e62 100%)
+            background: linear-gradient(45deg, #000ca1 0% 0%, #3c3e62 100%);
             width: 100%;
             font-size: 1.1em;
             padding: 12px;
@@ -1282,7 +1282,7 @@
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
-                    /*userInfoDiv.textContent = `Angemeldet: ${user.email}`;*/
+                    userInfoDiv.textContent = `Angemeldet: ${user.email}`;
                 } else {
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
