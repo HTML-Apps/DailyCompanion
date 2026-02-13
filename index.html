@@ -816,7 +816,7 @@
         }
 
         function calculateOverallAverage() {
-            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating']; 
+            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating', 'movement-flow-pain-rating'];
             let totalRating = 0;
             let ratingCount = 0;
 
@@ -1072,6 +1072,7 @@
             generateRatingBoxes('shoulder-pain-rating');
             generateRatingBoxes('upper-body-pain-rating');
             generateRatingBoxes('lower-body-pain-rating'); 
+            generateRatingBoxes('movement-flow-pain-rating');
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -1205,7 +1206,7 @@
                 const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
-                const movementFlowPainRating = document.querySelector('#movementFlowPainRating .rating-box.selected')?.dataset.value || null;
+                const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
 
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
                     .map(button => button.dataset.tag);
