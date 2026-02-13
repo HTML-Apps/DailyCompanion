@@ -871,6 +871,7 @@
             popupContentHtml += `<p><strong>Schulterschmerzen:</strong> ${data.shoulderPainRating ? data.shoulderPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Oberkörperschmerzen:</strong> ${data.upperBodyPainRating ? data.upperBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Bewegungsöffnung / Flow:</strong> ${data.movementFlowPainRating ? data.movementFlowPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
@@ -1204,6 +1205,7 @@
                 const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
+                const movementFlowPainRating = document.querySelector('#movementFlowPainRating .rating-box.selected')?.dataset.value || null;
 
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
                     .map(button => button.dataset.tag);
@@ -1223,6 +1225,7 @@
                 if (!shoulderPainRating) missingFields.push('Schmerzen Schultern');
                 if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
+                if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
@@ -1245,6 +1248,7 @@
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
                     upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
+                    movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
                     selectedNotesTags
@@ -1308,3 +1312,4 @@
 </body>
 
 </html>
+
