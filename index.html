@@ -10,6 +10,8 @@
     <link rel="apple-touch-icon" href="favicon.ico">    
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
+    <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -737,6 +739,19 @@
                 <div class="chart-container">
                     <canvas id="statsChart"></canvas>
                 </div>
+                
+                <div class="chart-container" style="margin-top: 30px;">
+                    <h4 style="text-align:center; color:#00f2fe;">Langzeit-Trend & Regression</h4>
+                    <select id="trendSelector" style="width:100%; padding:10px; margin-bottom:10px; background:#2a2a4a; color:white; border:1px solid #45456a; border-radius:10px;">
+                        <option value="overallAverage">Gesamtbilanz</option>
+                        <option value="moodRating">Stimmung</option>
+                        <option value="neckPainRating">Nackenschmerzen</option>
+                        <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
+                    </select>
+                    <canvas id="trendChart"></canvas>
+                    <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:5px;"></p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -952,8 +967,6 @@
             document.getElementById('bestDayDate').innerText = "Lade Daten...";
 
             try {
-                // Wir laden alle Einträge des Users, um lokal zu sortieren
-                // (Bei sehr vielen Daten wäre eine serverseitige Aggregation besser, aber für diese App ok)
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
                     .get();
@@ -963,35 +976,54 @@
                     return;
                 }
 
-                let entries = [];
+                let fullEntries = []; // Speichert alle Felder für die Trend-Analyse
+                let scoreEntries = []; // Hilfs-Array für Best Day / Top 5
+
                 snapshot.forEach(doc => {
                     const d = doc.data();
+                    const dateObj = d.date ? d.date.toDate() : new Date();
+
+                    // 1. Daten für Trend-Analyse (alle Metriken)
+                    fullEntries.push({
+                        ...d,
+                        date: dateObj
+                    });
+
+                    // 2. Daten für Best Day / Top 5 (basierend auf overallAverage)
                     if (d.overallAverage !== null && d.overallAverage !== undefined) {
-                        entries.push({
-                            date: d.date.toDate(),
+                        scoreEntries.push({
+                            date: dateObj,
                             score: parseFloat(d.overallAverage)
                         });
                     }
                 });
 
-                if (entries.length === 0) {
+                if (scoreEntries.length === 0) {
                     document.getElementById('bestDayDate').innerText = "Keine bewerteten Tage";
                     return;
                 }
 
-                // Sortieren nach Score absteigend
-                entries.sort((a, b) => b.score - a.score);
-
-                // Bester Tag
-                const best = entries[0];
+                // --- Klassische Statistik (Best Day / Chart) ---
+                scoreEntries.sort((a, b) => b.score - a.score);
+                const best = scoreEntries[0];
                 document.getElementById('bestDayDate').innerText = best.date.toLocaleDateString('de-DE');
                 document.getElementById('bestDayScore').innerText = best.score + " / 10";
 
-                // Top 5 und Flop 5
-                const top5 = entries.slice(0, 5);
-                const flop5 = entries.slice().sort((a, b) => a.score - b.score).slice(0, 5); // Kleinste zuerst
-
+                const top5 = scoreEntries.slice(0, 5);
+                const flop5 = scoreEntries.slice().sort((a, b) => a.score - b.score).slice(0, 5);
                 renderChart(top5, flop5);
+
+                // --- NEU: Trend-Analyse & Regression ---
+                // Initialisiere das Trend-Chart (Standardmäßig mit Gesamtbilanz)
+                renderTrendChart(fullEntries, 'overallAverage');
+
+                // Event Listener für das Dropdown-Menü (Trend-Umschalter)
+                const trendSelector = document.getElementById('trendSelector');
+                if (trendSelector) {
+                    trendSelector.onchange = (e) => {
+                        renderTrendChart(fullEntries, e.target.value);
+                    };
+                }
 
             } catch (error) {
                 console.error("Stats Error:", error);
@@ -1065,6 +1097,128 @@
                 }
             });
         }
+
+
+        let trendChartInstance = null;
+
+        function calculateTrend(dataPoints) {
+            // dataPoints Format: [{ x: 1, y: 5 }, { x: 2, y: 6 } ...] (x = Tag-Nummer)
+            
+            // Wir brauchen Arrays für simple-statistics: [[x1, y1], [x2, y2]]
+            const regressionData = dataPoints.map(p => [p.x, p.y]);
+            
+            // Berechne Regression (y = mx + b)
+            const line = ss.linearRegression(regressionData); 
+            const lineFunc = ss.linearRegressionLine(line);
+            const rSquared = ss.rSquared(regressionData, lineFunc); // Bestimmtheitsmaß
+
+            // Generiere Start- und Endpunkt für die Linie im Chart
+            const startX = dataPoints[0].x;
+            const endX = dataPoints[dataPoints.length - 1].x;
+            
+            return {
+                m: line.m, // Steigung
+                b: line.b, // Y-Achsenabschnitt
+                r2: rSquared,
+                startPoint: { x: startX, y: lineFunc(startX) },
+                endPoint: { x: endX, y: lineFunc(endX) }
+            };
+        }
+
+        function renderTrendChart(entries, metricKey) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // 1. Daten vorbereiten
+            // Wir filtern leere Werte raus und sortieren nach Datum
+            const validEntries = entries
+                .filter(e => e[metricKey] !== null && e[metricKey] !== undefined)
+                .sort((a, b) => a.date - b.date);
+
+            if (validEntries.length < 2) return;
+
+            // Start-Datum finden für x-Achse (Tag 0, Tag 1...)
+            const startDate = validEntries[0].date;
+            
+            // Datenpunkte für Chart.js und Regression erstellen
+            const scatterData = validEntries.map(e => {
+                const diffTime = Math.abs(e.date - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                return {
+                    x: diffDays, 
+                    y: e[metricKey],
+                    dateLabel: e.date.toLocaleDateString('de-DE') // Für Tooltip
+                };
+            });
+
+            // 2. Regression berechnen
+            const trend = calculateTrend(scatterData);
+
+            // 3. Interpretationstext
+            const trendText = document.getElementById('trendText');
+            const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
+            const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; // Grün oder Rot
+            trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
+
+            // 4. Chart zeichnen
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
+
+            trendChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Tageswerte',
+                            data: scatterData,
+                            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                            pointRadius: 3
+                        },
+                        {
+                            type: 'line',
+                            label: 'Trend-Linie',
+                            data: [trend.startPoint, trend.endPoint], // Nur Start und Ende verbinden
+                            borderColor: color,
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Tage seit Start', color: '#888' },
+                            ticks: { color: '#888' }
+                        },
+                        y: {
+                            min: 1, max: 10,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#ccc' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(context.dataset.type === 'line') return `Trend: ${context.raw.y.toFixed(2)}`;
+                                    const point = context.raw;
+                                    return `${point.dateLabel}: ${point.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
