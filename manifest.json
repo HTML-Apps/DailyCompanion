@@ -1,20 +1,20 @@
 {
-  "name": "Vokabeltrainer",
-  "short_name": "Vokabeltrainer",
+  "name": "DailyCompanion",
+  "short_name": "DailyCompanion",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f4f9",
-  "description": "Vokabeltrainer",
+  "description": "DailyCompanion",
   "icons": [
     {
-      "src": "book.png",
+      "src": "favicon.ico",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/ico"
     },
     {
       "src": "cook.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/ico"
     }
   ]
 }
