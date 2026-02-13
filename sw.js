@@ -1,8 +1,8 @@
-const CACHE_NAME = "wochenplaner-v1";
+const CACHE_NAME = "DailyCompanion-v1";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
-  "./book.png"
+  "./favicon.ico"
 ];
 
 // 1. Installieren: Dateien in den Cache laden
