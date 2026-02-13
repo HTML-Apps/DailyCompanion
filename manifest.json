@@ -7,14 +7,14 @@
   "description": "DailyCompanion",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "daily.png",
       "sizes": "192x192",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "favicon.ico",
+      "src": "daily.png",
       "sizes": "512x512",
-      "type": "image/x-icon"
+      "type": "image/png"
     }
   ]
 }
