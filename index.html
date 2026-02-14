@@ -1224,12 +1224,18 @@
                 // Für die Berechnung brauchen wir Zahlen (Timestamps)
                 const mathData = scatterData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData); 
-                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c";
-                
+
+                // --- DIESER TEIL FEHLTE: ---
+                const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
+                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
+
+                // Text in das HTML-Element schreiben
+                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
+                // ---------------------------
+
                 datasets.push({
                     type: 'line',
                     label: 'Trend',
-                    // Start- und Endpunkt wieder als Date-Objekte für die Achse
                     data: [
                         { x: new Date(trend.startPoint.x), y: trend.startPoint.y },
                         { x: new Date(trend.endPoint.x), y: trend.endPoint.y }
