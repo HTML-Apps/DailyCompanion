@@ -1196,11 +1196,6 @@
             const ctx = document.getElementById('trendChart').getContext('2d');
             const trendText = document.getElementById('trendText');
             
-            const trendText = document.getElementById('trendText');
-            const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-            const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; // Grün oder Rot
-            trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
-            
             const validEntries = entries
                 .filter(e => e[metricKey] !== null && e[metricKey] !== undefined)
                 .sort((a, b) => a.date - b.date);
