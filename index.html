@@ -1230,9 +1230,9 @@
                 const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
 
                 // Berechnung der Steigung pro Tag (ms pro Tag: 1000 * 60 * 60 * 24)
-                //const slopePerDay = trend.m * 86400000;
+                const slopePerDay = trend.m * 86400000;
 
-                // Anzeige im Text (jetzt mit 2 Nachkommastellen für bessere Lesbarkeit)
+                // Anzeige im Text (jetzt mit 4 Nachkommastellen für bessere Lesbarkeit)
                 const direction = slopePerDay > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
                 const color = slopePerDay > 0 ? "#2ecc71" : "#e74c3c"; 
 
