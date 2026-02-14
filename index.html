@@ -1221,22 +1221,19 @@
 
             // Trend-Berechnung (X-Werte für Mathe in Timestamps umwandeln)
             if (validEntries.length >= 2) {
-                // Für die Berechnung brauchen wir Zahlen (Timestamps)
                 const mathData = scatterData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData); 
 
-                // --- DIESER TEIL FEHLTE: ---
-                const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
-
-                // Berechnung der Steigung pro Tag (ms pro Tag: 1000 * 60 * 60 * 24)
+                // 1. Erst die Steigung pro Tag berechnen
                 const slopePerDay = trend.m * 86400000;
 
-                // Anzeige im Text (jetzt mit 4 Nachkommastellen für bessere Lesbarkeit)
-                const direction = slopePerDay > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-                const color = slopePerDay > 0 ? "#2ecc71" : "#e74c3c"; 
+                // 2. Dann Farbe und Richtung bestimmen (nur einmal deklarieren!)
+                const isPositive = slopePerDay > 0;
+                const directionText = isPositive ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
+                const trendColor = isPositive ? "#2ecc71" : "#e74c3c"; 
 
-                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Änderung/Tag: ${slopePerDay.toFixed(4)})`;
+                // 3. Text ausgeben
+                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(4)})`;
 
                 datasets.push({
                     type: 'line',
@@ -1245,11 +1242,13 @@
                         { x: new Date(trend.startPoint.x), y: trend.startPoint.y },
                         { x: new Date(trend.endPoint.x), y: trend.endPoint.y }
                     ],
-                    borderColor: color,
+                    borderColor: trendColor, // Nutzt die oben definierte Variable
                     borderDash: [5, 5],
                     pointRadius: 0,
                     fill: false
                 });
+            } else {
+                trendText.innerHTML = "Zu wenig Daten für eine Trend-Berechnung.";
             }
 
             if (trendChartInstance) trendChartInstance.destroy();
