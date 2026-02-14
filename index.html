@@ -749,6 +749,7 @@
                         <option value="shoulderPainRating">Schulterschmerzen</option>
                         <option value="upperBodyPainRating">Oberkörperschmerzen</option>
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
+                        <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
                     </select>
                     <canvas id="trendChart"></canvas>
                     <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:5px;"></p>
@@ -833,7 +834,7 @@
         }
 
         function calculateOverallAverage() {
-            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating', 'movement-flow-pain-rating'];
+            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating'];
             let totalRating = 0;
             let ratingCount = 0;
 
