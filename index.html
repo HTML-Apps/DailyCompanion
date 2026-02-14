@@ -1191,39 +1191,71 @@
 
         function renderTrendChart(entries, metricKey) {
             const ctx = document.getElementById('trendChart').getContext('2d');
+            const trendText = document.getElementById('trendText');
             
             // 1. Daten vorbereiten
-            // Wir filtern leere Werte raus und sortieren nach Datum
             const validEntries = entries
                 .filter(e => e[metricKey] !== null && e[metricKey] !== undefined)
                 .sort((a, b) => a.date - b.date);
 
-            if (validEntries.length < 2) return;
+            // KORREKTUR: Nur abbrechen, wenn GAR KEINE Daten da sind
+            if (validEntries.length === 0) {
+                trendText.innerHTML = "Keine Daten für diesen Zeitraum.";
+                if (trendChartInstance) trendChartInstance.destroy(); // Leeren Chart anzeigen
+                return;
+            }
 
-            // Start-Datum finden für x-Achse (Tag 0, Tag 1...)
+            // Start-Datum finden für x-Achse
             const startDate = validEntries[0].date;
             
-            // Datenpunkte für Chart.js und Regression erstellen
+            // Datenpunkte erstellen
             const scatterData = validEntries.map(e => {
                 const diffTime = Math.abs(e.date - startDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 return {
                     x: diffDays, 
                     y: e[metricKey],
-                    dateLabel: e.date.toLocaleDateString('de-DE') // Für Tooltip
+                    dateLabel: e.date.toLocaleDateString('de-DE')
                 };
             });
 
-            // 2. Regression berechnen
-            const trend = calculateTrend(scatterData);
+            let datasets = [
+                {
+                    label: 'Tageswerte',
+                    data: scatterData,
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Etwas heller gemacht
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    pointRadius: 5 // Punkte etwas größer, damit man den Einzelnen sieht
+                }
+            ];
 
-            // 3. Interpretationstext
-            const trendText = document.getElementById('trendText');
-            const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-            const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; // Grün oder Rot
-            trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
+            // 2. Trend NUR berechnen, wenn wir >= 2 Punkte haben
+            if (validEntries.length >= 2) {
+                const trend = calculateTrend(scatterData);
+                const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
+                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
+                
+                // Text aktualisieren
+                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
 
-            // 4. Chart zeichnen
+                // Linie zum Dataset hinzufügen
+                datasets.push({
+                    type: 'line',
+                    label: 'Trend-Linie',
+                    data: [trend.startPoint, trend.endPoint],
+                    borderColor: color,
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0
+                });
+            } else {
+                // Fallback für nur 1 Punkt
+                trendText.innerHTML = "Zu wenig Daten für eine Trend-Berechnung (min. 2 Tage notwendig).";
+            }
+
+            // 3. Chart zeichnen
             if (trendChartInstance) {
                 trendChartInstance.destroy();
             }
@@ -1231,26 +1263,7 @@
             trendChartInstance = new Chart(ctx, {
                 type: 'scatter',
                 data: {
-                    datasets: [
-                        {
-                            label: 'Tageswerte',
-                            data: scatterData,
-                            backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                            borderColor: 'rgba(255, 255, 255, 0.5)',
-                            pointRadius: 3
-                        },
-                        {
-                            type: 'line',
-                            label: 'Trend-Linie',
-                            data: [trend.startPoint, trend.endPoint], // Nur Start und Ende verbinden
-                            borderColor: color,
-                            borderWidth: 3,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0
-                        }
-                    ]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
