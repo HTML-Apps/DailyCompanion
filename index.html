@@ -1229,9 +1229,14 @@
                 const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
                 const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
 
-                // Text in das HTML-Element schreiben
-                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
-                // ---------------------------
+                // Berechnung der Steigung pro Tag (ms pro Tag: 1000 * 60 * 60 * 24)
+                const slopePerDay = trend.m * 86400000;
+
+                // Anzeige im Text (jetzt mit 2 Nachkommastellen für bessere Lesbarkeit)
+                const direction = slopePerDay > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
+                const color = slopePerDay > 0 ? "#2ecc71" : "#e74c3c"; 
+
+                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Änderung/Tag: ${slopePerDay.toFixed(2)})`;
 
                 datasets.push({
                     type: 'line',
