@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -697,6 +699,7 @@
                 <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
                 <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
                 <button type="button" class="notes-tag-button" data-tag="Creme Füße">Creme Füße</button> 
+                <button type="button" class="notes-tag-button" data-tag="Zähne">Zähne</button> 
                 <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button> 
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
@@ -1193,132 +1196,81 @@
             const ctx = document.getElementById('trendChart').getContext('2d');
             const trendText = document.getElementById('trendText');
             
-            // 1. Daten vorbereiten
             const validEntries = entries
                 .filter(e => e[metricKey] !== null && e[metricKey] !== undefined)
                 .sort((a, b) => a.date - b.date);
 
             if (validEntries.length === 0) {
-                trendText.innerHTML = "Keine Daten für diesen Zeitraum.";
                 if (trendChartInstance) trendChartInstance.destroy();
                 return;
             }
 
-            // Start-Datum fixieren (wichtig für die Berechnung der zweiten Achse)
-            const startDate = validEntries[0].date;
-            
-            const scatterData = validEntries.map(e => {
-                const diffTime = Math.abs(e.date - startDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                return {
-                    x: diffDays, 
-                    y: e[metricKey],
-                    dateLabel: e.date.toLocaleDateString('de-DE')
-                };
-            });
+            // X-Wert ist jetzt direkt das Date-Objekt
+            const scatterData = validEntries.map(e => ({
+                x: e.date, // Echtes Date-Objekt behalten
+                y: e[metricKey]
+            }));
 
-            let datasets = [
-                {
-                    label: 'Tageswerte',
-                    data: scatterData,
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                    borderColor: 'rgba(255, 255, 255, 0.8)',
-                    pointRadius: 5,
-                    xAxisID: 'x' // Bindung an die erste Achse
-                }
-            ];
+            let datasets = [{
+                label: 'Tageswerte',
+                data: scatterData,
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                pointRadius: 5
+            }];
 
-            // 2. Trend berechnen (falls möglich)
+            // Trend-Berechnung (X-Werte für Mathe in Timestamps umwandeln)
             if (validEntries.length >= 2) {
-                const trend = calculateTrend(scatterData);
-                const direction = trend.m > 0 ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c"; 
+                // Für die Berechnung brauchen wir Zahlen (Timestamps)
+                const mathData = scatterData.map(d => ({ x: d.x.getTime(), y: d.y }));
+                const trend = calculateTrend(mathData); 
+                const color = trend.m > 0 ? "#2ecc71" : "#e74c3c";
                 
-                trendText.innerHTML = `Trend: <strong style="color:${color}">${direction}</strong> (Steigung: ${trend.m.toFixed(4)})`;
-
                 datasets.push({
                     type: 'line',
-                    label: 'Trend-Linie',
-                    data: [trend.startPoint, trend.endPoint],
+                    label: 'Trend',
+                    // Start- und Endpunkt wieder als Date-Objekte für die Achse
+                    data: [
+                        { x: new Date(trend.startPoint.x), y: trend.startPoint.y },
+                        { x: new Date(trend.endPoint.x), y: trend.endPoint.y }
+                    ],
                     borderColor: color,
-                    borderWidth: 3,
                     borderDash: [5, 5],
                     pointRadius: 0,
-                    fill: false,
-                    tension: 0,
-                    xAxisID: 'x'
+                    fill: false
                 });
-            } else {
-                trendText.innerHTML = "Zu wenig Daten für eine Trend-Berechnung.";
             }
 
-            // 3. Chart zeichnen
-            if (trendChartInstance) {
-                trendChartInstance.destroy();
-            }
+            if (trendChartInstance) trendChartInstance.destroy();
 
             trendChartInstance = new Chart(ctx, {
                 type: 'scatter',
-                data: {
-                    datasets: datasets
-                },
+                data: { datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        // ACHSE 1: Tage (Zahlen)
                         x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: { display: true, text: 'Tage seit Start', color: '#888' },
-                            ticks: { color: '#888' }
-                        },
-                        // ACHSE 2: Datum (DD.MM.YYYY)
-                        x2: {
-                            type: 'linear',
-                            position: 'bottom',
-                            display: false,
-                            grid: {
-                                drawOnChartArea: false,
-                                drawTicks: true
+                            type: 'time', // <--- MAGIC: Zeit-Achse aktivieren
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'dd.MM.yyyy' // Deutsches Format
+                                },
+                                tooltipFormat: 'dd.MM.yyyy'
                             },
+                            title: { display: false },
                             ticks: {
-                                color: '#00f2fe',
-                                maxRotation: 45, // Drehung, damit das lange Datum Platz hat
-                                minRotation: 45,
-                                callback: function(value) {
-                                    // WICHTIG: value ist hier der X-Wert (Tage seit Start)
-                                    // Wir erstellen eine Kopie des Startdatums
-                                    let date = new Date(startDate.getTime());
-                                    
-                                    // Wir addieren die Tage (value) dazu
-                                    // Math.round stellt sicher, dass wir keine krummen Millisekunden haben
-                                    date.setDate(date.getDate() + Math.round(value));
-                                    
-                                    // Formatierung: DD.MM.YYYY
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const year = date.getFullYear();
-                                    
-                                    return `${day}.${month}.${year}`;
-                                }
-                            }
+                                color: '#888',
+                                maxRotation: 0, // Oft nicht mehr nötig bei Zeit-Achsen
+                                autoSkip: true, // Chart.js blendet Labels aus, wenn es zu eng wird
+                                maxTicksLimit: 10 // Maximale Anzahl an Daten-Labels
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
                             min: 1, max: 10,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
                             ticks: { color: '#ccc' }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    if(context.dataset.type === 'line') return `Trend: ${context.raw.y.toFixed(2)}`;
-                                    const point = context.raw;
-                                    return `${point.dateLabel}: ${point.y}`;
-                                }
-                            }
                         }
                     }
                 }
