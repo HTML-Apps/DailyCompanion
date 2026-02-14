@@ -1265,10 +1265,6 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
                     scales: {
                         // ACHSE 1: Tage (Zahlen)
                         x: {
@@ -1277,22 +1273,34 @@
                             title: { display: true, text: 'Tage seit Start', color: '#888' },
                             ticks: { color: '#888' }
                         },
-                        // ACHSE 2: Datum (Berechnet)
+                        // ACHSE 2: Datum (DD.MM.YYYY)
                         x2: {
-                            type: 'linear', // Muss linear sein, um mit x synchron zu laufen
+                            type: 'linear',
                             position: 'bottom',
                             display: true,
                             grid: {
-                                drawOnChartArea: false, // Keine Gitterlinien für die zweite Achse
+                                drawOnChartArea: false,
                                 drawTicks: true
                             },
                             ticks: {
-                                color: '#00f2fe', // Farbe für das Datum (Cyan)
-                                callback: function(value, index, values) {
-                                    // Berechnung: StartDatum + (Achsenwert * Tage)
-                                    const date = new Date(startDate.getTime());
-                                    date.setDate(date.getDate() + value);
-                                    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+                                color: '#00f2fe',
+                                maxRotation: 45, // Drehung, damit das lange Datum Platz hat
+                                minRotation: 45,
+                                callback: function(value) {
+                                    // WICHTIG: value ist hier der X-Wert (Tage seit Start)
+                                    // Wir erstellen eine Kopie des Startdatums
+                                    let date = new Date(startDate.getTime());
+                                    
+                                    // Wir addieren die Tage (value) dazu
+                                    // Math.round stellt sicher, dass wir keine krummen Millisekunden haben
+                                    date.setDate(date.getDate() + Math.round(value));
+                                    
+                                    // Formatierung: DD.MM.YYYY
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const year = date.getFullYear();
+                                    
+                                    return `${day}.${month}.${year}`;
                                 }
                             }
                         },
