@@ -739,6 +739,12 @@
                 <div class="chart-container">
                     <canvas id="statsChart"></canvas>
                 </div>
+
+                <div class="stats-card" style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                    <h4 style="color: #00f2fe; margin-top: 0;">Tag-Statistik</h4>
+                    <div id="tagStatsList" style="font-size: 0.9em; max-height: 200px; overflow-y: auto;">
+                        </div>
+                </div>
                 
                 <div class="chart-container" style="margin-top: 30px;">
                     <h4 style="text-align:center; color:#00f2fe;">Langzeit-Trend & Regression</h4>
@@ -796,6 +802,56 @@
                     calculateOverallAverage();
                 });
             }
+        }
+
+        function renderTagStatistics(entries) {
+            const tagCounts = {};
+            const tagLastSeen = {};
+
+            entries.forEach(entry => {
+                if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
+                    entry.selectedNotesTags.forEach(tag => {
+                        // Zählen
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                        
+                        // Letztes Mal finden
+                        const entryDate = entry.date;
+                        if (!tagLastSeen[tag] || entryDate > tagLastSeen[tag]) {
+                            tagLastSeen[tag] = entryDate;
+                        }
+                    });
+                }
+            });
+
+            const statsList = document.getElementById('tagStatsList');
+            statsList.innerHTML = '';
+
+            // Tags nach Häufigkeit sortieren
+            const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+            if (sortedTags.length === 0) {
+                statsList.innerHTML = '<p style="color: #888;">Noch keine Tags vorhanden.</p>';
+                return;
+            }
+
+            sortedTags.forEach(tag => {
+                const lastDate = tagLastSeen[tag].toLocaleDateString('de-DE');
+                const diffDays = Math.floor((new Date() - tagLastSeen[tag]) / (1000 * 60 * 60 * 24));
+                const lastSeenText = diffDays === 0 ? "Heute" : `vor ${diffDays} Tagen (${lastDate})`;
+
+                const item = document.createElement('div');
+                item.style.marginBottom = '10px';
+                item.style.paddingBottom = '5px';
+                item.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-weight: bold; color: #fff;">${tag}</span>
+                        <span style="color: #00f2fe;">${tagCounts[tag]}x benutzt</span>
+                    </div>
+                    <div style="font-size: 0.8em; color: #aaa;">Zuletzt: ${lastSeenText}</div>
+                `;
+                statsList.appendChild(item);
+            });
         }
 
         function calculateSleepDuration() {
@@ -1026,6 +1082,12 @@
                         renderTrendChart(fullEntries, e.target.value);
                     };
                 }
+
+                // NEU: Tag-Statistik berechnen und anzeigen
+                renderTagStatistics(fullEntries);
+
+                // Trend Chart initialisieren
+                renderTrendChart(fullEntries, 'overallAverage');
 
             } catch (error) {
                 console.error("Stats Error:", error);
