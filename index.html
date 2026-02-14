@@ -1265,51 +1265,57 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 20 // Zusätzlicher Platz nach unten für die Beschriftung
+                        }
+                    },
                     scales: {
-                        // ACHSE 1: Tage (Zahlen)
                         x: {
                             type: 'linear',
                             position: 'bottom',
-                            title: { display: true, text: 'Tage seit Start', color: '#888' },
-                            ticks: { color: '#888' }
+                            title: { display: true, text: 'Tage', color: '#888', font: { size: 10 } },
+                            ticks: { color: '#888', font: { size: 10 } }
                         },
-                        // ACHSE 2: Datum (DD.MM.YYYY)
                         x2: {
                             type: 'linear',
                             position: 'bottom',
                             display: true,
-                            grid: {
-                                drawOnChartArea: false,
-                                drawTicks: true
-                            },
+                            grid: { drawOnChartArea: false, drawTicks: true },
                             ticks: {
                                 color: '#00f2fe',
-                                maxRotation: 45, // Drehung, damit das lange Datum Platz hat
+                                font: { size: 9 }, // Kleinere Schrift spart Platz
+                                maxRotation: 45,
                                 minRotation: 45,
+                                autoSkip: true,   // Verhindert Überlappung
+                                maxTicksLimit: 10, // Maximal 10 Daten anzeigen, damit es nicht zu voll wird
                                 callback: function(value) {
-                                    // WICHTIG: value ist hier der X-Wert (Tage seit Start)
-                                    // Wir erstellen eine Kopie des Startdatums
-                                    let date = new Date(startDate.getTime());
+                                    // Wir rechnen NUR mit ganzen Zahlen
+                                    let dayOffset = Math.round(value);
                                     
-                                    // Wir addieren die Tage (value) dazu
-                                    // Math.round stellt sicher, dass wir keine krummen Millisekunden haben
-                                    date.setDate(date.getDate() + Math.round(value));
+                                    // WICHTIG: Neues Datumsobjekt basierend auf dem echten Startwert
+                                    let date = new Date(startDate);
+                                    date.setDate(date.getDate() + dayOffset);
                                     
-                                    // Formatierung: DD.MM.YYYY
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const year = date.getFullYear();
+                                    const d = String(date.getDate()).padStart(2, '0');
+                                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                                    const y = date.getFullYear();
                                     
-                                    return `${day}.${month}.${year}`;
+                                    return `${d}.${m}.${y}`;
                                 }
                             }
                         },
                         y: {
-                            min: 1, max: 10,
+                            min: 1,
+                            max: 10,
                             grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#ccc' }
+                            ticks: { color: '#ccc', font: { size: 10 } }
                         }
                     },
+                    plugins: {
+                        legend: { display: false } // Legende ausblenden spart massiv Höhe
+                    }
+                }
                     plugins: {
                         tooltip: {
                             callbacks: {
