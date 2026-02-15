@@ -672,6 +672,11 @@
         </div>
 
         <div class="category-item">
+            <label for="immunesystem">Immunsystem</label>
+            <div class="rating-scale" id="immunesystem"></div>
+        </div>
+
+        <div class="category-item">
             <label>Gesamttagesbilanz</label>
             <div class="overall-average-display" id="overallAverageDisplay">--</div>
         </div>
@@ -759,6 +764,7 @@
                         <option value="upperBodyPainRating">Oberkörperschmerzen</option>
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
                         <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
+                        <option value="immunesystemRating">Immunsystem</option>
                     </select>
                     <canvas id="trendChart"></canvas>
                     <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:15px; height: 50px;"></p>
@@ -948,6 +954,7 @@
             popupContentHtml += `<p><strong>Oberkörperschmerzen:</strong> ${data.upperBodyPainRating ? data.upperBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Bewegungsöffnung / Flow:</strong> ${data.movementFlowPainRating ? data.movementFlowPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Immunsystem:</strong> ${data.immunesystem ? data.immunesysten + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
@@ -1295,6 +1302,7 @@
             generateRatingBoxes('upper-body-pain-rating');
             generateRatingBoxes('lower-body-pain-rating'); 
             generateRatingBoxes('movement-flow-pain-rating');
+            generateRatingBoxes('immunesystem');
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -1429,6 +1437,7 @@
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
+                const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
 
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
                     .map(button => button.dataset.tag);
@@ -1449,6 +1458,7 @@
                 if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
+                if (!immunesystemRating) missingFields.push('Immunsystem');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
@@ -1472,6 +1482,7 @@
                     upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
                     movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
+                    immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
                     selectedNotesTags
