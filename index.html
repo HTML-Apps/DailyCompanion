@@ -769,6 +769,18 @@
                     <canvas id="trendChart"></canvas>
                     <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:15px; height: 50px;"></p>
                 </div>
+
+                <div class="chart-container" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <h4 style="text-align:center; color:#00f2fe;">Tag-Analyse (Häufigkeit & Kontext)</h4>
+                    <p style="text-align:center; font-size: 0.8em; color: #aaa; margin-bottom: 10px;">Wähle einen Tag, um zu sehen, wann er auftrat und wie deine Tagesbilanz war.</p>
+                    
+                    <select id="tagAnalysisSelector" style="width:100%; padding:10px; margin-bottom:10px; background:#2a2a4a; color:white; border:1px solid #45456a; border-radius:10px;">
+                        <option value="" disabled selected>Bitte Tag wählen...</option>
+                    </select>
+                    
+                    <canvas id="tagAnalysisChart"></canvas>
+                </div>
+
             </div>
         </div>
     </div>
@@ -793,6 +805,7 @@
         const auth = firebase.auth();
         
         let statsChartInstance = null; // Globale Variable für das Chart
+        let tagChartInstance = null; // Neue globale Variable
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -1099,6 +1112,42 @@
                 // Trend Chart initialisieren
                 renderTrendChart(fullEntries, 'overallAverage');
 
+
+                // --- NEU: Tag-Analyse Dropdown befüllen ---
+                const tagSelector = document.getElementById('tagAnalysisSelector');
+                const uniqueTags = new Set();
+
+                // Alle Tags sammeln
+                fullEntries.forEach(entry => {
+                    if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
+                        entry.selectedNotesTags.forEach(tag => uniqueTags.add(tag));
+                    }
+                });
+
+                // Dropdown leeren und neu füllen
+                tagSelector.innerHTML = '<option value="" disabled selected>Bitte Tag wählen...</option>';
+                const sortedTags = Array.from(uniqueTags).sort(); // Alphabetisch sortieren
+
+                sortedTags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag;
+                    option.textContent = tag;
+                    tagSelector.appendChild(option);
+                });
+
+                // Event Listener für Tag-Auswahl
+                tagSelector.onchange = (e) => {
+                    renderTagAnalysisChart(fullEntries, e.target.value);
+                };
+
+                // Falls Tags vorhanden sind, standardmäßig den ersten wählen (optional)
+                if (sortedTags.length > 0) {
+                    tagSelector.value = sortedTags[0];
+                    renderTagAnalysisChart(fullEntries, sortedTags[0]);
+                }
+
+
+
             } catch (error) {
                 console.error("Stats Error:", error);
                 document.getElementById('bestDayDate').innerText = "Fehler";
@@ -1293,6 +1342,80 @@
                 }
             });
         }
+
+
+
+        function renderTagAnalysisChart(entries, selectedTag) {
+            const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
+            
+            // 1. Daten filtern: Nur Einträge, die den gewählten Tag enthalten
+            const validEntries = entries
+                .filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag))
+                .sort((a, b) => a.date - b.date);
+
+            // 2. Daten für Chart mappen
+            // Y-Achse: Wir nehmen die 'overallAverage' (Tagesbilanz), damit man sieht, 
+            // ob der Tag an guten oder schlechten Tagen vorkam.
+            // Falls keine Bilanz da ist, setzen wir sie auf 0 oder 5 (Mittelwert).
+            const scatterData = validEntries.map(e => ({
+                x: e.date, 
+                y: e.overallAverage || 0, // Y-Position ist die Tagesbilanz
+                details: e // Speichern für Tooltip
+            }));
+
+            if (tagChartInstance) {
+                tagChartInstance.destroy();
+            }
+
+            tagChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: `Vorkommen: ${selectedTag} (${validEntries.length}x)`,
+                        data: scatterData,
+                        backgroundColor: '#00f2fe', // Helles Cyan
+                        borderColor: '#00c7ff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'dd.MM.yyyy' },
+                                tooltipFormat: 'dd.MM.yyyy'
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#888' }
+                        },
+                        y: {
+                            min: 0, 
+                            max: 10,
+                            title: { display: true, text: 'Tagesbilanz Score', color: '#666' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#ccc' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return `Datum: ${point.x.toLocaleDateString('de-DE')} | Score: ${point.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
 
 
         document.addEventListener('DOMContentLoaded', () => {
