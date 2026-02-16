@@ -503,6 +503,18 @@
         .close-btn:hover {
             color: #fff;
         }
+
+        .tag-category {
+            width: 100%; /* Erzwingt den Umbruch */
+            color: #00f2fe; /* Deine Akzentfarbe */
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 15px 0 8px 5px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding-bottom: 3px;
+        }
     </style>
 </head>
 <body>
@@ -686,6 +698,7 @@
         <div class="category-item">
             <label for="notes">Anmerkungen 🏷️</label>
             <div class="notes-tags-group">
+                <div class="tag-category">Ernährung / Magen</div>
                 <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Bosch-Kantine</button>
                 <button type="button" class="notes-tag-button" data-tag="Schokolade">Schokolade</button>
                 <button type="button" class="notes-tag-button" data-tag="Eis">Eis</button>
