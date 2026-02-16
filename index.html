@@ -94,6 +94,23 @@
             text-align: center;
         }
 
+        .rating-group {
+            margin-bottom: 30px;
+            background-color: rgba(25, 25, 45, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgb(135, 135, 158);
+        }
+
+        .rating-group label {
+            display: block;
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .time-input-group {
             display: flex;
             flex-direction: row;
@@ -413,8 +430,13 @@
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
             .header-fixed h1 { font-size: 2em; }
             .container { padding: 15px; width: 100%; margin-top: 0; margin-bottom: 5px; }
+
             .category-item { padding: 15px; margin-bottom: 15px; }
             .category-item label { font-size: 1.3em; margin-bottom: 15px; }
+
+            .rating-group { padding: 15px; margin-bottom: 15px; }
+            .rating-group label { font-size: 1.3em; margin-bottom: 15px; }
+
             .time-input-group { flex-direction: row; gap: 8px; justify-content: center; }
             .time-entry { font-size: 1.1em; }
             .time-entry input[type="time"] { font-size: 0.9em; padding: 6px 10px; width: 90px; }
@@ -695,6 +717,17 @@
             <div class="overall-average-display" id="overallAverageDisplay">--</div>
         </div>
 
+        <div class="rating-group">
+            <label>Morgensteifigkeit (Minuten)</label>
+            <select id="morningStiffness" class="stiffness-select">
+                <option value="0">0 Min (Frei)</option>
+                <option value="15">15 Min</option>
+                <option value="30">30 Min</option>
+                <option value="60">1 Std</option>
+                <option value="120">2 Std+</option>
+            </select>
+        </div>
+
         <div class="category-item">
             <label for="notes">Anmerkungen 🏷️</label>
             <div class="notes-tags-group">
@@ -732,6 +765,12 @@
                 <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
 
                 <div class="tag-category" style="text-align:center">Biologika / JAK</div>
+                <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button> 
+                <button type="button" class="notes-tag-button" data-tag="Rötung Spritze">Rötung Spritze</button> 
+                <button type="button" class="notes-tag-button" data-tag="Kopfweh">Kopfweh</button> 
+                <button type="button" class="notes-tag-button" data-tag="schwach">schwach</button> 
+                <button type="button" class="notes-tag-button" data-tag="mittel">mittel</button> 
+                <button type="button" class="notes-tag-button" data-tag="stark">stark</button> 
                 <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button> 
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
