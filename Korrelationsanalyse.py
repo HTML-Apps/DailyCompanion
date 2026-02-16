@@ -6,8 +6,12 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-# 1. Daten laden
-filename = 'daily_entries_export_2026-02-13.json' 
+# READ-ME:
+# Zeile 484 beachten - zusätzliche DAten einblenden
+# WICHTIG: Datum an Filename anpassen in Zeile 14
+
+# 1. Daten laden 
+filename = 'daily_entries_export_2026-02-16.json' 
 try:
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -246,8 +250,92 @@ print(f"Das bedeutet, pro Tag verändert sich deine Unterkörperschmerzen im Sch
 
 plt.show()
 
+# ------------------------------------------------------------------
+# ANALYSE 1.5: Bewegungsöffnung / Flow - TREND MIT REGRESSIONSGERADE
+# ------------------------------------------------------------------
+# Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
+"""df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
+
+# Berechnung der Regressionsgeraden (y = mx + b)
+m, b = np.polyfit(df['days_since_start'], df['movementFlowPainRating'], 1)
+df['regression_line'] = m * df['days_since_start'] + b
+
+plt.figure(figsize=(15, 7))
+
+# Die tatsächlichen Werte
+plt.scatter(df['date'], df['movementFlowPainRating'], alpha=0.3, label='Tageswert (Bewegungsöffnung / Flow)', color='gray')
+
+# Der gleitende Durchschnitt (7 Tage)
+df['rolling_avg'] = df['movementFlowPainRating'].rolling(window=7).mean()
+plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+
+# Die Regressionsgerade
+plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+         color='red', linestyle='--', linewidth=3)
+
+plt.title('Langzeit-Trend der Bewegungsöffnung / Flow (10 = schmerzfrei)')
+plt.ylabel('Bewegungsöffnung / Flow (1-10)')
+plt.grid(True, alpha=0.2)
+plt.legend()
+
+# Interpretation der Steigung ausgeben
+if m > 0:
+    status = "Verbesserung"
+    trend_color = "grün"
+else:
+    status = "Verschlechterung"
+    trend_color = "rot"
+
+print(f"\n--- TREND-ANALYSE ---")
+print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+print(f"Das bedeutet, pro Tag verändert sich deine/deinen Bewegungsöffnung / Flow im Schnitt um {m:.4f} Punkte.")
+
+plt.show()"""
+
+# ------------------------------------------------------------------
+# ANALYSE 1.6: Immunsystem - TREND MIT REGRESSIONSGERADE
+# ------------------------------------------------------------------
+# Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
+"""df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
+
+# Berechnung der Regressionsgeraden (y = mx + b)
+m, b = np.polyfit(df['days_since_start'], df['immunesystemRating'], 1)
+df['regression_line'] = m * df['days_since_start'] + b
+
+plt.figure(figsize=(15, 7))
+
+# Die tatsächlichen Werte
+plt.scatter(df['date'], df['immunesystemRating'], alpha=0.3, label='Tageswert (Immunsystem)', color='gray')
+
+# Der gleitende Durchschnitt (7 Tage)
+df['rolling_avg'] = df['immunesystemRating'].rolling(window=7).mean()
+plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+
+# Die Regressionsgerade
+plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+         color='red', linestyle='--', linewidth=3)
+
+plt.title('Langzeit-Trend des Immunsystems (10 = schmerzfrei)')
+plt.ylabel('Immunsystem (1-10)')
+plt.grid(True, alpha=0.2)
+plt.legend()
+
+# Interpretation der Steigung ausgeben
+if m > 0:
+    status = "Verbesserung"
+    trend_color = "grün"
+else:
+    status = "Verschlechterung"
+    trend_color = "rot"
+
+print(f"\n--- TREND-ANALYSE ---")
+print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+print(f"Das bedeutet, pro Tag verändert sich dein Immunsystem im Schnitt um {m:.4f} Punkte.")
+
+plt.show()"""
+
 # ---------------------------------------------------------
-# ANALYSE 1.5: Gesamtbilanz - TREND MIT REGRESSIONSGERADE
+# ANALYSE 1.7: Gesamtbilanz - TREND MIT REGRESSIONSGERADE
 # ---------------------------------------------------------
 # Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
 df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
@@ -380,7 +468,6 @@ if len(cluster_data) > 10:
 # ---------------------------------------------------------
     
 # 1. Daten laden
-filename = 'daily_entries_export_2026-02-13.json' 
 with open(filename, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
@@ -398,7 +485,7 @@ for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
 # 3. TIME-LAG: Schmerz von morgen
 df['overallAverage_tomorrow'] = df['overallAverage'].shift(-1)
 
-# 4. Spalten auswählen
+# 4. Spalten auswählen: Bei besserer Datenlage hinzufügen: 'movementFlowPainRating' und 'immunesystem'
 cols_to_analyze = [
     'moodRating', 
     'neckPainRating', 
