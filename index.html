@@ -712,11 +712,6 @@
             <div class="rating-scale" id="immunesystem"></div>
         </div>
 
-        <div class="category-item">
-            <label>Gesamttagesbilanz</label>
-            <div class="overall-average-display" id="overallAverageDisplay">--</div>
-        </div>
-
         <div class="rating-group">
             <label>Morgensteifigkeit (Minuten)</label>
             <select id="morningStiffness" class="stiffness-select">
@@ -726,6 +721,11 @@
                 <option value="60">1 Std</option>
                 <option value="120">2 Std+</option>
             </select>
+        </div>
+
+        <div class="category-item">
+            <label>Gesamttagesbilanz</label>
+            <div class="overall-average-display" id="overallAverageDisplay">--</div>
         </div>
 
         <div class="category-item">
@@ -773,6 +773,7 @@
                 <button type="button" class="notes-tag-button" data-tag="stark">stark</button> 
                 <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button> 
             </div>
+            <input type="number" id="crpInput" step="0.1">
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
         </div>
 
