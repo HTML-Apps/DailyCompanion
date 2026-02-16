@@ -563,6 +563,36 @@
             border-bottom: 1px solid rgba(0, 242, 254, 0.2);
             padding-bottom: 3px;
         }
+
+        /* Neues Styling für Inputs, damit sie zum Theme passen */
+        .styled-input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #2a2a4a; /* Dein Standard-Dunkelblau */
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1em;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+            outline: none;
+            appearance: none; /* Entfernt Standard-Browser-Styling */
+            -webkit-appearance: none;
+        }
+
+        .styled-input:focus {
+            border-color: #00f2fe; /* Deine Akzentfarbe beim Klicken */
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Pfeil im Select-Menü wieder sichtbar machen (da appearance: none ihn versteckt) */
+        select.styled-input {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300f2fe%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+        }
     </style>
 </head>
 <body>
@@ -738,9 +768,9 @@
             <div class="rating-scale" id="immunesystem"></div>
         </div>
 
-        <div class="rating-group">
+        <div class="category-item">
             <label>Morgensteifigkeit</label>
-            <select id="morningStiffness">
+            <select id="morningStiffness" class="styled-input">
                 <option value="0">0 Min (Frei)</option>
                 <option value="15">15 Min</option>
                 <option value="30">30 Min</option>
@@ -751,10 +781,10 @@
             </select>
         </div>
 
-        <div class="rating-group">
+        <div class="category-item">
             <label>CRP-Wert (mg/L)</label>
             <div class="crp-input-container">
-                <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0">
+                <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0" class="styled-input">
             </div>
         </div>
 
@@ -808,7 +838,6 @@
                 <button type="button" class="notes-tag-button" data-tag="stark">stark</button> 
                 <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button> 
             </div>
-            <input type="number" id="crpInput" step="0.1">
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
         </div>
 
@@ -1071,10 +1100,17 @@
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Bewegungsöffnung / Flow:</strong> ${data.movementFlowPainRating ? data.movementFlowPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Immunsystem:</strong> ${data.immunesystem ? data.immunesysten + '/10' : 'Nicht bewertet'}</p>`;
+            
+            const stiffnessText = data.morningStiffness ? data.morningStiffness + ' Min.' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>Morgensteifigkeit:</strong> ${stiffnessText}</p>`;
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
-            
+
+            const crpText = data.crpValue ? data.crpValue + ' mg/L' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>CRP-Wert:</strong> ${crpText}</p>`;
+            popupContentHtml += '<hr>';
+
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
 
@@ -1637,6 +1673,16 @@
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
+                // --- NEU: HIER EINFÜGEN ---
+                // Werte aus den Feldern holen
+                const morningStiffnessSelect = document.getElementById('morningStiffness');
+                const morningStiffnessValue = morningStiffnessSelect ? morningStiffnessSelect.value : null;
+
+                const crpInput = document.getElementById('crpInput');
+                // Wir wandeln es in Float um, falls Text eingegeben wurde
+                const crpValue = crpInput.value ? parseFloat(crpInput.value) : null;
+                // ---------------------------
+
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
                 const noSport = document.getElementById('sportNone');
@@ -1702,6 +1748,11 @@
                     glutenStatus,
                     milkStatus,
                     selectedPainmeds,
+
+                    // --- NEU: DATEN ZUM OBJEKT HINZUFÜGEN ---
+                    morningStiffness: morningStiffnessValue, // Speichert z.B. "30"
+                    crpValue: crpValue,                      // Speichert z.B. 5.2
+
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
