@@ -94,21 +94,47 @@
             text-align: center;
         }
 
-        .rating-group {
-            margin-bottom: 30px;
-            background-color: rgba(25, 25, 45, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: 3px solid rgb(135, 135, 158);
+        /* Styling für das Dropdown und das Nummernfeld */
+        .rating-group select, 
+        .rating-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.05); /* Dezenter Glas-Effekt */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            -webkit-appearance: none; /* Entfernt Standard-Styling bei iOS */
         }
 
-        .rating-group label {
-            display: block;
-            font-size: 1.4em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-align: center;
+        /* Fokus-Effekt wie bei deinen Slidern */
+        .rating-group select:focus, 
+        .rating-group input[type="number"]:focus {
+            border-color: #00f2fe;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Speziell für das CRP-Feld: Die kleinen Pfeile ausblenden (optional für cleanen Look) */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Styling für die Dropdown-Optionen (Hintergrund im Menü) */
+        .rating-group select option {
+            background: #1a1a2e; /* Dunkler Hintergrund für die Liste */
+            color: white;
+        }
+
+        .crp-input-container {
+            position: relative;
+            width: 100%;
         }
 
         .time-input-group {
@@ -713,14 +739,23 @@
         </div>
 
         <div class="rating-group">
-            <label>Morgensteifigkeit (Minuten)</label>
-            <select id="morningStiffness" class="stiffness-select">
+            <label>Morgensteifigkeit</label>
+            <select id="morningStiffness">
                 <option value="0">0 Min (Frei)</option>
                 <option value="15">15 Min</option>
                 <option value="30">30 Min</option>
+                <option value="45">45 Min</option>
                 <option value="60">1 Std</option>
+                <option value="90">1,5 Std</option>
                 <option value="120">2 Std+</option>
             </select>
+        </div>
+
+        <div class="rating-group">
+            <label>CRP-Wert (mg/L)</label>
+            <div class="crp-input-container">
+                <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0">
+            </div>
         </div>
 
         <div class="category-item">
