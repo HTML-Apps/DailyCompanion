@@ -1790,6 +1790,8 @@
                     return;
                 }
 
+                let missingFields = [];
+
                 // Daten sammeln
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
@@ -1839,7 +1841,6 @@
                 const notes = document.getElementById('notes').value;
 
                 // Validierung
-                let missingFields = [];
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
