@@ -939,25 +939,6 @@
             measurementId: "G-52MKKC9GCS" 
         };
 
-        const updateSleepLabel = () => {
-            const today = new Date();
-            
-            // Datum formatieren: DD.MM.YYYY
-            const formattedDate = today.toLocaleDateString('de-DE', {
-                day: '2-2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-
-            const label = document.getElementById('sleep-label');
-            if (label) {
-                label.innerHTML = `Schlafzeiten ${formattedDate} 😴`;
-            }
-        };
-
-        // Funktion sofort ausführen
-        updateSleepLabel();
-
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -1678,6 +1659,25 @@
                 }
             });
         }
+
+        const updateSleepLabel = () => {
+            const today = new Date();
+            
+            // Datum formatieren: DD.MM.YYYY
+            const formattedDate = today.toLocaleDateString('de-DE', {
+                day: '2-2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const label = document.getElementById('sleep-label');
+            if (label) {
+                label.innerHTML = `Schlafzeiten ${formattedDate} 😴`;
+            }
+        };
+
+        // Funktion sofort ausführen
+        updateSleepLabel();
 
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
