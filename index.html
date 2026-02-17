@@ -1787,8 +1787,9 @@
                 // Daten sammeln
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
+
                 const morningStiffnessSelect = document.getElementById('morningStiffness');
-                const morningStiffnessValue = morningStiffnessSelect ? morningStiffnessSelect.value : null;
+                const morningStiffnessValue = morningStiffnessSelect.value; // Ist "" wenn "Bitte wählen" aktiv ist
 
                 // 2. Zur Validierung hinzufügen
                 if (!morningStiffnessValue) {
