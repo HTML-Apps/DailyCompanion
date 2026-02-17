@@ -1144,7 +1144,7 @@
                     // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
                     document.getElementById('morningStiffness').value = ""; 
                 }
-                
+
             if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
             if(data.notes) document.getElementById('notes').value = data.notes;
 
@@ -1853,7 +1853,7 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
-                if (!morningStiffnessValue) missingFields.push('morningStiffness');
+                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
