@@ -1138,7 +1138,13 @@
             if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
             calculateSleepDuration(); // Dauer neu berechnen
 
-            if(data.morningStiffness) document.getElementById('morningStiffness').value = data.morningStiffness;
+            if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
+                    document.getElementById('morningStiffness').value = data.morningStiffness;
+                } else {
+                    // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
+                    document.getElementById('morningStiffness').value = ""; 
+                }
+                
             if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
             if(data.notes) document.getElementById('notes').value = data.notes;
 
