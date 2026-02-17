@@ -1114,10 +1114,11 @@
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
+            popupContentHtml += '<hr>';
 
             const crpText = data.crpValue ? data.crpValue + ' mg/L' : 'Nicht angegeben';
             popupContentHtml += `<p><strong>CRP-Wert:</strong> ${crpText}</p>`;
-            popupContentHtml += '<hr>';
+            
 
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
@@ -1127,9 +1128,6 @@
             popupContent.innerHTML = popupContentHtml;
             popupOverlay.style.display = 'flex';
         }
-
-
-
 
         // Funktion, um Daten aus der DB wieder in das HTML-Formular zu laden
         function populateFormWithData(data) {
@@ -1224,15 +1222,6 @@
             setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
             setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
         }
-
-
-
-
-
-
-
-
-
 
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
@@ -1480,7 +1469,6 @@
             });
         }
 
-
         let trendChartInstance = null;
 
         function calculateTrend(dataPoints) {
@@ -1601,8 +1589,6 @@
                 }
             });
         }
-
-
 
         function renderTagAnalysisChart(entries, selectedTag) {
             const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
@@ -2005,6 +1991,4 @@
         });
     </script>
 </body>
-
 </html>
-
