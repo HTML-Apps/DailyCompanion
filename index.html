@@ -621,7 +621,7 @@
     
     <div class="container">
         <div class="category-item">
-            <label>Schlafzeiten 😴</label>
+            <label id="sleep-label">Schlafzeiten 😴</label>
             <div class="time-input-group">
                 <div class="time-entry">
                     <span class="icon">🌙</span>
@@ -946,6 +946,25 @@
         let statsChartInstance = null; // Globale Variable für das Chart
         let tagChartInstance = null; // Neue globale Variable
         let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
+
+        const updateSleepLabel = () => {
+            const today = new Date();
+            
+            // Datum formatieren: DD.MM.YYYY
+            const formattedDate = today.toLocaleDateString('de-DE', {
+                day: '2-2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const label = document.getElementById('sleep-label');
+            if (label) {
+                label.innerHTML = `Schlafzeiten ${formattedDate} 😴`;
+            }
+        };
+
+        // Funktion sofort ausführen
+        updateSleepLabel();
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
