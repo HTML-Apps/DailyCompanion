@@ -897,6 +897,8 @@
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
                         <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
                         <option value="immunesystemRating">Immunsystem</option>
+                        <option value="morningStiffness">Morgensteifigkeit</option>
+                        <option value="crpInput">CRP-Wert</option>
                     </select>
                     <canvas id="trendChart"></canvas>
                     <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:15px; height: 50px;"></p>
@@ -1144,7 +1146,9 @@
                 'upperBodyPainRating': 'upper-body-pain-rating',
                 'lowerBodyPainRating': 'lower-body-pain-rating',
                 'movementFlowPainRating': 'movement-flow-pain-rating',
-                'immunesystemRating': 'immunesystem'
+                'immunesystemRating': 'immunesystem',
+                'morningStiffnessValue': 'morningStiffness',
+                'crpValue': 'crpInput'
             };
 
             for (const [dbField, htmlId] of Object.entries(ratingMap)) {
@@ -1668,6 +1672,8 @@
             generateRatingBoxes('lower-body-pain-rating');
             generateRatingBoxes('movement-flow-pain-rating');
             generateRatingBoxes('immunesystem');
+            generateRatingBoxes('morningStiffness');
+            generateRatingBoxes('crpInput');
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -1830,6 +1836,7 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
+                if (!morningStiffnessValue) missingFields.push('morningStiffness');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
