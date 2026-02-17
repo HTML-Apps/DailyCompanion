@@ -770,6 +770,8 @@
         <div class="category-item">
             <label>Morgensteifigkeit</label>
             <select id="morningStiffness" class="styled-input">
+                <option value="" selected disabled hidden>Bitte wählen...</option>
+                
                 <option value="0">0 Min (Frei)</option>
                 <option value="15">15 Min</option>
                 <option value="30">30 Min</option>
@@ -1787,6 +1789,12 @@
                 const bedTime = document.getElementById('bedTime').value;
                 const morningStiffnessSelect = document.getElementById('morningStiffness');
                 const morningStiffnessValue = morningStiffnessSelect ? morningStiffnessSelect.value : null;
+
+                // 2. Zur Validierung hinzufügen
+                if (!morningStiffnessValue) {
+                    missingFields.push('Morgensteifigkeit');
+                }
+
                 const crpInput = document.getElementById('crpInput');
                 const crpValue = crpInput.value ? parseFloat(crpInput.value) : null;
 
@@ -1863,7 +1871,7 @@
                     glutenStatus,
                     milkStatus,
                     selectedPainmeds,
-                    morningStiffness: morningStiffnessValue,
+                    morningStiffness: morningStiffnessValue !== "" ? morningStiffnessValue : null,
                     crpValue: crpValue,
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
