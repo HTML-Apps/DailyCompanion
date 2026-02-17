@@ -939,6 +939,7 @@
         
         let statsChartInstance = null; // Globale Variable für das Chart
         let tagChartInstance = null; // Neue globale Variable
+        let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -1235,15 +1236,19 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Datum sicher parsen (verhindert Zeitzonen-Probleme)
+            // Datum parsen
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; // Monate sind 0-basiert in JS
+            const month = parseInt(parts[1]) - 1; 
             const day = parseInt(parts[2]);
 
-            // Start des Tages (00:00:00)
+            // --- NEU: Wir setzen das globale Datum auf den gewählten Tag ---
+            const selectedDate = new Date(year, month, day, 12, 0, 0, 0); // Mittagszeit, um Zeitzonenprobleme zu minimieren
+            currentEditingDate = selectedDate; 
+            // -------------------------------------------------------------
+
+            // Zeitfenster für die Suche definieren
             const start = new Date(year, month, day, 0, 0, 0, 0);
-            // Ende des Tages (23:59:59)
             const end = new Date(year, month, day, 23, 59, 59, 999);
 
             try {
@@ -1255,26 +1260,28 @@
                     .get();
 
                 if (snapshot.empty) {
-                    // Fallback: Versuchen wir es ohne Zeitfilter, falls Zeitzonen verrückt spielen,
-                    // oder geben einfach die Meldung aus.
-                    alert("Kein Eintrag für dieses Datum gefunden.");
+                    alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
+                    // Formular leeren für neuen Eintrag in der Vergangenheit (optional, aber sinnvoll)
+                    // Hier könnten wir eine resetForm() Funktion aufrufen, falls du eine hast.
+                    // Wichtig ist: currentEditingDate ist jetzt auf die Vergangenheit gesetzt.
+                    document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
                 } else {
                     const data = snapshot.docs[0].data();
-                    // Wir müssen das Datum für die Anzeige lesbar machen, falls es nicht im Timestamp ist
-                    // (z.B. für den Titel des Popups)
-                    if (!data.date && data.timestamp) data.date = data.timestamp; 
                     
-                    showPopup(data, true);
+                    // --- WICHTIG: Statt Popup laden wir die Daten ins Formular ---
+                    populateFormWithData(data); 
+                    
+                    // UI Feedback geben
+                    const formattedDate = selectedDate.toLocaleDateString('de-DE');
+                    document.getElementById('submitBtn').textContent = `Eintrag vom ${formattedDate} aktualisieren`;
+                    alert(`Daten vom ${formattedDate} wurden geladen. Du kannst sie jetzt bearbeiten.`);
+                    
+                    // Optional: Nach oben scrollen, damit man das Formular sieht
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Detaillierter Fehler:", error);
-                
-                // Spezifische Prüfung auf fehlenden Index
-                if (error.message.includes("index")) {
-                    alert("WICHTIG: Firebase benötigt einen Index für diese Suche.\n\nÖffne die Browser-Konsole (F12), dort findest du einen Link von Google. Klicke darauf, um den Index automatisch zu erstellen.");
-                } else {
-                    alert("Fehler beim Laden: " + error.message);
-                }
+                console.error("Fehler beim Laden:", error);
+                alert("Fehler: " + error.message);
             }
         }
 
@@ -1653,9 +1660,6 @@
             });
         }
 
-
-
-
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
@@ -1832,6 +1836,13 @@
                     return;
                 }
 
+                // --- WICHTIG: Datum aus der globalen Variable holen, nicht einfach "new Date()" ---
+                // Wir klonen das Datum, um sicherzugehen
+                const targetDate = new Date(currentEditingDate); 
+                const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
+                const endOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999);
+                // ---------------------------------------------------------------------------------
+
                 const data = {
                     date: firebase.firestore.FieldValue.serverTimestamp(),
                     userId: user.uid,
@@ -1857,12 +1868,8 @@
                     selectedNotesTags
                 };
 
-                // --- LOGIK: UPDATE ODER ADD ---
-                const now = new Date();
-                const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-                const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
                 try {
+                    // Prüfen, ob Eintrag für dieses Datum (currentEditingDate) existiert
                     const snapshot = await db.collection("dailyEntries")
                         .where("userId", "==", user.uid)
                         .where("date", ">=", startOfDay)
@@ -1871,20 +1878,37 @@
                         .get();
 
                     if (!snapshot.empty) {
-                        // UPDATE (ID des existierenden Dokuments nutzen)
+                        // --- UPDATE FALL (Eintrag existiert) ---
                         const docId = snapshot.docs[0].id;
+                        
+                        // Beim Update wollen wir das ursprüngliche Erstellungsdatum NICHT ändern,
+                        // damit der Eintrag chronologisch dort bleibt, wo er war.
+                        // Also fügen wir 'data.date' NICHT hinzu.
+                        
                         await db.collection("dailyEntries").doc(docId).update(data);
-                        alert("Eintrag für heute wurde aktualisiert!");
+                        alert(`Eintrag vom ${targetDate.toLocaleDateString()} aktualisiert!`);
                     } else {
-                        // ADD (Neuer Eintrag)
+                        // --- NEUER EINTRAG FALL ---
+                        // Hier müssen wir ein Datum setzen. 
+                        // Wenn currentEditingDate "heute" ist -> serverTimestamp
+                        // Wenn currentEditingDate in der Vergangenheit ist -> nehmen wir das vergangene Datum
+                        
+                        // Um sicher zu sein, speichern wir einfach das 'currentEditingDate' als Timestamp
+                        data.date = firebase.firestore.Timestamp.fromDate(targetDate);
+                        
                         await db.collection("dailyEntries").add(data);
-                        alert("Neuer Eintrag erfolgreich gespeichert!");
+                        alert(`Neuer Eintrag für ${targetDate.toLocaleDateString()} gespeichert!`);
                     }
-                    showPopup(data);
+                    
+                    showPopup(data); // Popup zur Bestätigung zeigen
+                    
+                    // Nach dem Speichern: Button wieder neutral machen, aber Datum beibehalten, 
+                    // falls man noch was ändern will.
                     document.getElementById('submitBtn').textContent = "Eintrag aktualisieren";
+                    
                 } catch (e) {
                     console.error("Fehler beim Speichern: ", e);
-                    alert("Fehler beim Speichern: " + e.message);
+                    alert("Fehler: " + e.message);
                 }
             });
 
@@ -1922,6 +1946,9 @@
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
                     userInfoDiv.textContent = `Angemeldet: ${user.email}`;
+
+                    // --- NEU: Sicherstellen, dass wir beim Start auf "Heute" sind ---
+                    currentEditingDate = new Date();
 
                     const now = new Date();
                     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
