@@ -850,7 +850,7 @@
             <label>Historie & Statistik 📊</label>
             <div class="history-controls">
                 <div class="history-search-group">
-                    <input type="text" id="searchDate" placeholder="TT.MM.JJJJ" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
+                    <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                     <button class="action-button btn-search" id="searchBtn">Laden</button>
                 </div>
                 <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
@@ -1854,7 +1854,7 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
-                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
+                //if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
