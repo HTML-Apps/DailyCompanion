@@ -1680,6 +1680,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            updateSleepLabel();
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
@@ -2007,7 +2008,6 @@
                     if (signInButton) signInButton.style.display = 'block';
                 }
             });
-            updateSleepLabel();
         });
     </script>
 </body>
