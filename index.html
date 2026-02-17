@@ -939,14 +939,6 @@
             measurementId: "G-52MKKC9GCS" 
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-        
-        let statsChartInstance = null; // Globale Variable für das Chart
-        let tagChartInstance = null; // Neue globale Variable
-        let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
-
         const updateSleepLabel = () => {
             const today = new Date();
             
@@ -965,6 +957,14 @@
 
         // Funktion sofort ausführen
         updateSleepLabel();
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        let statsChartInstance = null; // Globale Variable für das Chart
+        let tagChartInstance = null; // Neue globale Variable
+        let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
