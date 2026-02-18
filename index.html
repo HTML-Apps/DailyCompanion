@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -44,7 +45,7 @@
             position: sticky;
             top: 0;
             width: 100%;
-            background: linear-gradient(135deg, #7878aa 0%, #0d1226 100%);
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
             padding: 10px 0;
             z-index: 100;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
@@ -55,8 +56,9 @@
         .header-fixed h1 {
             font-size: 2.5em;
             font-weight: 700;
-            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
+            background: linear-gradient(45deg, #000000 0%, #000000 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
@@ -91,6 +93,50 @@
             font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        /* Styling für das Dropdown und das Nummernfeld */
+        .rating-group select, 
+        .rating-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.05); /* Dezenter Glas-Effekt */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            -webkit-appearance: none; /* Entfernt Standard-Styling bei iOS */
+            appearance: none;
+        }
+
+        /* Fokus-Effekt wie bei deinen Slidern */
+        .rating-group select:focus, 
+        .rating-group input[type="number"]:focus {
+            border-color: #00f2fe;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Speziell für das CRP-Feld: Die kleinen Pfeile ausblenden (optional für cleanen Look) */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Styling für die Dropdown-Optionen (Hintergrund im Menü) */
+        .rating-group select option {
+            background: #1a1a2e; /* Dunkler Hintergrund für die Liste */
+            color: white;
+        }
+
+        .crp-input-container {
+            position: relative;
+            width: 92%;
         }
 
         .time-input-group {
@@ -412,8 +458,13 @@
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
             .header-fixed h1 { font-size: 2em; }
             .container { padding: 15px; width: 100%; margin-top: 0; margin-bottom: 5px; }
+
             .category-item { padding: 15px; margin-bottom: 15px; }
             .category-item label { font-size: 1.3em; margin-bottom: 15px; }
+
+            .rating-group { padding: 15px; margin-bottom: 15px; }
+            .rating-group label { font-size: 1.3em; margin-bottom: 15px; }
+
             .time-input-group { flex-direction: row; gap: 8px; justify-content: center; }
             .time-entry { font-size: 1.1em; }
             .time-entry input[type="time"] { font-size: 0.9em; padding: 6px 10px; width: 90px; }
@@ -475,6 +526,7 @@
             margin-bottom: 20px;
             background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -500,6 +552,47 @@
 
         .close-btn:hover {
             color: #fff;
+        }
+
+        .tag-category {
+            width: 100%; /* Erzwingt den Umbruch */
+            color: #00f2fe; /* Deine Akzentfarbe */
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 15px 0 8px 5px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding-bottom: 3px;
+        }
+
+        /* Neues Styling für Inputs, damit sie zum Theme passen */
+        .styled-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #2a2a4a; /* Dein Standard-Dunkelblau */
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1em;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+            outline: none;
+            appearance: none; /* Entfernt Standard-Browser-Styling */
+            -webkit-appearance: none;
+        }
+
+        .styled-input:focus {
+            border-color: #00f2fe; /* Deine Akzentfarbe beim Klicken */
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Pfeil im Select-Menü wieder sichtbar machen (da appearance: none ihn versteckt) */
+        select.styled-input {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300f2fe%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
         }
     </style>
 </head>
@@ -530,7 +623,7 @@
     
     <div class="container">
         <div class="category-item">
-            <label>Schlafzeiten 😴</label>
+            <label id="sleepTimeLabel">Schlafzeiten 😴</label>
             <div class="time-input-group">
                 <div class="time-entry">
                     <span class="icon">🌙</span>
@@ -672,6 +765,33 @@
         </div>
 
         <div class="category-item">
+            <label for="immunesystem">Immunsystem</label>
+            <div class="rating-scale" id="immunesystem"></div>
+        </div>
+
+        <div class="category-item">
+            <label>Morgensteifigkeit</label>
+            <select id="morningStiffness" class="styled-input">
+                <option value="" selected disabled hidden>Bitte wählen...</option>
+                
+                <option value="0">0 Min (Frei)</option>
+                <option value="15">15 Min</option>
+                <option value="30">30 Min</option>
+                <option value="45">45 Min</option>
+                <option value="60">1 Std</option>
+                <option value="90">1,5 Std</option>
+                <option value="120">2 Std+</option>
+            </select>
+        </div>
+
+        <div class="category-item">
+            <label>CRP-Wert (mg/L)</label>
+            <div class="crp-input-container">
+                <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0" class="styled-input">
+            </div>
+        </div>
+
+        <div class="category-item">
             <label>Gesamttagesbilanz</label>
             <div class="overall-average-display" id="overallAverageDisplay">--</div>
         </div>
@@ -679,28 +799,51 @@
         <div class="category-item">
             <label for="notes">Anmerkungen 🏷️</label>
             <div class="notes-tags-group">
+                <div class="tag-category"style="text-align:center; margin-top = 0px;">Ernährung / Magen</div>
+                <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Bosch-Kantine</button>
                 <button type="button" class="notes-tag-button" data-tag="Schokolade">Schokolade</button>
                 <button type="button" class="notes-tag-button" data-tag="Eis">Eis</button>
                 <button type="button" class="notes-tag-button" data-tag="Müsli">Müsli</button>
                 <button type="button" class="notes-tag-button" data-tag="Stuhl">Stuhl</button>
-                <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Bosch-Kantine</button>
                 <button type="button" class="notes-tag-button" data-tag="Shake">Shake</button>
                 <button type="button" class="notes-tag-button" data-tag="Proteinriegel">Proteinriegel</button>
+                <button type="button" class="notes-tag-button" data-tag="Bauch gespannt">Bauch gespannt</button>
+                <button type="button" class="notes-tag-button" data-tag="Bauch gebläht">Bauch gebläht</button>
+
+                <div class="tag-category" style="text-align:center">Schmerzen / Entzündungen</div>
                 <button type="button" class="notes-tag-button" data-tag="Nackensperre">Nackensperre</button>
                 <button type="button" class="notes-tag-button" data-tag="Atemsperre">Atemsperre</button>
                 <button type="button" class="notes-tag-button" data-tag="Beinsperre">Beinsperre</button>
                 <button type="button" class="notes-tag-button" data-tag="Nierenschmerz">Nierenschmerz</button>
+                <button type="button" class="notes-tag-button" data-tag="Zeh links">Zeh links</button> 
+                <button type="button" class="notes-tag-button" data-tag="Zeh rechts">Zeh rechts</button> 
+                <button type="button" class="notes-tag-button" data-tag="Zähne">Zähne</button> 
+
+                <div class="tag-category" style="text-align:center">Immunsystem / Psoriasis</div>
                 <button type="button" class="notes-tag-button" data-tag="Erreger">Erreger</button>
                 <button type="button" class="notes-tag-button" data-tag="Allergie">Allergie</button>
-                <button type="button" class="notes-tag-button" data-tag="Bauch gespannt">Bauch gespannt</button>
-                <button type="button" class="notes-tag-button" data-tag="Bauch gebläht">Bauch gebläht</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Füße">Creme Füße</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Hüfte">Creme Hüfte</button>
+                <button type="button" class="notes-tag-button" data-tag="Haut geschlossen">Haut geschlossen</button>
+                <button type="button" class="notes-tag-button" data-tag="Haut offen">Haut offen</button>
+
+                <div class="tag-category" style="text-align:center">Supplements / GD</div>
                 <button type="button" class="notes-tag-button" data-tag="Gläschen">Gläschen</button>
                 <button type="button" class="notes-tag-button" data-tag="Vitamin D3">Vitamin D3</button>
+                <button type="button" class="notes-tag-button" data-tag="Omega3">Omega3</button>
                 <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
-                <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
-                <button type="button" class="notes-tag-button" data-tag="Creme Füße">Creme Füße</button> 
-                <button type="button" class="notes-tag-button" data-tag="Zähne">Zähne</button> 
-                <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button> 
+
+                <div class="tag-category" style="text-align:center">Biologika / JAK</div>
+                <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button> 
+                <button type="button" class="notes-tag-button" data-tag="Rötung Spritze">Rötung Spritze</button> 
+                <button type="button" class="notes-tag-button" data-tag="Kopfweh">Kopfweh</button> 
+                <button type="button" class="notes-tag-button" data-tag="schwach">schwach</button> 
+                <button type="button" class="notes-tag-button" data-tag="mittel">mittel</button> 
+                <button type="button" class="notes-tag-button" data-tag="stark">stark</button> 
+                <button type="button" class="notes-tag-button" data-tag="Biologika Spritze">Biologika Spritze</button>
+
+                <div class="tag-category" style="text-align:center">Anmerkungen</div> 
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
         </div>
@@ -709,10 +852,12 @@
             <label>Historie & Statistik 📊</label>
             <div class="history-controls">
                 <div class="history-search-group">
-                    <input type="date" id="searchDate" class="date-input">
+                    <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                     <button class="action-button btn-search" id="searchBtn">Laden</button>
                 </div>
                 <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
+                <button class="action-button btn-stats" onclick="exportDailyEntries()">Daten exportieren (JSON)</button>
+                <button class="action-button btn-stats" onclick="exportDailyEntries()">Python-Auswertung (.py)</button>
             </div>
         </div>
 
@@ -759,10 +904,33 @@
                         <option value="upperBodyPainRating">Oberkörperschmerzen</option>
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
                         <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
+                        <option value="immunesystemRating">Immunsystem</option>
+                        <option value="morningStiffness">Morgensteifigkeit (Min)</option> <!-- Klarere Bezeichnung -->
+                        <option value="crpValue">CRP-Wert (mg/L)</option> <!-- Geändert zu 'crpValue' -->
+
+                        <!-- NEUE OPTIONEN -->
+                        <option value="sport">Sport (Ja/Nein)</option>
+                        <option value="painmeds">Schmerzmittel (Ja/Nein)</option>
+                        <option value="stretching">Dehnung (Ja/Nein)</option>
+                        <option value="gluten">Gluten (Ja/Nein)</option>
+                        <option value="milk">Milch (Ja/Nein)</option>
                     </select>
                     <canvas id="trendChart"></canvas>
                     <p id="trendText" style="text-align:center; font-size:0.9em; margin-top:15px; height: 50px;"></p>
                 </div>
+
+                <div class="chart-container" style="margin-top: 150px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <h4 style="text-align:center; color:#00f2fe;">Data-Tag-Analyse (Häufigkeit & Kontext)</h4>
+                    <p style="text-align:center; font-size: 0.8em; color: #aaa; margin-bottom: 10px;">Wähle einen Data-Tag, um zu sehen, wann er auftrat und wie deine Tagesbilanz war.</p>
+                    
+                    <select id="tagAnalysisSelector" style="width:100%; padding:10px; margin-bottom:10px; background:#2a2a4a; color:white; border:1px solid #45456a; border-radius:10px;">
+                        <option value="" disabled selected>Bitte Tag wählen...</option>
+                    </select>
+                    
+                    <canvas id="tagAnalysisChart"></canvas>
+                    <p style="text-align:center; font-size: 0.8em; color: #aaa; margin-bottom: 10px;">Timeline</p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -787,6 +955,95 @@
         const auth = firebase.auth();
         
         let statsChartInstance = null; // Globale Variable für das Chart
+        let tagChartInstance = null; // Neue globale Variable
+        let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
+    
+        let currentEntryId = null; // NEU: Variable zum Speichern der ID des aktuell bearbeiteten Eintrags
+
+        function fillFormWithData(data) {
+            // 1. Zeiten setzen
+            document.getElementById('bedTime').value = data.bedTime || '';
+            document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
+            calculateSleepDuration(); // Dauer neu berechnen lassen
+
+            // 2. Textarea
+            document.getElementById('notes').value = data.notes || '';
+
+            // 3. Reset aller Checkboxen und Rating-Boxen vor dem Setzen
+            document.querySelectorAll('.sport-checkbox input').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.sport-checkbox').classList.remove('selected');
+            });
+            document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
+
+            // 4. Sport Checkboxen wiederherstellen
+            if (data.selectedSports) {
+                data.selectedSports.forEach(sportName => {
+                    // Finde die Checkbox anhand des data-sport-name
+                    const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                });
+            }
+
+            // 5. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
+            const setSingleSelect = (groupClass, dataName, attrName) => {
+                if (dataName) {
+                    const cb = document.querySelector(`.${groupClass} input[data-${attrName}-name="${dataName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                }
+            };
+            setSingleSelect('stretching-options-group', data.stretchingStatus, 'stretching');
+            setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
+            setSingleSelect('milk-options-group', data.milkStatus, 'milk');
+
+            // 6. Schmerzmittel
+            if (data.selectedPainmeds) {
+                data.selectedPainmeds.forEach(medName => {
+                    const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                });
+            }
+
+            // 7. Ratings wiederherstellen
+            const setRating = (containerId, value) => {
+                if (value) {
+                    const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
+                    if (box) box.classList.add('selected');
+                }
+            };
+            setRating('mood-rating', data.moodRating);
+            setRating('neck-pain-rating', data.neckPainRating);
+            setRating('shoulder-pain-rating', data.shoulderPainRating);
+            setRating('upper-body-pain-rating', data.upperBodyPainRating);
+            setRating('lower-body-pain-rating', data.lowerBodyPainRating);
+            setRating('movement-flow-pain-rating', data.movementFlowPainRating);
+            
+            // Gesamtwert neu berechnen
+            calculateOverallAverage();
+
+            // 8. Tags wiederherstellen
+            if (data.selectedNotesTags) {
+                data.selectedNotesTags.forEach(tagName => {
+                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
+                    if (btn) btn.classList.add('selected');
+                });
+            }
+
+            // Button Text ändern, damit man sieht, dass man im "Edit Modus" ist
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = "Eintrag aktualisieren";
+            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
+        }
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -948,10 +1205,19 @@
             popupContentHtml += `<p><strong>Oberkörperschmerzen:</strong> ${data.upperBodyPainRating ? data.upperBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Bewegungsöffnung / Flow:</strong> ${data.movementFlowPainRating ? data.movementFlowPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Immunsystem:</strong> ${data.immunesystem ? data.immunesysten + '/10' : 'Nicht bewertet'}</p>`;
+            
+            const stiffnessText = data.morningStiffness ? data.morningStiffness + ' Min.' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>Morgensteifigkeit:</strong> ${stiffnessText}</p>`;
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
+            popupContentHtml += '<hr>';
+
+            const crpText = data.crpValue ? data.crpValue + ' mg/L' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>CRP-Wert:</strong> ${crpText}</p>`;
             
+
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
 
@@ -961,14 +1227,125 @@
             popupOverlay.style.display = 'flex';
         }
 
+        // Funktion, um Daten aus der DB wieder in das HTML-Formular zu laden
+        function populateFormWithData(data) {
+            // 1. Einfache Text/Time/Number Felder
+            if(data.wakeUpTime) document.getElementById('wakeUpTime').value = data.wakeUpTime;
+            if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
+            calculateSleepDuration(); // Dauer neu berechnen
+
+            if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
+                    document.getElementById('morningStiffness').value = data.morningStiffness;
+                } else {
+                    // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
+                    document.getElementById('morningStiffness').value = ""; 
+                }
+
+            if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
+            if(data.notes) document.getElementById('notes').value = data.notes;
+
+            // 2. Ratings (Die bunten Boxen)
+            const ratingMap = {
+                'moodRating': 'mood-rating',
+                'neckPainRating': 'neck-pain-rating',
+                'shoulderPainRating': 'shoulder-pain-rating',
+                'upperBodyPainRating': 'upper-body-pain-rating',
+                'lowerBodyPainRating': 'lower-body-pain-rating',
+                'movementFlowPainRating': 'movement-flow-pain-rating',
+                'immunesystemRating': 'immunesystem',
+                'morningStiffnessValue': 'morningStiffness',
+                'crpValue': 'crpInput'
+            };
+
+            for (const [dbField, htmlId] of Object.entries(ratingMap)) {
+                if (data[dbField]) {
+                    // Erst alle 'selected' entfernen
+                    const container = document.getElementById(htmlId);
+                    Array.from(container.children).forEach(b => b.classList.remove('selected'));
+                    // Dann den richtigen auswählen
+                    const boxToSelect = container.querySelector(`.rating-box[data-value="${data[dbField]}"]`);
+                    if (boxToSelect) boxToSelect.classList.add('selected');
+                }
+            }
+            calculateOverallAverage(); // Durchschnitt neu berechnen
+
+            // 3. Checkboxen (Sport, Meds, etc.) zurücksetzen und neu setzen
+            // Das ist etwas komplexer, da du Arrays speicherst.
+            // Hier eine vereinfachte Logik für deine Struktur:
+            
+            // Hilfsfunktion zum Zurücksetzen einer Gruppe
+            const resetGroup = (selector) => {
+                document.querySelectorAll(selector).forEach(cb => {
+                    cb.checked = false; 
+                    cb.closest('.sport-checkbox').classList.remove('selected');
+                });
+            };
+
+            // Sport laden
+            if (data.selectedSports) {
+                resetGroup('.sport-options-group input');
+                data.selectedSports.forEach(sportName => {
+                    const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
+                    if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+                });
+            }
+
+            // Schmerzmittel laden
+            if (data.selectedPainmeds) {
+                resetGroup('.painmed-options-group input');
+                data.selectedPainmeds.forEach(medName => {
+                    const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
+                    if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+                });
+            }
+
+            // Tags laden
+            if (data.selectedNotesTags) {
+                document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
+                data.selectedNotesTags.forEach(tag => {
+                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tag}"]`);
+                    if(btn) btn.classList.add('selected');
+                });
+            }
+
+            // Single Choice Gruppen (Dehnen, Gluten, Milch)
+            const setSingleChoice = (groupClass, dbValue, dataAttribute) => {
+                if (!dbValue) return;
+                resetGroup(`.${groupClass} input`);
+                const cb = document.querySelector(`.${groupClass} input[${dataAttribute}="${dbValue}"]`);
+                if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+            };
+
+            setSingleChoice('stretching-options-group', data.stretchingStatus, 'data-stretching-name');
+            setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
+            setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
+        }
+
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        // NEU: Funktion zum Aktualisieren des Datums im Schlafzeiten-Label
+        function updateSleepTimeLabel() {
+            const sleepLabel = document.getElementById('sleepTimeLabel');
+            if (!sleepLabel) return; // Sicherheitsabfrage
+
+            // Das Datum aus der globalen Variable holen und im deutschen Format (TT.MM.JJJJ) formatieren
+            const formattedDate = currentEditingDate.toLocaleDateString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            // Den Text des Labels aktualisieren
+            sleepLabel.innerHTML = `Schlafzeiten 😴 <span style="font-weight: 600; font-size: 1em; color: #ffffff;">${formattedDate}</span>`;
         }
 
         // NEU: Funktionen für Statistik und Suche
         function closeStatsPopup() {
             document.getElementById('statsOverlay').style.display = 'none';
         }
+
 
         async function loadEntryByDate() {
             const dateInput = document.getElementById('searchDate').value;
@@ -977,15 +1354,16 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Datum sicher parsen (verhindert Zeitzonen-Probleme)
+            // Reset der ID bei neuer Suche
+            currentEntryId = null;
+            document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
+
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; // Monate sind 0-basiert in JS
+            const month = parseInt(parts[1]) - 1;
             const day = parseInt(parts[2]);
 
-            // Start des Tages (00:00:00)
             const start = new Date(year, month, day, 0, 0, 0, 0);
-            // Ende des Tages (23:59:59)
             const end = new Date(year, month, day, 23, 59, 59, 999);
 
             try {
@@ -997,26 +1375,25 @@
                     .get();
 
                 if (snapshot.empty) {
-                    // Fallback: Versuchen wir es ohne Zeitfilter, falls Zeitzonen verrückt spielen,
-                    // oder geben einfach die Meldung aus.
                     alert("Kein Eintrag für dieses Datum gefunden.");
                 } else {
-                    const data = snapshot.docs[0].data();
-                    // Wir müssen das Datum für die Anzeige lesbar machen, falls es nicht im Timestamp ist
-                    // (z.B. für den Titel des Popups)
-                    if (!data.date && data.timestamp) data.date = data.timestamp; 
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
                     
-                    showPopup(data, true);
+                    // WICHTIG: ID speichern!
+                    currentEntryId = doc.id; 
+                    
+                    // Formular befüllen
+                    fillFormWithData(data);
+                    
+                    alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
+
+                    // Optional: Nach oben scrollen, damit man das Formular sieht
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Detaillierter Fehler:", error);
-                
-                // Spezifische Prüfung auf fehlenden Index
-                if (error.message.includes("index")) {
-                    alert("WICHTIG: Firebase benötigt einen Index für diese Suche.\n\nÖffne die Browser-Konsole (F12), dort findest du einen Link von Google. Klicke darauf, um den Index automatisch zu erstellen.");
-                } else {
-                    alert("Fehler beim Laden: " + error.message);
-                }
+                console.error("Fehler:", error);
+                alert("Fehler beim Laden: " + error.message);
             }
         }
 
@@ -1092,6 +1469,42 @@
                 // Trend Chart initialisieren
                 renderTrendChart(fullEntries, 'overallAverage');
 
+
+                // --- NEU: Tag-Analyse Dropdown befüllen ---
+                const tagSelector = document.getElementById('tagAnalysisSelector');
+                const uniqueTags = new Set();
+
+                // Alle Tags sammeln
+                fullEntries.forEach(entry => {
+                    if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
+                        entry.selectedNotesTags.forEach(tag => uniqueTags.add(tag));
+                    }
+                });
+
+                // Dropdown leeren und neu füllen
+                tagSelector.innerHTML = '<option value="" disabled selected>Bitte Tag wählen...</option>';
+                const sortedTags = Array.from(uniqueTags).sort(); // Alphabetisch sortieren
+
+                sortedTags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag;
+                    option.textContent = tag;
+                    tagSelector.appendChild(option);
+                });
+
+                // Event Listener für Tag-Auswahl
+                tagSelector.onchange = (e) => {
+                    renderTagAnalysisChart(fullEntries, e.target.value);
+                };
+
+                // Falls Tags vorhanden sind, standardmäßig den ersten wählen (optional)
+                if (sortedTags.length > 0) {
+                    tagSelector.value = sortedTags[0];
+                    renderTagAnalysisChart(fullEntries, sortedTags[0]);
+                }
+
+
+
             } catch (error) {
                 console.error("Stats Error:", error);
                 document.getElementById('bestDayDate').innerText = "Fehler";
@@ -1165,7 +1578,6 @@
             });
         }
 
-
         let trendChartInstance = null;
 
         function calculateTrend(dataPoints) {
@@ -1195,45 +1607,139 @@
         function renderTrendChart(entries, metricKey) {
             const ctx = document.getElementById('trendChart').getContext('2d');
             const trendText = document.getElementById('trendText');
-            
-            const validEntries = entries
-                .filter(e => e[metricKey] !== null && e[metricKey] !== undefined)
-                .sort((a, b) => a.date - b.date);
+            trendText.innerHTML = ""; // Text für jeden neuen Render zurücksetzen
 
-            if (validEntries.length === 0) {
-                if (trendChartInstance) trendChartInstance.destroy();
+            if (trendChartInstance) {
+                trendChartInstance.destroy(); // Altes Chart immer zuerst zerstören
+            }
+
+            // --- 1. Konfiguration für jeden Metrik-Typ (ÜBERARBEITET) ---
+            // Definiert, wie jeder Datentyp behandelt und visualisiert wird.
+            const metricConfig = {
+                // Standard: Rating-Skala 1-10
+                default: {
+                    chartType: 'scatter',
+                    yAxisMin: 0,
+                    yAxisMax: 10,
+                    yAxisLabel: 'Wert (1-10)',
+                    dataExtractor: (entry) => entry[metricKey] ? parseFloat(entry[metricKey]) : null,
+                    showTrend: true
+                },
+                // Numerische Werte mit eigener Skala
+                morningStiffness: {
+                    chartType: 'scatter',
+                    yAxisMin: 0,
+                    yAxisMax: 120,
+                    yAxisLabel: 'Minuten',
+                    dataExtractor: (entry) => entry.morningStiffness ? parseInt(entry.morningStiffness) : null,
+                    showTrend: true
+                },
+                crpValue: { // Korrekter Key aus der Datenbank
+                    chartType: 'scatter',
+                    yAxisMin: 0,
+                    yAxisMax: undefined, // undefined lässt Chart.js die Skala automatisch finden
+                    yAxisLabel: 'mg/L',
+                    dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null,
+                    showTrend: true
+                },
+                // NEU: Binäre Werte als "Ereignis-Punkte" (Scatter-Plot)
+                // ANGEPASST: yAxisMin und yAxisMax für Margin, damit Punkte nicht abgeschnitten werden.
+                sport: {
+                    chartType: 'scatter', // Zeigt einen Punkt für jedes "Ja"
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
+                    yAxisLabel: 'Aktivität',
+                    // Gibt 1 zurück, wenn Sport gemacht wurde, sonst null
+                    dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null,
+                    showTrend: false // Trendlinie macht hier keinen Sinn
+                },
+                painmeds: {
+                    chartType: 'scatter',
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
+                    yAxisLabel: 'Einnahme',
+                    dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null,
+                    showTrend: false
+                },
+                stretching: {
+                    chartType: 'scatter',
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
+                    yAxisLabel: 'Aktivität',
+                    dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht') ? 1 : null,
+                    showTrend: false
+                },
+                gluten: {
+                    chartType: 'scatter',
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
+                    yAxisLabel: 'Konsum',
+                    dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null,
+                    showTrend: false
+                },
+                milk: {
+                    chartType: 'scatter',
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
+                    yAxisLabel: 'Konsum',
+                    dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null,
+                    showTrend: false
+                }
+            };
+
+            // Wähle die richtige Konfiguration. Wenn keine spezielle da ist, nimm 'default'.
+            const config = metricConfig[metricKey] || metricConfig.default;
+
+            // --- 2. Daten vorbereiten (ROBUSTER GEMACHT) ---
+            // Zuerst alle Einträge nach Datum sortieren. Das ist der wichtigste Fix für das CRP-Problem.
+            // Wichtig: entry.date muss ein Date-Objekt sein, damit die Sortierung funktioniert.
+            // Wenn entry.date ein String ist, muss es erst zu einem Date-Objekt konvertiert werden:
+            // const sortedEntries = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Gehe davon aus, dass entry.date bereits ein Date-Objekt ist.
+            const sortedEntries = [...entries].sort((a, b) => a.date - b.date);
+
+
+            // Mit dem dataExtractor aus der Konfiguration wandeln wir die Rohdaten in Chart-Daten um.
+            // Jeder Eintrag wird verarbeitet und nur die mit einem gültigen Y-Wert werden behalten.
+            const chartData = sortedEntries.map(entry => {
+                return {
+                    x: entry.date,
+                    y: config.dataExtractor(entry)
+                };
+            }).filter(point => point.y !== null); // Entfernt alle Einträge, an denen das Ereignis nicht stattfand oder kein Wert da war.
+
+            if (chartData.length < 1) {
+                trendText.innerHTML = "Keine Daten für diese Kategorie vorhanden.";
                 return;
             }
 
-            // X-Wert ist jetzt direkt das Date-Objekt
-            const scatterData = validEntries.map(e => ({
-                x: e.date, // Echtes Date-Objekt behalten
-                y: e[metricKey]
-            }));
-
+            // --- 3. Datasets und Optionen für das Chart erstellen ---
             let datasets = [{
-                label: 'Tageswerte',
-                data: scatterData,
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                borderColor: 'rgba(255, 255, 255, 0.8)',
-                pointRadius: 5
+                label: document.querySelector(`#trendSelector option[value="${metricKey}"]`).textContent,
+                data: chartData,
+                backgroundColor: 'rgba(0, 242, 254, 0.7)',
+                borderColor: 'rgba(0, 242, 254, 1)',
+                pointRadius: 6,
+                pointHoverRadius: 8
             }];
 
-            // Trend-Berechnung (X-Werte für Mathe in Timestamps umwandeln)
-            if (validEntries.length >= 2) {
-                const mathData = scatterData.map(d => ({ x: d.x.getTime(), y: d.y }));
-                const trend = calculateTrend(mathData); 
+            // Regressionstrend nur berechnen, wenn in der Konfiguration erlaubt (showTrend: true)
+            if (config.showTrend && chartData.length >= 2) {
+                // ... (Dieser Teil bleibt exakt gleich wie in der vorherigen Version)
+                const mathData = chartData.map(d => ({ x: d.x.getTime(), y: d.y }));
+                const trend = calculateTrend(mathData);
 
-                // 1. Erst die Steigung pro Tag berechnen
                 const slopePerDay = trend.m * 86400000;
 
-                // 2. Dann Farbe und Richtung bestimmen (nur einmal deklarieren!)
-                const isPositive = slopePerDay > 0;
-                const directionText = isPositive ? "Verbesserung (Positiv)" : "Verschlechterung (Negativ)";
-                const trendColor = isPositive ? "#2ecc71" : "#e74c3c"; 
+                const isImprovementPositive = ['moodRating', 'overallAverage', 'movementFlowPainRating', 'immunesystemRating'].includes(metricKey);
+                const actualTrendIsUp = slopePerDay > 0;
 
-                // 3. Text ausgeben
-                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(4)})`;
+                let isGoodTrend = isImprovementPositive ? actualTrendIsUp : !actualTrendIsUp;
+
+                const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
+                const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c";
+
+                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(3)})`;
 
                 datasets.push({
                     type: 'line',
@@ -1242,59 +1748,203 @@
                         { x: new Date(trend.startPoint.x), y: trend.startPoint.y },
                         { x: new Date(trend.endPoint.x), y: trend.endPoint.y }
                     ],
-                    borderColor: trendColor, // Nutzt die oben definierte Variable
+                    borderColor: trendColor,
                     borderDash: [5, 5],
                     pointRadius: 0,
                     fill: false
                 });
-            } else {
-                trendText.innerHTML = "Zu wenig Daten für eine Trend-Berechnung.";
             }
 
-            if (trendChartInstance) trendChartInstance.destroy();
-
+            // --- 4. Chart zeichnen ---
             trendChartInstance = new Chart(ctx, {
-                type: 'scatter',
+                type: config.chartType, // Dynamischer Chart-Typ
                 data: { datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            type: 'time', // <--- MAGIC: Zeit-Achse aktivieren
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd.MM.yyyy' // Deutsches Format
-                                },
-                                tooltipFormat: 'dd.MM.yyyy'
-                            },
-                            title: { display: false },
-                            ticks: {
-                                color: '#888',
-                                maxRotation: 0, // Oft nicht mehr nötig bei Zeit-Achsen
-                                autoSkip: true, // Chart.js blendet Labels aus, wenn es zu eng wird
-                                maxTicksLimit: 10 // Maximale Anzahl an Daten-Labels
-                            },
+                            type: 'time',
+                            time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy' },
+                            ticks: { color: '#888', autoSkip: true, maxTicksLimit: 10 },
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
-                            min: 1, max: 10,
-                            ticks: { color: '#ccc' }
+                            min: config.yAxisMin,
+                            max: config.yAxisMax,
+                            beginAtZero: true,
+                            title: { display: true, text: config.yAxisLabel, color: '#ccc' },
+                            ticks: {
+                                color: '#ccc',
+                                // Spezielle Ticks für die neuen Ja/Nein-Charts
+                                callback: function(value) {
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
+                                        if (value === 1) return 'Ja'; // Zeigt "Ja" auf der Y-Achse bei Y=1
+                                        return null; // Blendet alle anderen Ticks (wie die 0) aus
+                                    }
+                                    return value; // Standard-Verhalten für numerische Charts
+                                }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    // Für Ja/Nein-Charts zeigen wir nur den Label-Text
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
+                                        // Hier könnte man noch prüfen, ob context.parsed.y === 1 ist, um sicherzustellen, dass nur die "Ja"-Punkte einen Tooltip bekommen
+                                        if (context.parsed.y === 1) {
+                                            // Zeigt den Metrik-Namen, z.B. "Sport: Ja"
+                                            return `${context.dataset.label}: Ja`;
+                                        }
+                                        return ''; // Für Punkte, die nicht 1 sind (also null oder andere), keinen Tooltip anzeigen
+                                    }
+                                    // Für numerische Charts zeigen wir Label + Wert
+                                    return `${context.dataset.label || ''}: ${context.parsed.y}`;
+                                }
+                            }
                         }
                     }
                 }
             });
         }
 
+        function renderTagAnalysisChart(entries, selectedTag) {
+            const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
+            
+            // 1. Daten filtern: Nur Einträge, die den gewählten Tag enthalten
+            const validEntries = entries
+                .filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag))
+                .sort((a, b) => a.date - b.date);
+
+            // 2. Daten für Chart mappen
+            // Y-Achse: Wir nehmen die 'overallAverage' (Tagesbilanz), damit man sieht, 
+            // ob der Tag an guten oder schlechten Tagen vorkam.
+            // Falls keine Bilanz da ist, setzen wir sie auf 0 oder 5 (Mittelwert).
+            const scatterData = validEntries.map(e => ({
+                x: e.date, 
+                y: e.overallAverage || 0, // Y-Position ist die Tagesbilanz
+                details: e // Speichern für Tooltip
+            }));
+
+            if (tagChartInstance) {
+                tagChartInstance.destroy();
+            }
+
+            tagChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: `Vorkommen: ${selectedTag} (${validEntries.length}x)`,
+                        data: scatterData,
+                        backgroundColor: '#00f2fe', // Helles Cyan
+                        borderColor: '#00c7ff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'dd.MM.yyyy' },
+                                tooltipFormat: 'dd.MM.yyyy'
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#888' }
+                        },
+                        y: {
+                            min: 0, 
+                            max: 10,
+                            title: { display: true, text: 'Tagesbilanz Score', color: '#666' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#ccc' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return `Datum: ${point.x.toLocaleDateString('de-DE')} | Score: ${point.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function exportDailyEntries() {
+            // 👉 Sicherheits-Abfrage
+            const confirmDownload = confirm("Möchten Sie die Daten wirklich herunterladen?");
+            
+            if (!confirmDownload) {
+                console.log("Download abgebrochen.");
+                return;
+            }
+
+            console.log("Starte Datenexport...");
+            
+            try {
+                const snapshot = await db.collection("dailyEntries").get();
+                
+                if (snapshot.empty) {
+                    alert("Keine Daten gefunden.");
+                    return;
+                }
+
+                const data = [];
+                snapshot.forEach(doc => {
+                    const docData = doc.data();
+
+                    // Firestore Timestamp → ISO String
+                    for (let key in docData) {
+                        if (docData[key] && typeof docData[key].toDate === 'function') {
+                            docData[key] = docData[key].toDate().toISOString();
+                        }
+                    }
+
+                    data.push({
+                        id: doc.id,
+                        ...docData
+                    });
+                });
+
+                const jsonString = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `daily_entries_export_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert(`Export erfolgreich: ${data.length} Einträge heruntergeladen.`);
+                console.log(`Erfolg! ${data.length} Einträge exportiert.`);
+
+            } catch (error) {
+                console.error("Fehler:", error);
+                alert("Export fehlgeschlagen!");
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
             generateRatingBoxes('upper-body-pain-rating');
-            generateRatingBoxes('lower-body-pain-rating'); 
+            generateRatingBoxes('lower-body-pain-rating');
             generateRatingBoxes('movement-flow-pain-rating');
+            generateRatingBoxes('immunesystem');
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -1387,10 +2037,11 @@
 
             calculateOverallAverage();
 
+            // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const user = auth.currentUser;
                 if (!user) {
-                    alert('Bitte melden Sie sich zuerst an, um Daten zu speichern.');
+                    alert('Bitte anmelden Sie sich zuerst an, um Daten zu speichern.');
                     return;
                 }
 
@@ -1400,13 +2051,21 @@
                     return;
                 }
 
+                let missingFields = [];
+
+                // Daten sammeln
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
+
+                const morningStiffnessSelect = document.getElementById('morningStiffness');
+                const morningStiffnessValue = morningStiffnessSelect.value; // Ist "" wenn "Bitte wählen" aktiv ist
+
+                const crpInput = document.getElementById('crpInput');
+                const crpValue = crpInput.value ? parseFloat(crpInput.value) : null;
 
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
                 const noSport = document.getElementById('sportNone');
-
                 if (noSport.checked) {
                     selectedSports.push(noSport.dataset.sportName);
                 } else if (activeSports.length > 0) {
@@ -1421,7 +2080,7 @@
                 const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
 
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
-                                          .map(cb => cb.dataset.painmedName);
+                                            .map(cb => cb.dataset.painmedName);
 
                 const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
                 const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
@@ -1429,6 +2088,7 @@
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
+                const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
 
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
                     .map(button => button.dataset.tag);
@@ -1436,7 +2096,7 @@
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
 
-                let missingFields = [];
+                // Validierung
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
@@ -1449,11 +2109,20 @@
                 if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
+                if (!immunesystemRating) missingFields.push('Immunsystem');
+                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
 
                 if (missingFields.length > 0) {
-                    alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
+                    alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
                     return;
                 }
+
+                // --- WICHTIG: Datum aus der globalen Variable holen, nicht einfach "new Date()" ---
+                // Wir klonen das Datum, um sicherzugehen
+                const targetDate = new Date(currentEditingDate); 
+                const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
+                const endOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999);
+                // ---------------------------------------------------------------------------------
 
                 const data = {
                     date: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1466,36 +2135,57 @@
                     glutenStatus,
                     milkStatus,
                     selectedPainmeds,
+                    morningStiffness: morningStiffnessValue !== "" ? morningStiffnessValue : null,
+                    crpValue: crpValue,
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
                     upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
                     movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
+                    immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
                     selectedNotesTags
                 };
 
                 try {
-                    const docRef = await db.collection("dailyEntries").add(data);
-                    console.log("Dokument erfolgreich geschrieben mit ID: ", docRef.id);
-                    alert("Daten erfolgreich gespeichert!");
-                    showPopup(data);
+                    if (currentEntryId) {
+                        // UPDATE MODUS (Bestehender Eintrag)
+                        // Wir fügen KEIN neues Datum hinzu, damit das alte Datum erhalten bleibt!
+                        // 'data' enthält jetzt kein 'date'-Feld, also bleibt das Feld in der DB unberührt.
+                        
+                        await db.collection("dailyEntries").doc(currentEntryId).update(data);
+                        alert("Eintrag erfolgreich aktualisiert!");
+                        
+                        // Optional: Nach Update wieder in den "Neu"-Modus wechseln
+                        currentEntryId = null;
+                        document.getElementById('submitBtn').textContent = "Speichern";
+                        document.getElementById('submitBtn').style.background = ""; // Style reset
+                        
+                    } else {
+                        // CREATE MODUS (Neuer Eintrag)
+                        // Hier fügen wir das aktuelle Datum hinzu
+                        data.date = firebase.firestore.FieldValue.serverTimestamp();
+                        
+                        await db.collection("dailyEntries").add(data);
+                        alert("Neuer Eintrag erfolgreich gespeichert!");
+                    }
+                    
+                    // Nach Speichern Formular leeren oder so lassen? Deine Entscheidung.
+                    // showPopup(data); // Kannst du drinnen lassen zur Bestätigung
+
                 } catch (e) {
-                    console.error("Fehler beim Hinzufügen des Dokuments: ", e);
-                    alert("Fehler beim Speichern der Daten: " + e.message);
+                    console.error("Fehler:", e);
+                    alert("Fehler beim Speichern: " + e.message);
                 }
             });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
             document.getElementById('popupOverlay').addEventListener('click', (event) => {
-                if (event.target.id === 'popupOverlay') {
-                    closePopup();
-                }
+                if (event.target.id === 'popupOverlay') closePopup();
             });
 
-            // Event Listeners für neue Statistik & Search Features
             document.getElementById('searchBtn').addEventListener('click', loadEntryByDate);
             document.getElementById('statsBtn').addEventListener('click', loadStatistics);
             document.getElementById('closeStatsBtn').addEventListener('click', closeStatsPopup);
@@ -1521,10 +2211,37 @@
                 });
             }
 
-            auth.onAuthStateChanged((user) => {
+            auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
                     userInfoDiv.textContent = `Angemeldet: ${user.email}`;
+
+                    // --- NEU: Sicherstellen, dass wir beim Start auf "Heute" sind ---
+                    currentEditingDate = new Date();
+                    updateSleepTimeLabel(); // <--- HIER EINFÜGEN
+
+                    const now = new Date();
+                    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+                    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+                    try {
+                        const snapshot = await db.collection("dailyEntries")
+                            .where("userId", "==", user.uid)
+                            .where("date", ">=", startOfDay)
+                            .where("date", "<=", endOfDay)
+                            .limit(1)
+                            .get();
+
+                        if (!snapshot.empty) {
+                            console.log("Eintrag für heute gefunden. Lade Daten...");
+                            const data = snapshot.docs[0].data();
+                            populateFormWithData(data); 
+                            userInfoDiv.textContent += " (Eintrag von heute geladen ✏️)";
+                            document.getElementById('submitBtn').textContent = "Eintrag aktualisieren";
+                        }
+                    } catch (e) {
+                        console.error("Fehler beim Laden des heutigen Eintrags:", e);
+                    }
                 } else {
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
