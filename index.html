@@ -1559,10 +1559,11 @@
                     showTrend: true
                 },
                 // NEU: Binäre Werte als "Ereignis-Punkte" (Scatter-Plot)
+                // ANGEPASST: yAxisMin und yAxisMax für Margin, damit Punkte nicht abgeschnitten werden.
                 sport: {
                     chartType: 'scatter', // Zeigt einen Punkt für jedes "Ja"
-                    yAxisMin: 0,
-                    yAxisMax: 1, // Wir platzieren alle Punkte auf einer Linie (y=1)
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Aktivität',
                     // Gibt 1 zurück, wenn Sport gemacht wurde, sonst null
                     dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null,
@@ -1570,32 +1571,32 @@
                 },
                 painmeds: {
                     chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 1,
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Einnahme',
                     dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null,
                     showTrend: false
                 },
                 stretching: {
                     chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 1,
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Aktivität',
                     dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht') ? 1 : null,
                     showTrend: false
                 },
                 gluten: {
                     chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 1,
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Konsum',
                     dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null,
                     showTrend: false
                 },
                 milk: {
                     chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 1,
+                    yAxisMin: -0.1, // Etwas Puffer unten
+                    yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Konsum',
                     dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null,
                     showTrend: false
@@ -1607,7 +1608,12 @@
 
             // --- 2. Daten vorbereiten (ROBUSTER GEMACHT) ---
             // Zuerst alle Einträge nach Datum sortieren. Das ist der wichtigste Fix für das CRP-Problem.
-            const sortedEntries = entries.sort((a, b) => a.date - b.date);
+            // Wichtig: entry.date muss ein Date-Objekt sein, damit die Sortierung funktioniert.
+            // Wenn entry.date ein String ist, muss es erst zu einem Date-Objekt konvertiert werden:
+            // const sortedEntries = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Gehe davon aus, dass entry.date bereits ein Date-Objekt ist.
+            const sortedEntries = [...entries].sort((a, b) => a.date - b.date);
+
 
             // Mit dem dataExtractor aus der Konfiguration wandeln wir die Rohdaten in Chart-Daten um.
             // Jeder Eintrag wird verarbeitet und nur die mit einem gültigen Y-Wert werden behalten.
@@ -1622,7 +1628,7 @@
                 trendText.innerHTML = "Keine Daten für diese Kategorie vorhanden.";
                 return;
             }
-            
+
             // --- 3. Datasets und Optionen für das Chart erstellen ---
             let datasets = [{
                 label: document.querySelector(`#trendSelector option[value="${metricKey}"]`).textContent,
@@ -1638,16 +1644,16 @@
                 // ... (Dieser Teil bleibt exakt gleich wie in der vorherigen Version)
                 const mathData = chartData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData);
-                
+
                 const slopePerDay = trend.m * 86400000;
-                
+
                 const isImprovementPositive = ['moodRating', 'overallAverage', 'movementFlowPainRating', 'immunesystemRating'].includes(metricKey);
                 const actualTrendIsUp = slopePerDay > 0;
-                
+
                 let isGoodTrend = isImprovementPositive ? actualTrendIsUp : !actualTrendIsUp;
 
                 const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
-                const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c"; 
+                const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c";
 
                 trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(3)})`;
 
@@ -1688,8 +1694,8 @@
                                 color: '#ccc',
                                 // Spezielle Ticks für die neuen Ja/Nein-Charts
                                 callback: function(value) {
-                                    if (config.showTrend === false) { // Gilt nur für unsere Ja/Nein-Scatter-Plots
-                                        if (value === 1) return 'Ja'; // Zeigt "Ja" auf der Y-Achse
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
+                                        if (value === 1) return 'Ja'; // Zeigt "Ja" auf der Y-Achse bei Y=1
                                         return null; // Blendet alle anderen Ticks (wie die 0) aus
                                     }
                                     return value; // Standard-Verhalten für numerische Charts
@@ -1703,8 +1709,13 @@
                             callbacks: {
                                 label: function(context) {
                                     // Für Ja/Nein-Charts zeigen wir nur den Label-Text
-                                    if (config.showTrend === false) {
-                                        return context.dataset.label.replace(' (Ja/Nein)', '');
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
+                                        // Hier könnte man noch prüfen, ob context.parsed.y === 1 ist, um sicherzustellen, dass nur die "Ja"-Punkte einen Tooltip bekommen
+                                        if (context.parsed.y === 1) {
+                                            // Zeigt den Metrik-Namen, z.B. "Sport: Ja"
+                                            return `${context.dataset.label}: Ja`;
+                                        }
+                                        return ''; // Für Punkte, die nicht 1 sind (also null oder andere), keinen Tooltip anzeigen
                                     }
                                     // Für numerische Charts zeigen wir Label + Wert
                                     return `${context.dataset.label || ''}: ${context.parsed.y}`;
