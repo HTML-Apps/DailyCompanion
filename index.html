@@ -1350,13 +1350,22 @@
             const dateInput = document.getElementById('searchDate').value;
             const user = auth.currentUser;
 
-            if (!user) { alert("Bitte anmelden."); return; }
-            if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
+            if (!user) { 
+                alert("Bitte melden Sie sich erst an."); 
+                return; 
+            }
+            if (!dateInput) { 
+                alert("Bitte wählen Sie ein Datum aus der Historie aus."); 
+                return; 
+            }
 
-            // Reset der ID bei neuer Suche
+            // WICHTIG: Vor jeder neuen Suche die alte ID zurücksetzen
             currentEntryId = null;
-            document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = "Speichern";
+            submitBtn.style.background = ""; // Reset auf Standard-Farbe
 
+            // Datum konvertieren für die Abfrage
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
             const month = parseInt(parts[1]) - 1;
@@ -1374,24 +1383,34 @@
                     .get();
 
                 if (snapshot.empty) {
-                    alert("Kein Eintrag für dieses Datum gefunden.");
+                    alert(`Kein Eintrag für den ${day}.${month + 1}.${year} gefunden.`);
                 } else {
                     const doc = snapshot.docs[0];
                     const data = doc.data();
                     
-                    // WICHTIG: ID speichern!
+                    // HIER PASSIERT DIE MAGIE: 
+                    // Die ID des Firebase-Dokuments wird global gespeichert.
                     currentEntryId = doc.id; 
                     
-                    // Formular befüllen
-                    fillFormWithData(data);
-                    
-                    alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
+                    // Deine Funktion zum Befüllen der Formularfelder aufrufen
+                    // In deiner index.html heißt diese Funktion "populateFormWithData"
+                    if (typeof populateFormWithData === "function") {
+                        populateFormWithData(data);
+                    } else if (typeof fillFormWithData === "function") {
+                        fillFormWithData(data);
+                    }
 
-                    // Optional: Nach oben scrollen, damit man das Formular sieht
+                    // Visuelles Feedback für den User
+                    submitBtn.textContent = `Eintrag vom ${day}.${month + 1}.${year} aktualisieren`;
+                    submitBtn.style.background = "linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)"; // Blaues Design für Update
+                    
+                    alert(`Eintrag gefunden und geladen!`);
+
+                    // Scrollt sanft zum Anfang des Formulars
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Fehler:", error);
+                console.error("Fehler beim Abrufen des Eintrags:", error);
                 alert("Fehler beim Laden: " + error.message);
             }
         }
@@ -2149,36 +2168,28 @@
                 };
 
                 try {
-                    if (currentEntryId) {
-                        // UPDATE MODUS (Bestehender Eintrag)
-                        // Wir fügen KEIN neues Datum hinzu, damit das alte Datum erhalten bleibt!
-                        // 'data' enthält jetzt kein 'date'-Feld, also bleibt das Feld in der DB unberührt.
+                        if (currentEntryId) {
+                            // UPDATE: Bestehendes Dokument aktualisieren
+                            // WICHTIG: Hier KEIN neues date-Feld senden, damit der alte Zeitstempel bleibt!
+                            await db.collection("dailyEntries").doc(currentEntryId).update(data);
+                            alert("Eintrag erfolgreich aktualisiert!");
+                        } else {
+                            // NEU: Neues Dokument erstellen
+                            data.date = firebase.firestore.FieldValue.serverTimestamp();
+                            await db.collection("dailyEntries").add(data);
+                            alert("Neuer Eintrag gespeichert!");
+                        }
                         
-                        await db.collection("dailyEntries").doc(currentEntryId).update(data);
-                        alert("Eintrag erfolgreich aktualisiert!");
-                        
-                        // Optional: Nach Update wieder in den "Neu"-Modus wechseln
+                        // Reset nach dem Speichern (Optional)
                         currentEntryId = null;
                         document.getElementById('submitBtn').textContent = "Speichern";
-                        document.getElementById('submitBtn').style.background = ""; // Style reset
+                        document.getElementById('submitBtn').style.background = ""; 
                         
-                    } else {
-                        // CREATE MODUS (Neuer Eintrag)
-                        // Hier fügen wir das aktuelle Datum hinzu
-                        data.date = firebase.firestore.FieldValue.serverTimestamp();
-                        
-                        await db.collection("dailyEntries").add(data);
-                        alert("Neuer Eintrag erfolgreich gespeichert!");
+                    } catch (e) {
+                        console.error("Fehler beim Speichern:", e);
+                        alert("Fehler: " + e.message);
                     }
-                    
-                    // Nach Speichern Formular leeren oder so lassen? Deine Entscheidung.
-                    // showPopup(data); // Kannst du drinnen lassen zur Bestätigung
-
-                } catch (e) {
-                    console.error("Fehler:", e);
-                    alert("Fehler beim Speichern: " + e.message);
-                }
-            });
+                });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
             document.getElementById('popupOverlay').addEventListener('click', (event) => {
