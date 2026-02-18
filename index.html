@@ -1347,54 +1347,61 @@
         }
 
 
+        // Globale Variablen deklarieren (außerhalb aller Funktionen!)
+        let currentEntryId = null;
+        let currentEditingDate = new Date(); // Default: Heutiges Datum
+
         async function loadEntryByDate() {
-            const dateInput = document.getElementById('searchDate').value;
-            const user = auth.currentUser;
+        const dateInput = document.getElementById('searchDate').value;
+        const user = auth.currentUser;
 
-            if (!user) { alert("Bitte anmelden."); return; }
-            if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
+        if (!user) { alert("Bitte anmelden."); return; }
+        if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Reset der ID bei neuer Suche
-            currentEntryId = null;
-            document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
+        // Reset der ID bei neuer Suche
+        currentEntryId = null;
+        document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
 
-            const parts = dateInput.split('-');
-            const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1;
-            const day = parseInt(parts[2]);
+        const parts = dateInput.split('-');
+        const year = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1;
+        const day = parseInt(parts[2]);
 
-            const start = new Date(year, month, day, 0, 0, 0, 0);
-            const end = new Date(year, month, day, 23, 59, 59, 999);
+        // NEU: Setze currentEditingDate auf das ausgewählte Datum
+        currentEditingDate = new Date(year, month, day);
 
-            try {
-                const snapshot = await db.collection("dailyEntries")
-                    .where("userId", "==", user.uid)
-                    .where("date", ">=", start)
-                    .where("date", "<=", end)
-                    .limit(1)
-                    .get();
+        const start = new Date(year, month, day, 0, 0, 0, 0);
+        const end = new Date(year, month, day, 23, 59, 59, 999);
 
-                if (snapshot.empty) {
-                    alert("Kein Eintrag für dieses Datum gefunden.");
-                } else {
-                    const doc = snapshot.docs[0];
-                    const data = doc.data();
-                    
-                    // WICHTIG: ID speichern!
-                    currentEntryId = doc.id; 
-                    
-                    // Formular befüllen
-                    fillFormWithData(data);
-                    
-                    alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
+        try {
+            const snapshot = await db.collection("dailyEntries")
+            .where("userId", "==", user.uid)
+            .where("date", ">=", start)
+            .where("date", "<=", end)
+            .limit(1)
+            .get();
 
-                    // Optional: Nach oben scrollen, damit man das Formular sieht
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            } catch (error) {
-                console.error("Fehler:", error);
-                alert("Fehler beim Laden: " + error.message);
+            if (snapshot.empty) {
+            alert("Kein Eintrag für dieses Datum gefunden. Sie können einen neuen erstellen.");
+            } else {
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+
+            // WICHTIG: ID speichern!
+            currentEntryId = doc.id;
+
+            // Formular befüllen
+            fillFormWithData(data);
+
+            alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
+            
+            // Optional: Nach oben scrollen, damit man das Formular sieht
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+        } catch (error) {
+            console.error("Fehler:", error);
+            alert("Fehler beim Laden: " + error.message);
+        }
         }
 
         async function loadStatistics() {
@@ -2053,7 +2060,7 @@
 
                 let missingFields = [];
 
-                // Daten sammeln
+                // Daten sammeln (wie bisher, kleine Anpassungen für Konsistenz)
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
@@ -2080,7 +2087,7 @@
                 const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
 
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
-                                            .map(cb => cb.dataset.painmedName);
+                    .map(cb => cb.dataset.painmedName);
 
                 const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
                 const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
@@ -2096,7 +2103,7 @@
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
 
-                // Validierung
+                // Validierung (wie bisher)
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
@@ -2110,22 +2117,15 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
-                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
+                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
                     return;
                 }
 
-                // --- WICHTIG: Datum aus der globalen Variable holen, nicht einfach "new Date()" ---
-                // Wir klonen das Datum, um sicherzugehen
-                const targetDate = new Date(currentEditingDate); 
-                const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-                const endOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999);
-                // ---------------------------------------------------------------------------------
-
+                // Data-Objekt OHNE date initialisieren
                 const data = {
-                    date: firebase.firestore.FieldValue.serverTimestamp(),
                     userId: user.uid,
                     wakeUpTime,
                     bedTime,
@@ -2151,35 +2151,27 @@
 
                 try {
                     if (currentEntryId) {
-                        // UPDATE MODUS (Bestehender Eintrag)
-                        // Wir fügen KEIN neues Datum hinzu, damit das alte Datum erhalten bleibt!
-                        // 'data' enthält jetzt kein 'date'-Feld, also bleibt das Feld in der DB unberührt.
-                        
-                        await db.collection("dailyEntries").doc(currentEntryId).update(data);
-                        alert("Eintrag erfolgreich aktualisiert!");
-                        
-                        // Optional: Nach Update wieder in den "Neu"-Modus wechseln
-                        currentEntryId = null;
-                        document.getElementById('submitBtn').textContent = "Speichern";
-                        document.getElementById('submitBtn').style.background = ""; // Style reset
-                        
-                    } else {
-                        // CREATE MODUS (Neuer Eintrag)
-                        // Hier fügen wir das aktuelle Datum hinzu
-                        data.date = firebase.firestore.FieldValue.serverTimestamp();
-                        
-                        await db.collection("dailyEntries").add(data);
-                        alert("Neuer Eintrag erfolgreich gespeichert!");
-                    }
-                    
-                    // Nach Speichern Formular leeren oder so lassen? Deine Entscheidung.
-                    // showPopup(data); // Kannst du drinnen lassen zur Bestätigung
+                    // UPDATE MODUS: Kein date-Feld, damit das alte Datum erhalten bleibt
+                    await db.collection("dailyEntries").doc(currentEntryId).update(data);
+                    alert("Eintrag erfolgreich aktualisiert!");
 
+                    // Nach Update in "Neu"-Modus wechseln
+                    currentEntryId = null;
+                    document.getElementById('submitBtn').textContent = "Speichern";
+                    document.getElementById('submitBtn').style.background = ""; // Style reset
+                    } else {
+                    // CREATE MODUS: Date auf currentEditingDate setzen (nicht serverTimestamp, um historisches Datum zu ermöglichen)
+                    data.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
+                    await db.collection("dailyEntries").add(data);
+                    alert("Neuer Eintrag erfolgreich gespeichert!");
+                    }
+
+                    // Optional: Formular nach Speichern zurücksetzen oder belassen
                 } catch (e) {
                     console.error("Fehler:", e);
                     alert("Fehler beim Speichern: " + e.message);
                 }
-            });
+                });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
             document.getElementById('popupOverlay').addEventListener('click', (event) => {
