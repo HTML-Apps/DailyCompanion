@@ -1523,124 +1523,128 @@
         function renderTrendChart(entries, metricKey) {
             const ctx = document.getElementById('trendChart').getContext('2d');
             const trendText = document.getElementById('trendText');
-            trendText.innerHTML = ""; // Text zurücksetzen
+            trendText.innerHTML = ""; // Text für jeden neuen Render zurücksetzen
 
-            if (trendChartInstance) trendChartInstance.destroy(); // Altes Chart immer zerstören
+            if (trendChartInstance) {
+                trendChartInstance.destroy(); // Altes Chart immer zuerst zerstören
+            }
 
-            // --- 1. Konfiguration für jeden Metrik-Typ ---
-            // Hier definieren wir, wie jeder Datentyp behandelt werden soll.
+            // --- 1. Konfiguration für jeden Metrik-Typ (ÜBERARBEITET) ---
+            // Definiert, wie jeder Datentyp behandelt und visualisiert wird.
             const metricConfig = {
                 // Standard: Rating-Skala 1-10
                 default: {
-                    type: 'scatter',
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: 10,
                     yAxisLabel: 'Wert (1-10)',
-                    dataFormatter: (value) => parseFloat(value) // Einfache Konvertierung
+                    dataExtractor: (entry) => entry[metricKey] ? parseFloat(entry[metricKey]) : null,
+                    showTrend: true
                 },
                 // Numerische Werte mit eigener Skala
                 morningStiffness: {
-                    type: 'scatter',
+                    chartType: 'scatter',
                     yAxisMin: 0,
-                    yAxisMax: 120, // Max. Wert aus deinem Dropdown
+                    yAxisMax: 120,
                     yAxisLabel: 'Minuten',
-                    dataFormatter: (value) => value ? parseInt(value) : null
+                    dataExtractor: (entry) => entry.morningStiffness ? parseInt(entry.morningStiffness) : null,
+                    showTrend: true
                 },
-                crpValue: { // Name aus dem Dropdown (vorher crpInput)
-                    type: 'scatter',
+                crpValue: { // Korrekter Key aus der Datenbank
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: undefined, // undefined lässt Chart.js die Skala automatisch finden
                     yAxisLabel: 'mg/L',
-                    dataFormatter: (value) => value ? parseFloat(value) : null
+                    dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null,
+                    showTrend: true
                 },
-                // Binäre Werte (Ja/Nein)
+                // NEU: Binäre Werte als "Ereignis-Punkte" (Scatter-Plot)
                 sport: {
-                    type: 'bar', // Balkendiagramm eignet sich hier besser
+                    chartType: 'scatter', // Zeigt einen Punkt für jedes "Ja"
                     yAxisMin: 0,
-                    yAxisMax: 1,
+                    yAxisMax: 1, // Wir platzieren alle Punkte auf einer Linie (y=1)
                     yAxisLabel: 'Aktivität',
-                    // Konvertiert "Kein Sport" zu 0, alles andere zu 1
-                    dataFormatter: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : 0
+                    // Gibt 1 zurück, wenn Sport gemacht wurde, sonst null
+                    dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null,
+                    showTrend: false // Trendlinie macht hier keinen Sinn
                 },
                 painmeds: {
-                    type: 'bar',
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: 1,
                     yAxisLabel: 'Einnahme',
-                    // Konvertiert "Keine" zu 0, alles andere zu 1
-                    dataFormatter: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : 0
+                    dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null,
+                    showTrend: false
                 },
                 stretching: {
-                    type: 'bar',
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: 1,
                     yAxisLabel: 'Aktivität',
-                    dataFormatter: (entry) => (entry.stretchingStatus === 'Gemacht') ? 1 : 0
+                    dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht') ? 1 : null,
+                    showTrend: false
                 },
                 gluten: {
-                    type: 'bar',
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: 1,
                     yAxisLabel: 'Konsum',
-                    dataFormatter: (entry) => (entry.glutenStatus === 'Ja') ? 1 : 0
+                    dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null,
+                    showTrend: false
                 },
                 milk: {
-                    type: 'bar',
+                    chartType: 'scatter',
                     yAxisMin: 0,
                     yAxisMax: 1,
                     yAxisLabel: 'Konsum',
-                    dataFormatter: (entry) => (entry.milkStatus === 'Ja') ? 1 : 0
+                    dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null,
+                    showTrend: false
                 }
             };
 
             // Wähle die richtige Konfiguration. Wenn keine spezielle da ist, nimm 'default'.
             const config = metricConfig[metricKey] || metricConfig.default;
 
-            // --- 2. Daten vorbereiten ---
-            // Wir filtern und sortieren die Einträge.
+            // --- 2. Daten vorbereiten (ROBUSTER GEMACHT) ---
+            // Zuerst alle Einträge nach Datum sortieren. Das ist der wichtigste Fix für das CRP-Problem.
             const sortedEntries = entries.sort((a, b) => a.date - b.date);
-            
-            // Mit dem dataFormatter aus der Konfiguration wandeln wir die Rohdaten in Chart-Daten um.
-            const chartData = sortedEntries.map(e => ({
-                x: e.date,
-                // Je nach Konfiguration wird hier entweder der Wert selbst (e[metricKey])
-                // oder der ganze Eintrag (e) an die Formatierungsfunktion übergeben.
-                y: config.dataFormatter(config.type === 'bar' ? e : e[metricKey])
-            })).filter(p => p.y !== null && p.y !== undefined); // Ungültige/leere Einträge entfernen
+
+            // Mit dem dataExtractor aus der Konfiguration wandeln wir die Rohdaten in Chart-Daten um.
+            // Jeder Eintrag wird verarbeitet und nur die mit einem gültigen Y-Wert werden behalten.
+            const chartData = sortedEntries.map(entry => {
+                return {
+                    x: entry.date,
+                    y: config.dataExtractor(entry)
+                };
+            }).filter(point => point.y !== null); // Entfernt alle Einträge, an denen das Ereignis nicht stattfand oder kein Wert da war.
 
             if (chartData.length < 1) {
                 trendText.innerHTML = "Keine Daten für diese Kategorie vorhanden.";
                 return;
             }
-
+            
             // --- 3. Datasets und Optionen für das Chart erstellen ---
             let datasets = [{
                 label: document.querySelector(`#trendSelector option[value="${metricKey}"]`).textContent,
                 data: chartData,
-                backgroundColor: config.type === 'bar' ? 'rgba(0, 242, 254, 0.6)' : 'rgba(255, 255, 255, 0.5)',
-                borderColor: config.type === 'bar' ? 'rgba(0, 242, 254, 1)' : 'rgba(255, 255, 255, 0.8)',
-                pointRadius: config.type === 'bar' ? 0 : 5, // Keine Punkte bei Balken
-                barPercentage: 0.5 // Macht die Balken schmaler
+                backgroundColor: 'rgba(0, 242, 254, 0.7)',
+                borderColor: 'rgba(0, 242, 254, 1)',
+                pointRadius: 6,
+                pointHoverRadius: 8
             }];
-            
-            // Regressionstrend nur für Scatter-Plots (numerische Daten) berechnen
-            if (config.type === 'scatter' && chartData.length >= 2) {
+
+            // Regressionstrend nur berechnen, wenn in der Konfiguration erlaubt (showTrend: true)
+            if (config.showTrend && chartData.length >= 2) {
+                // ... (Dieser Teil bleibt exakt gleich wie in der vorherigen Version)
                 const mathData = chartData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData);
                 
                 const slopePerDay = trend.m * 86400000;
                 
-                // Positive Steigung bei Schmerzen/CRP ist schlecht, bei Stimmung ist sie gut.
-                // Wir müssen die "gute" Richtung definieren.
-                const isImprovementPositive = ['moodRating', 'overallAverage', 'movementFlowPainRating'].includes(metricKey);
+                const isImprovementPositive = ['moodRating', 'overallAverage', 'movementFlowPainRating', 'immunesystemRating'].includes(metricKey);
                 const actualTrendIsUp = slopePerDay > 0;
                 
-                let isGoodTrend;
-                if (isImprovementPositive) {
-                    isGoodTrend = actualTrendIsUp; // Bei Stimmung ist "hoch" gut.
-                } else {
-                    isGoodTrend = !actualTrendIsUp; // Bei Schmerzen ist "runter" gut.
-                }
+                let isGoodTrend = isImprovementPositive ? actualTrendIsUp : !actualTrendIsUp;
 
                 const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
                 const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c"; 
@@ -1663,7 +1667,7 @@
 
             // --- 4. Chart zeichnen ---
             trendChartInstance = new Chart(ctx, {
-                type: config.type, // Dynamischer Chart-Typ!
+                type: config.chartType, // Dynamischer Chart-Typ
                 data: { datasets: datasets },
                 options: {
                     responsive: true,
@@ -1671,10 +1675,7 @@
                     scales: {
                         x: {
                             type: 'time',
-                            time: {
-                                unit: 'day',
-                                tooltipFormat: 'dd.MM.yyyy'
-                            },
+                            time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy' },
                             ticks: { color: '#888', autoSkip: true, maxTicksLimit: 10 },
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
@@ -1685,33 +1686,28 @@
                             title: { display: true, text: config.yAxisLabel, color: '#ccc' },
                             ticks: {
                                 color: '#ccc',
-                                // Spezielle Ticks für Ja/Nein-Charts
+                                // Spezielle Ticks für die neuen Ja/Nein-Charts
                                 callback: function(value) {
-                                    if (config.type === 'bar') {
-                                        if (value === 1) return 'Ja';
-                                        if (value === 0) return 'Nein';
-                                        return null; // Andere Ticks ausblenden
+                                    if (config.showTrend === false) { // Gilt nur für unsere Ja/Nein-Scatter-Plots
+                                        if (value === 1) return 'Ja'; // Zeigt "Ja" auf der Y-Achse
+                                        return null; // Blendet alle anderen Ticks (wie die 0) aus
                                     }
-                                    return value; // Standard-Verhalten für andere Charts
+                                    return value; // Standard-Verhalten für numerische Charts
                                 }
-                            }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
                         }
                     },
                     plugins: {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
+                                    // Für Ja/Nein-Charts zeigen wir nur den Label-Text
+                                    if (config.showTrend === false) {
+                                        return context.dataset.label.replace(' (Ja/Nein)', '');
                                     }
-                                    // Angepasste Tooltip-Anzeige
-                                    if (config.type === 'bar') {
-                                        label += (context.parsed.y === 1) ? 'Ja' : 'Nein';
-                                    } else {
-                                        label += context.parsed.y;
-                                    }
-                                    return label;
+                                    // Für numerische Charts zeigen wir Label + Wert
+                                    return `${context.dataset.label || ''}: ${context.parsed.y}`;
                                 }
                             }
                         }
