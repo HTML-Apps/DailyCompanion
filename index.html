@@ -859,7 +859,8 @@
             </div>
         </div>
 
-        <button class="submit-button" id="submitBtn">Speichern</button>
+        <!-- <button class="submit-button" id="submitBtn">Speichern</button> -->
+        <button onclick="saveOrUpdateEntry()">Eintrag speichern / aktualisieren</button>
     </div>
 
     <div class="overlay" id="popupOverlay">
@@ -955,6 +956,7 @@
         let statsChartInstance = null; // Globale Variable für das Chart
         let tagChartInstance = null; // Neue globale Variable
         let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
+        let currentEditingDocId = null;
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -1258,61 +1260,135 @@
         }
 
         async function loadEntryByDate() {
-            const dateInput = document.getElementById('searchDate').value;
             const user = auth.currentUser;
+            if (!user) {
+                alert("Bitte zuerst einloggen.");
+                return;
+            }
 
-            if (!user) { alert("Bitte anmelden."); return; }
-            if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
+            const searchDateInput = document.getElementById("searchDate").value;
 
-            // Datum parsen
-            const parts = dateInput.split('-');
-            const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; 
-            const day = parseInt(parts[2]);
+            if (!searchDateInput) {
+                alert("Bitte ein Datum auswählen.");
+                return;
+            }
 
-            // --- NEU: Wir setzen das globale Datum auf den gewählten Tag ---
-            const selectedDate = new Date(year, month, day, 12, 0, 0, 0); // Mittagszeit, um Zeitzonenprobleme zu minimieren
-            currentEditingDate = selectedDate; 
-            updateSleepTimeLabel();
-            // -------------------------------------------------------------
+            const targetDate = new Date(searchDateInput);
 
-            // Zeitfenster für die Suche definieren
-            const start = new Date(year, month, day, 0, 0, 0, 0);
-            const end = new Date(year, month, day, 23, 59, 59, 999);
+            // Start und Ende des Tages bestimmen
+            const startOfDay = new Date(targetDate);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const endOfDay = new Date(targetDate);
+            endOfDay.setHours(23, 59, 59, 999);
 
             try {
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
-                    .where("date", ">=", start)
-                    .where("date", "<=", end)
+                    .where("date", ">=", startOfDay)
+                    .where("date", "<=", endOfDay)
                     .limit(1)
                     .get();
 
                 if (snapshot.empty) {
-                    alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
-                    // Formular leeren für neuen Eintrag in der Vergangenheit (optional, aber sinnvoll)
-                    // Hier könnten wir eine resetForm() Funktion aufrufen, falls du eine hast.
-                    // Wichtig ist: currentEditingDate ist jetzt auf die Vergangenheit gesetzt.
-                    document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
-                } else {
-                    const data = snapshot.docs[0].data();
-                    
-                    // --- WICHTIG: Statt Popup laden wir die Daten ins Formular ---
-                    populateFormWithData(data); 
-                    
-                    // UI Feedback geben
-                    const formattedDate = selectedDate.toLocaleDateString('de-DE');
-                    document.getElementById('submitBtn').textContent = `Eintrag vom ${formattedDate} aktualisieren`;
-                    alert(`Daten vom ${formattedDate} wurden geladen. Du kannst sie jetzt bearbeiten.`);
-                    
-                    // Optional: Nach oben scrollen, damit man das Formular sieht
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    alert("Kein Eintrag für dieses Datum gefunden.");
+                    currentEditingDocId = null; // wichtig!
+                    return;
                 }
+
+                const doc = snapshot.docs[0];
+
+                // 🔥 HIER speichern wir die doc.id
+                currentEditingDocId = doc.id;
+
+                const data = doc.data();
+
+                // Formular befüllen (hier deine Felder einsetzen)
+                document.getElementById("wakeUpTime").value = data.wakeUpTime || "";
+                document.getElementById("sleepTime").value = data.sleepTime || "";
+                document.getElementById("mood").value = data.mood || "";
+                document.getElementById("notes").value = data.notes || "";
+
+                alert("Eintrag geladen – du kannst ihn jetzt bearbeiten.");
+
             } catch (error) {
-                console.error("Fehler beim Laden:", error);
-                alert("Fehler: " + error.message);
+                console.error(error);
+                alert("Fehler beim Laden des Eintrags.");
             }
         }
+
+        async function saveOrUpdateEntry() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Bitte zuerst einloggen.");
+                return;
+            }
+
+            // Werte aus Formular
+            const wakeUpTime = document.getElementById("wakeUpTime").value;
+            const sleepTime = document.getElementById("sleepTime").value;
+            const mood = document.getElementById("mood").value;
+            const notes = document.getElementById("notes").value;
+
+            const searchDateInput = document.getElementById("searchDate").value;
+
+            let targetDate;
+
+            if (searchDateInput) {
+                targetDate = new Date(searchDateInput);
+            } else {
+                targetDate = new Date(); // heute
+            }
+
+            try {
+                // 🟢 FALL 1: UPDATE (Eintrag wurde geladen)
+                if (currentEditingDocId) {
+                    console.log("Update bestehender Eintrag:", currentEditingDocId);
+
+                    const data = {
+                        userId: user.uid,
+                        wakeUpTime,
+                        sleepTime,
+                        mood,
+                        notes
+                        // ❌ KEIN date hier!
+                    };
+
+                    await db.collection("dailyEntries")
+                        .doc(currentEditingDocId)
+                        .update(data);
+
+                    alert("Eintrag erfolgreich aktualisiert.");
+                }
+
+                // 🟢 FALL 2: NEUER EINTRAG
+                else {
+                    console.log("Erstelle neuen Eintrag");
+
+                    const data = {
+                        userId: user.uid,
+                        date: firebase.firestore.Timestamp.fromDate(targetDate),
+                        wakeUpTime,
+                        sleepTime,
+                        mood,
+                        notes
+                    };
+
+                    const docRef = await db.collection("dailyEntries").add(data);
+
+                    // 🔥 Optional: direkt merken
+                    currentEditingDocId = docRef.id;
+
+                    alert("Eintrag gespeichert.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Fehler beim Speichern.");
+            }
+        }
+
+
 
         async function loadStatistics() {
             const user = auth.currentUser;
@@ -2118,6 +2194,10 @@
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
             document.getElementById('popupOverlay').addEventListener('click', (event) => {
                 if (event.target.id === 'popupOverlay') closePopup();
+            });
+
+            document.getElementById("searchDate").addEventListener("change", () => {
+                currentEditingDocId = null;
             });
 
             document.getElementById('searchBtn').addEventListener('click', loadEntryByDate);
