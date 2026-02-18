@@ -622,7 +622,7 @@
     
     <div class="container">
         <div class="category-item">
-            <label>Schlafzeiten 😴</label>
+            <label id="sleepTimeLabel">Schlafzeiten 😴</label>
             <div class="time-input-group">
                 <div class="time-entry">
                     <span class="icon">🌙</span>
@@ -1228,6 +1228,22 @@
             document.getElementById('popupOverlay').style.display = 'none';
         }
 
+        // NEU: Funktion zum Aktualisieren des Datums im Schlafzeiten-Label
+        function updateSleepTimeLabel() {
+            const sleepLabel = document.getElementById('sleepTimeLabel');
+            if (!sleepLabel) return; // Sicherheitsabfrage
+
+            // Das Datum aus der globalen Variable holen und im deutschen Format (TT.MM.JJJJ) formatieren
+            const formattedDate = currentEditingDate.toLocaleDateString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            // Den Text des Labels aktualisieren
+            sleepLabel.innerHTML = `Schlafzeiten 😴 <span style="font-weight: 400; font-size: 0.8em; color: #aaa;">${formattedDate}</span>`;
+        }
+
         // NEU: Funktionen für Statistik und Suche
         function closeStatsPopup() {
             document.getElementById('statsOverlay').style.display = 'none';
@@ -1249,6 +1265,7 @@
             // --- NEU: Wir setzen das globale Datum auf den gewählten Tag ---
             const selectedDate = new Date(year, month, day, 12, 0, 0, 0); // Mittagszeit, um Zeitzonenprobleme zu minimieren
             currentEditingDate = selectedDate; 
+            updateSleepTimeLabel();
             // -------------------------------------------------------------
 
             // Zeitfenster für die Suche definieren
@@ -1959,6 +1976,7 @@
 
                     // --- NEU: Sicherstellen, dass wir beim Start auf "Heute" sind ---
                     currentEditingDate = new Date();
+                    updateSleepTimeLabel(); // <--- HIER EINFÜGEN
 
                     const now = new Date();
                     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
