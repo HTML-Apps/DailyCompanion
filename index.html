@@ -855,6 +855,7 @@
                     <button class="action-button btn-search" id="searchBtn">Laden</button>
                 </div>
                 <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
+                <button class="action-button btn-stats" onclick="exportDailyEntries()">Daten exportieren (JSON)</button>
             </div>
         </div>
 
@@ -1795,6 +1796,52 @@
                     }
                 }
             });
+        }
+
+        async function exportDailyEntries() {
+            console.log("Starte Datenexport...");
+            
+            try {
+                const snapshot = await db.collection("dailyEntries").get();
+                
+                if (snapshot.empty) {
+                    alert("Keine Daten gefunden.");
+                    return;
+                }
+
+                const data = [];
+                snapshot.forEach(doc => {
+                    const docData = doc.data();
+
+                    // Firestore Timestamp → ISO String
+                    for (let key in docData) {
+                        if (docData[key] && typeof docData[key].toDate === 'function') {
+                            docData[key] = docData[key].toDate().toISOString();
+                        }
+                    }
+
+                    data.push({
+                        id: doc.id,
+                        ...docData
+                    });
+                });
+
+                const jsonString = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `daily_entries_export_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log(`Erfolg! ${data.length} Einträge exportiert.`);
+            } catch (error) {
+                console.error("Fehler:", error);
+                alert("Export fehlgeschlagen!");
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
