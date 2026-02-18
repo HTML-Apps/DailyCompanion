@@ -1799,6 +1799,14 @@
         }
 
         async function exportDailyEntries() {
+            // 👉 Sicherheits-Abfrage
+            const confirmDownload = confirm("Möchten Sie die Daten wirklich herunterladen?");
+            
+            if (!confirmDownload) {
+                console.log("Download abgebrochen.");
+                return;
+            }
+
             console.log("Starte Datenexport...");
             
             try {
@@ -1837,7 +1845,9 @@
                 link.click();
                 document.body.removeChild(link);
 
+                alert(`Export erfolgreich: ${data.length} Einträge heruntergeladen.`);
                 console.log(`Erfolg! ${data.length} Einträge exportiert.`);
+
             } catch (error) {
                 console.error("Fehler:", error);
                 alert("Export fehlgeschlagen!");
