@@ -956,6 +956,93 @@
         let statsChartInstance = null; // Globale Variable für das Chart
         let tagChartInstance = null; // Neue globale Variable
         let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
+    
+        let currentEntryId = null; // NEU: Variable zum Speichern der ID des aktuell bearbeiteten Eintrags
+
+        function fillFormWithData(data) {
+            // 1. Zeiten setzen
+            document.getElementById('bedTime').value = data.bedTime || '';
+            document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
+            calculateSleepDuration(); // Dauer neu berechnen lassen
+
+            // 2. Textarea
+            document.getElementById('notes').value = data.notes || '';
+
+            // 3. Reset aller Checkboxen und Rating-Boxen vor dem Setzen
+            document.querySelectorAll('.sport-checkbox input').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.sport-checkbox').classList.remove('selected');
+            });
+            document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
+
+            // 4. Sport Checkboxen wiederherstellen
+            if (data.selectedSports) {
+                data.selectedSports.forEach(sportName => {
+                    // Finde die Checkbox anhand des data-sport-name
+                    const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                });
+            }
+
+            // 5. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
+            const setSingleSelect = (groupClass, dataName, attrName) => {
+                if (dataName) {
+                    const cb = document.querySelector(`.${groupClass} input[data-${attrName}-name="${dataName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                }
+            };
+            setSingleSelect('stretching-options-group', data.stretchingStatus, 'stretching');
+            setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
+            setSingleSelect('milk-options-group', data.milkStatus, 'milk');
+
+            // 6. Schmerzmittel
+            if (data.selectedPainmeds) {
+                data.selectedPainmeds.forEach(medName => {
+                    const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                });
+            }
+
+            // 7. Ratings wiederherstellen
+            const setRating = (containerId, value) => {
+                if (value) {
+                    const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
+                    if (box) box.classList.add('selected');
+                }
+            };
+            setRating('mood-rating', data.moodRating);
+            setRating('neck-pain-rating', data.neckPainRating);
+            setRating('shoulder-pain-rating', data.shoulderPainRating);
+            setRating('upper-body-pain-rating', data.upperBodyPainRating);
+            setRating('lower-body-pain-rating', data.lowerBodyPainRating);
+            setRating('movement-flow-pain-rating', data.movementFlowPainRating);
+            
+            // Gesamtwert neu berechnen
+            calculateOverallAverage();
+
+            // 8. Tags wiederherstellen
+            if (data.selectedNotesTags) {
+                data.selectedNotesTags.forEach(tagName => {
+                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
+                    if (btn) btn.classList.add('selected');
+                });
+            }
+
+            // Button Text ändern, damit man sieht, dass man im "Edit Modus" ist
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = "Eintrag aktualisieren";
+            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
+        }
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -1258,6 +1345,7 @@
             document.getElementById('statsOverlay').style.display = 'none';
         }
 
+
         async function loadEntryByDate() {
             const dateInput = document.getElementById('searchDate').value;
             const user = auth.currentUser;
@@ -1265,19 +1353,15 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Datum parsen
+            // Reset der ID bei neuer Suche
+            currentEntryId = null;
+            document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
+
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; 
+            const month = parseInt(parts[1]) - 1;
             const day = parseInt(parts[2]);
 
-            // --- NEU: Wir setzen das globale Datum auf den gewählten Tag ---
-            const selectedDate = new Date(year, month, day, 12, 0, 0, 0); // Mittagszeit, um Zeitzonenprobleme zu minimieren
-            currentEditingDate = selectedDate; 
-            updateSleepTimeLabel();
-            // -------------------------------------------------------------
-
-            // Zeitfenster für die Suche definieren
             const start = new Date(year, month, day, 0, 0, 0, 0);
             const end = new Date(year, month, day, 23, 59, 59, 999);
 
@@ -1290,28 +1374,25 @@
                     .get();
 
                 if (snapshot.empty) {
-                    alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
-                    // Formular leeren für neuen Eintrag in der Vergangenheit (optional, aber sinnvoll)
-                    // Hier könnten wir eine resetForm() Funktion aufrufen, falls du eine hast.
-                    // Wichtig ist: currentEditingDate ist jetzt auf die Vergangenheit gesetzt.
-                    document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
+                    alert("Kein Eintrag für dieses Datum gefunden.");
                 } else {
-                    const data = snapshot.docs[0].data();
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
                     
-                    // --- WICHTIG: Statt Popup laden wir die Daten ins Formular ---
-                    populateFormWithData(data); 
+                    // WICHTIG: ID speichern!
+                    currentEntryId = doc.id; 
                     
-                    // UI Feedback geben
-                    const formattedDate = selectedDate.toLocaleDateString('de-DE');
-                    document.getElementById('submitBtn').textContent = `Eintrag vom ${formattedDate} aktualisieren`;
-                    alert(`Daten vom ${formattedDate} wurden geladen. Du kannst sie jetzt bearbeiten.`);
+                    // Formular befüllen
+                    fillFormWithData(data);
                     
+                    alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
+
                     // Optional: Nach oben scrollen, damit man das Formular sieht
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Fehler beim Laden:", error);
-                alert("Fehler: " + error.message);
+                console.error("Fehler:", error);
+                alert("Fehler beim Laden: " + error.message);
             }
         }
 
@@ -1978,11 +2059,6 @@
                 const morningStiffnessSelect = document.getElementById('morningStiffness');
                 const morningStiffnessValue = morningStiffnessSelect.value; // Ist "" wenn "Bitte wählen" aktiv ist
 
-                // 2. Zur Validierung hinzufügen
-                //if (!morningStiffnessValue) {
-                    //missingFields.push('Morgensteifigkeit');
-                //}
-
                 const crpInput = document.getElementById('crpInput');
                 const crpValue = crpInput.value ? parseFloat(crpInput.value) : null;
 
@@ -2073,46 +2149,34 @@
                 };
 
                 try {
-                    // Prüfen, ob Eintrag für dieses Datum (currentEditingDate) existiert
-                    const snapshot = await db.collection("dailyEntries")
-                        .where("userId", "==", user.uid)
-                        .where("date", ">=", startOfDay)
-                        .where("date", "<=", endOfDay)
-                        .limit(1)
-                        .get();
-
-                    if (!snapshot.empty) {
-                        // --- UPDATE FALL (Eintrag existiert) ---
-                        const docId = snapshot.docs[0].id;
+                    if (currentEntryId) {
+                        // UPDATE MODUS (Bestehender Eintrag)
+                        // Wir fügen KEIN neues Datum hinzu, damit das alte Datum erhalten bleibt!
+                        // 'data' enthält jetzt kein 'date'-Feld, also bleibt das Feld in der DB unberührt.
                         
-                        // Beim Update wollen wir das ursprüngliche Erstellungsdatum NICHT ändern,
-                        // damit der Eintrag chronologisch dort bleibt, wo er war.
-                        // Also fügen wir 'data.date' NICHT hinzu.
+                        await db.collection("dailyEntries").doc(currentEntryId).update(data);
+                        alert("Eintrag erfolgreich aktualisiert!");
                         
-                        await db.collection("dailyEntries").doc(docId).update(data);
-                        alert(`Eintrag vom ${targetDate.toLocaleDateString()} aktualisiert!`);
+                        // Optional: Nach Update wieder in den "Neu"-Modus wechseln
+                        currentEntryId = null;
+                        document.getElementById('submitBtn').textContent = "Speichern";
+                        document.getElementById('submitBtn').style.background = ""; // Style reset
+                        
                     } else {
-                        // --- NEUER EINTRAG FALL ---
-                        // Hier müssen wir ein Datum setzen. 
-                        // Wenn currentEditingDate "heute" ist -> serverTimestamp
-                        // Wenn currentEditingDate in der Vergangenheit ist -> nehmen wir das vergangene Datum
-                        
-                        // Um sicher zu sein, speichern wir einfach das 'currentEditingDate' als Timestamp
-                        data.date = firebase.firestore.Timestamp.fromDate(targetDate);
+                        // CREATE MODUS (Neuer Eintrag)
+                        // Hier fügen wir das aktuelle Datum hinzu
+                        data.date = firebase.firestore.FieldValue.serverTimestamp();
                         
                         await db.collection("dailyEntries").add(data);
-                        alert(`Neuer Eintrag für ${targetDate.toLocaleDateString()} gespeichert!`);
+                        alert("Neuer Eintrag erfolgreich gespeichert!");
                     }
                     
-                    //showPopup(data); // Popup zur Bestätigung zeigen
-                    
-                    // Nach dem Speichern: Button wieder neutral machen, aber Datum beibehalten, 
-                    // falls man noch was ändern will.
-                    document.getElementById('submitBtn').textContent = "Eintrag aktualisieren";
-                    
+                    // Nach Speichern Formular leeren oder so lassen? Deine Entscheidung.
+                    // showPopup(data); // Kannst du drinnen lassen zur Bestätigung
+
                 } catch (e) {
-                    console.error("Fehler beim Speichern: ", e);
-                    alert("Fehler: " + e.message);
+                    console.error("Fehler:", e);
+                    alert("Fehler beim Speichern: " + e.message);
                 }
             });
 
