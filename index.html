@@ -1981,7 +1981,8 @@
                                         return ''; // Für Punkte, die nicht 1 sind (also null oder andere), keinen Tooltip anzeigen
                                     }
                                     // Für numerische Charts zeigen wir Label + Wert
-                                    return `${context.dataset.label || ''}: ${context.parsed.y}`;
+                                    //return `${context.dataset.label || ''}: ${context.parsed.y}`;
+                                    return `Datum: ${point.x.toLocaleDateString('de-DE')} | Score: ${point.y}`;
                                 }
                             }
                         }
