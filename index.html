@@ -1970,17 +1970,29 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
+                                title: function(context) {
+                                    // Zeigt das Datum als Titel des Tooltips an
+                                    if (context[0] && context[0].parsed && context[0].parsed.x) {
+                                        const date = new Date(context[0].parsed.x);
+                                        return date.toLocaleDateString('de-DE', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                    }
+                                    return '';
+                                },
                                 label: function(context) {
                                     // Für Ja/Nein-Charts zeigen wir nur den Label-Text
-                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
-                                        // Hier könnte man noch prüfen, ob context.parsed.y === 1 ist, um sicherzustellen, dass nur die "Ja"-Punkte einen Tooltip bekommen
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') {
                                         if (context.parsed.y === 1) {
-                                            // Zeigt den Metrik-Namen, z.B. "Sport: Ja"
                                             return `${context.dataset.label}: Ja`;
                                         }
-                                        return ''; // Für Punkte, die nicht 1 sind (also null oder andere), keinen Tooltip anzeigen
+                                        return '';
                                     }
                                     // Für numerische Charts zeigen wir Label + Wert
+                                    // `context.parsed.y` ist der numerische Wert
+                                    // `context.dataset.label` ist der Name der Metrik (z.B. "Stimmung")
                                     return `${context.dataset.label || ''}: ${context.parsed.y}`;
                                 }
                             }
