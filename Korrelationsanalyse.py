@@ -6,12 +6,12 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-# --- COLAB EINSTELLUNGEN ---
+# READ-ME: activate conda
+# Zeile 467 beachten - zusätzliche Daten einblenden
+
+# --- COLAB EINSTELLUNGEN einkommentieren---
 # %matplotlib inline
 # plt.rcParams['figure.figsize'] = [15, 7]
-
-# READ-ME: activate conda
-# Zeile 484 beachten - zusätzliche Daten einblenden
 
 # 1. Daten laden 
 filename = 'daily_entries_export.json' 
@@ -29,17 +29,42 @@ df['date'] = pd.to_datetime(df['date'], errors='coerce')
 df = df.dropna(subset=['date']).sort_values('date')
 df['date'] = df['date'].dt.tz_localize(None)
 
-binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Nicht gemacht': 0}
+binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio': 1, 'Nicht gemacht': 0}
+# Beachte: Die spezifischen Sport- und Schmerzmittelnamen sind hier nicht mehr nötig,
+# da wir eine andere Logik für die Listen anwenden.
+# 'Kein Sport': 0, 'Fitnessstudio': 1, 'Fußball': 1, 'Radfahren': 1,
+# 'Keine': 0, 'IBU': 1,'Etoricoxib_60': 1,'Etoricoxib_120': 1,'Biologika': 1
+
+
+# --- Spalten, die einfache String-Werte enthalten ---
 for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
     if col in df.columns:
-        df[col + '_num'] = df[col].map(binary_map)
+        # Sicherstellen, dass die Spalte nicht leer ist, bevor map() aufgerufen wird
+        # .fillna('') hilft, TypeError bei NaN zu vermeiden, falls map() auf NaN trifft und es kein Schlüssel im dict ist
+        df[col + '_num'] = df[col].fillna('').map(binary_map)
+
+# --- Spalten, die Listen enthalten (selectedSports, selectedPainmeds) ---
+# Hier müssen wir eine andere Logik anwenden, um eine binäre 0/1 Spalte zu erstellen.
+
+# Für 'selectedSports': 1, wenn Sport gemacht wurde (d.h., die Liste ist nicht leer UND enthält nicht nur 'Kein Sport')
+if 'selectedSports' in df.columns:
+    df['sport_binary'] = df['selectedSports'].apply(
+        lambda x: 1 if isinstance(x, list) and len(x) > 0 and 'Kein Sport' not in x else 0
+    )
+
+# Für 'selectedPainmeds': 1, wenn Schmerzmittel genommen wurden (d.h., die Liste ist nicht leer UND enthält nicht nur 'Keine')
+if 'selectedPainmeds' in df.columns:
+    df['meds_binary'] = df['selectedPainmeds'].apply(
+        lambda x: 1 if isinstance(x, list) and len(x) > 0 and 'Keine' not in x else 0
+    )
 
 def parse_sleep(s):
     try:
         if not isinstance(s, str): return None
         parts = s.split()
         return int(parts[1]) + int(parts[3])/60
-    except: return None
+    except (AttributeError, ValueError, IndexError): # Mehr Fehler abfangen
+        return None
 
 df['sleep_hours'] = df['sleepDuration'].apply(parse_sleep)
 
@@ -440,43 +465,9 @@ if df['sleep_hours'].notnull().any():
     plt.xlabel('Schlafstunden')
     plt.ylabel('Schmerz-Score')
     plt.show()
-
-# ---------------------------------------------------------
-# ANALYSE 5: CLUSTER-ANALYSE (TAGESTYPEN)
-# ---------------------------------------------------------
-cluster_cols = ['neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 'lowerBodyPainRating']
-cluster_labels = ['Nacken', 'Schulter', 'Oberkörper', 'Unterkörper']
-cluster_data = df[cluster_cols].dropna()
-
-if len(cluster_data) > 10:
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(cluster_data)
-    kmeans = KMeans(n_clusters=3, random_state=42, n_init=10).fit(scaled_data)
-    cluster_data['Typ'] = kmeans.labels_
-    cluster_profiles = cluster_data.groupby('Typ').mean()
-
-    angles = np.linspace(0, 2 * np.pi, len(cluster_labels), endpoint=False).tolist()
-    angles += angles[:1]
-
-    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-    colors = ['#2ca02c', '#ff7f0e', '#1f77b4'] # Grün, Orange, Blau
-    
-    for i in range(len(cluster_profiles)):
-        values = cluster_profiles.iloc[i].tolist()
-        values += values[:1]
-        ax.plot(angles, values, color=colors[i], linewidth=2, label=f'Cluster {i}')
-        ax.fill(angles, values, color=colors[i], alpha=0.2)
-
-    ax.set_theta_offset(np.pi / 2)
-    ax.set_theta_direction(-1)
-    ax.set_thetagrids(np.degrees(angles[:-1]), cluster_labels)
-    ax.set_ylim(0, 10) # Feste Skala 1-10
-    plt.title('Dein Wohlbefinden nach Körperregionen\n(Größere Fläche = Weniger Schmerz)', y=1.1)
-    plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
-    plt.show()
     
 # ---------------------------------------------------------
-# ANALYSE 6: Korrelations-Heatmap
+# ANALYSE 5: Korrelations-Heatmap
 # ---------------------------------------------------------
     
 # 1. Daten laden
@@ -507,7 +498,7 @@ cols_to_analyze = [
     'overallAverage',
     'overallAverage_tomorrow',
     'movementFlowPainRating',
-    'immunesystem',
+    'immunesystemRating',
     'sport_binary',
     'stretchingStatus_num',
     'meds_binary',
@@ -535,7 +526,7 @@ label_dict = {
     'milkStatus_num': 'Milch Heute',
     'overallAverage_tomorrow': 'Gesamtschmerz Morgen',
     'movementFlowPainRating': 'Bewegungsöffnung / Flow',
-    'immunesystem':'Immunsystem'
+    'immunesystemRating':'Immunsystem'
 }
 
 # Ersetze die Namen in der Korrelationsmatrix nur für die Anzeige
@@ -555,7 +546,7 @@ print("\n--- Korrelationen zum Gesamtschmerz am nächsten Tag ---")
 print(display_matrix['Gesamtschmerz Morgen'].sort_values(ascending=False))
 
 # ---------------------------------------------------------
-# ANALYSE 7: K-Means Cluster-Analyse
+# ANALYSE 6: K-Means Cluster-Analyse
 # ---------------------------------------------------------
 
 # WICHTIG: --- Cluster Profile (Durchschnittswerte pro Gruppe) --- in Terminal interpretieren (Werte*100 = Prozent)
@@ -634,3 +625,76 @@ plt.legend(title='Tag-Typ (Cluster)', bbox_to_anchor=(1.05, 1), loc='upper left'
 plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
+
+"""
+Beispiel-Auswertung 16.02.2026
+
+--- Cluster Profile (Durchschnittswerte pro Gruppe) ---
+Cluster                       0        1         2
+moodRating             7.668712  7.18750  6.753846
+overallAverage         7.307975  7.26875  6.280000
+neckPainRating         7.006135  7.00000  5.707692
+shoulderPainRating     6.957055  7.37500  5.723077
+upperBodyPainRating    7.319018  7.18750  6.169231
+lowerBodyPainRating    7.588957  7.56250  7.046154
+glutenStatus_num       0.012270  0.06250  0.323077
+milkStatus_num         0.233129  0.18750  0.430769
+stretchingStatus_num   0.288344  0.43750  0.123077
+sport_binary           0.638037  0.75000  0.400000
+meds_binary            0.122699  0.75000  0.307692
+tag_bosch_kantine      0.085890  0.00000  0.169231
+tag_schokolade         0.073620  0.00000  0.215385
+tag_eis                0.067485  0.00000  0.153846
+tag_müsli              0.000000  0.75000  0.000000
+tag_stuhl              0.042945  0.00000  0.061538
+tag_shake              0.490798  0.68750  0.092308
+tag_proteinriegel      0.000000  0.56250  0.000000
+tag_bauch_gespannt     0.245399  0.37500  0.200000
+tag_bauch_gebläht      0.012270  0.00000  0.046154
+tag_nackensperre       0.073620  0.25000  0.215385
+tag_atemsperre         0.000000  0.00000  0.015385
+tag_beinsperre         0.024540  0.00000  0.015385
+tag_nierenschmerz      0.030675  0.00000  0.015385
+tag_zeh_links          0.000000  0.00000  0.000000
+tag_zeh_rechts         0.000000  0.00000  0.000000
+tag_zähne              0.012270  0.00000  0.000000
+tag_erreger            0.055215  0.00000  0.123077
+tag_allergie           0.000000  0.00000  0.015385
+tag_creme_arme         0.466258  0.25000  0.215385
+tag_creme_füße         0.490798  0.50000  0.123077
+tag_creme_hüfte        0.000000  0.00000  0.000000
+tag_gläschen           0.705521  0.12500  0.261538
+tag_vitamin_d3         0.184049  0.18750  0.153846
+tag_omega3             0.000000  0.00000  0.000000
+tag_mouthtape          0.895706  1.00000  0.507692
+tag_biologika_spritze  0.000000  0.00000  0.000000
+
+Cluster 0: Der "Clean-Life & Routine" Modus (Dein bester Zustand)
+Wohlbefinden: Hier hast du die beste Stimmung (7.67) und die höchste Schmerzfreiheit (7.31).
+Ernährung: Fast 0 % Gluten und moderate Milchwerte.
+Der "Gläschen-Effekt": Das Tag gläschen ist hier mit 70 % extrem dominant. Es scheint für dich ein absolut sicheres "Safe-Food" zu sein, das mit hoher Schmerzfreiheit korreliert.
+Lifestyle: Du nutzt hier fast immer das Mouthtape (89 %) und cremst dich regelmäßig ein.
+Interpretation: Das ist dein stabiler Alltag. Wenig Experimente, gute Routine, kaum Schmerzen und fast keine Medikamente (nur 12 %).
+
+Cluster 1: Das "Müsli- & Medikamenten-Hoch" (Die Leistungs-Falle)
+Wohlbefinden: Schmerzwerte sind fast so gut wie in Cluster 0, aber...
+Der Preis: Du nimmst an 75 % dieser Tage Medikamente.
+Die Trigger: Dieses Cluster wird zu 75 % von Müsli und zu 56 % von Proteinriegeln dominiert.
+Körper-Feedback: Obwohl der Schmerzwert okay ist, hast du hier den höchsten Wert für "Bauch gespannt" (37 %).
+Interpretation: Das sind Tage, an denen du sehr aktiv bist (höchste Sport-Quote: 75 % und bestes Stretching: 43 %). Es scheint, als würdest du die negativen Effekte von Müsli/Proteinriegeln (gespannter Bauch) durch Sport und Medikamente "niederringen". Du bist leistungsfähig, aber dein System steht unter Stress.
+
+Cluster 2: Die "Entzündungs-Abwärtsspirale" (Der Gefahrenbereich)
+Wohlbefinden: Dein schlechtester Zustand. Schmerzfreiheit sinkt auf 6.28. Besonders Nacken (5.7) und Schulter (5.7) sind betroffen.
+Die Ursachen-Kombi:
+Ernährung: Höchste Werte bei Gluten (32 %), Milch (43 %), Schokolade (21 %) und Eis (15 %).
+Mechanik: Die niedrigste Stretching-Rate (12 %) und die niedrigste Mouthtape-Quote (50 %).
+Immunsystem: Hier sind die meisten Erreger (12 %) im Spiel.
+Interpretation: Das ist der "Perfect Storm". Schlechtes Essen (Zucker/Gluten), wenig Bewegung und eventuell ein aufkeimender Infekt führen sofort zu einer Verschlechterung der Bechterew-Symptomatik im Oberkörper.
+Die wichtigsten Erkenntnisse für dein Management:
+Mouthtape & Nacken: Schau dir den Zusammenhang an: In Cluster 0 (Mouthtape 89 %) ist der Nacken super (7.0). In Cluster 2 (Mouthtape nur 50 %) ist der Nacken schlecht (5.7). Es gibt eine starke Korrelation zwischen nächtlicher Nasenatmung und Nackenentspannung bei dir.
+
+Müsli vs. Gläschen: Dein Körper reagiert völlig unterschiedlich. Das "Gläschen" (Cluster 0) bringt schmerzfreie Ruhe ohne Medikamente. Das "Müsli" (Cluster 1) treibt dich zwar an, benötigt aber Medikamente und spannt den Bauch an.
+
+Die "Bosch-Kantine" (Cluster 2): Hier ist die Quote mit 17 % am höchsten. Die Kombination aus Kantinenessen, Schokolade und wenig Dehnen scheint dein direkter Weg in den Schmerzschub zu sein.
+
+"""
