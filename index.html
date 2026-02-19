@@ -2707,7 +2707,6 @@
             calculateOverallAverage();
 
             // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
-                        // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const user = auth.currentUser;
                 if (!user) {
@@ -2792,7 +2791,7 @@
                     userId: user.uid,
                     wakeUpTime,
                     bedTime,
-                    sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
+                    sleepDuration: document.getElementById('sleepDurationDisplay').textContent, // Aktuelle Anzeige nutzen
                     selectedSports,
                     stretchingStatus,
                     glutenStatus,
@@ -2815,24 +2814,32 @@
                 try {
                     if (currentEntryId) {
                         // UPDATE MODUS: Wenn currentEntryId gesetzt ist, aktualisiere den bestehenden Eintrag
-                        // Wichtig: Beim Update wollen wir das ursprüngliche 'date'-Feld NICHT überschreiben!
-                        // Es wird also kein 'date' Feld in dataToSave mitgegeben, wenn aktualisiert wird.
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
                         alert("Eintrag erfolgreich aktualisiert!");
                         
-                        // Nach dem Update: Formular zurücksetzen und in den "Neu erstellen"-Modus wechseln
-                        resetForm(); 
+                        // Nach dem Update: Den soeben aktualisierten Eintrag neu laden
+                        // Das sorgt dafür, dass das Formular den aktuellen Zustand widerspiegelt
+                        // und der "Eintrag aktualisieren"-Modus beibehalten wird.
+                        // Wir verwenden hier die currentEditingDate Variable, die das Datum des Eintrags hält.
+                        const dateToReload = currentEditingDate.toISOString().slice(0, 10);
+                        document.getElementById('searchDate').value = dateToReload; // Setze das Datum in den Such-Input
+                        loadEntryByDate(); // Lade den Eintrag für dieses Datum erneut
+
                     } else {
                         // CREATE MODUS: Wenn currentEntryId null ist, erstelle einen neuen Eintrag
-                        // Setze das Datum für den neuen Eintrag.
-                        // Wenn der Tag heute ist, nimm serverTimestamp. Wenn es ein geladenes Vergangenheitsdatum ist, nimm das.
+                        // Setze das Datum für den neuen Eintrag basierend auf currentEditingDate
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
-                        await db.collection("dailyEntries").add(dataToSave);
+                        const docRef = await db.collection("dailyEntries").add(dataToSave);
                         alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
                         
-                        // Nach dem Speichern: Formular zurücksetzen
-                        resetForm(); 
+                        // Nach dem Speichern eines NEUEN Eintrags:
+                        // Wenn es der heutige Tag war, laden wir ihn neu, um in den Update-Modus zu wechseln.
+                        // Wenn es ein vergangener Tag war, laden wir ihn auch neu, um ihn als bearbeitet anzuzeigen.
+                        currentEntryId = docRef.id; // Die neue ID speichern
+                        const dateToReload = currentEditingDate.toISOString().slice(0, 10);
+                        document.getElementById('searchDate').value = dateToReload; // Setze das Datum in den Such-Input
+                        loadEntryByDate(); // Lade den Eintrag für dieses Datum erneut
                     }
                     
                 } catch (e) {
@@ -2840,36 +2847,6 @@
                     alert("Fehler: " + e.message);
                 }
             });
-
-            document.getElementById('closePopupBtn').addEventListener('click', closePopup);
-            document.getElementById('popupOverlay').addEventListener('click', (event) => {
-                if (event.target.id === 'popupOverlay') closePopup();
-            });
-
-            document.getElementById('searchBtn').addEventListener('click', loadEntryByDate);
-            document.getElementById('statsBtn').addEventListener('click', loadStatistics);
-            document.getElementById('closeStatsBtn').addEventListener('click', closeStatsPopup);
-            document.getElementById('statsOverlay').addEventListener('click', (event) => {
-                if(event.target.id === 'statsOverlay') closeStatsPopup();
-            });
-
-            const signInButton = document.getElementById('signInButton');
-            const userInfoDiv = document.getElementById('userInfo'); 
-
-            if (signInButton) {
-                signInButton.addEventListener('click', () => {
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    auth.signInWithPopup(provider)
-                        .then((result) => {
-                            const user = result.user;
-                            alert(`Erfolgreich angemeldet als ${user.displayName}!`);
-                            signInButton.style.display = 'none';
-                        }).catch((error) => {
-                            console.error('Fehler bei der Google-Anmeldung:', error);
-                            alert(`Anmeldefehler: ${error.message}`);
-                        });
-                });
-            }
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
