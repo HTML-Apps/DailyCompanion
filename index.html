@@ -1926,7 +1926,8 @@
                 const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
                 const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c";
 
-                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(3)})`;
+                //trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong> (Änderung/Tag: ${slopePerDay.toFixed(3)})`;
+                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong><br>(Änderung/Tag: ${slopePerDay.toFixed(3)})`;
 
                 datasets.push({
                     type: 'line',
