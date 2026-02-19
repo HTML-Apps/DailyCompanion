@@ -1830,7 +1830,7 @@
                     yAxisMin: -0.1, // Etwas Puffer unten
                     yAxisMax: 1.1, // Etwas Puffer oben
                     yAxisLabel: 'Aktivität',
-                    dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht') ? 1 : null,
+                    dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht' && 'Physio') ? 1 : null,
                     showTrend: false
                 },
                 gluten: {
@@ -1981,8 +1981,7 @@
                                         return ''; // Für Punkte, die nicht 1 sind (also null oder andere), keinen Tooltip anzeigen
                                     }
                                     // Für numerische Charts zeigen wir Label + Wert
-                                    //return `${context.dataset.label || ''}: ${context.parsed.y}`;
-                                    return `Datum: ${point.x.toLocaleDateString('de-DE')} | Score: ${point.y}`;
+                                    return `${context.dataset.label || ''}: ${context.parsed.y}`;
                                 }
                             }
                         }
