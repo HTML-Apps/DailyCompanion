@@ -1918,7 +1918,7 @@
                 const link = document.createElement("a");
                 link.href = url;
                 // Tipp: Dateiname statisch lassen, damit das Python-Skript ihn immer findet
-                link.download = `daily_entries_export_2026-02-16.json`; 
+                link.download = `daily_entries_export.json`; 
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1933,8 +1933,8 @@
         from sklearn.preprocessing import StandardScaler
 
         # --- COLAB EINSTELLUNGEN ---
-        # %matplotlib inline
-        # plt.rcParams['figure.figsize'] = [15, 7]
+        %matplotlib inline
+        plt.rcParams['figure.figsize'] = [15, 7]
 
         # READ-ME: activate conda
         # Zeile 484 beachten - zusätzliche Daten einblenden
