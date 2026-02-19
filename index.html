@@ -1683,10 +1683,10 @@
             // Einfachheitshalber: Top 5 links, Flop 5 rechts (als separate Balken)
             
             // Labels formatieren
-            const topLabels = top5.map(e => "🏆 " + e.date.toLocaleDateString('de-DE').slice(0, 5));
+            const topLabels = top5.map(e => "🏆 " + e.date.toLocaleDateString('de-DE').slice(0, 9));
             const topData = top5.map(e => e.score);
             
-            const flopLabels = flop5.map(e => "⚠️ " + e.date.toLocaleDateString('de-DE').slice(0, 5));
+            const flopLabels = flop5.map(e => "⚠️ " + e.date.toLocaleDateString('de-DE').slice(0, 9));
             const flopData = flop5.map(e => e.score);
 
             const allLabels = [...topLabels, ...flopLabels];
