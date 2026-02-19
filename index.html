@@ -1224,114 +1224,7 @@
             popupContent.innerHTML = popupContentHtml;
             popupOverlay.style.display = 'flex';
         }
-
-        // Funktion, um Daten aus der DB wieder in das HTML-Formular zu laden
-        // function populateFormWithData(data) {
-        //     // 1. Einfache Text/Time/Number Felder
-        //     if(data.wakeUpTime) document.getElementById('wakeUpTime').value = data.wakeUpTime;
-        //     if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
-        //     calculateSleepDuration(); // Dauer neu berechnen
-
-        //     if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
-        //             document.getElementById('morningStiffness').value = data.morningStiffness;
-        //         } else {
-        //             // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
-        //             document.getElementById('morningStiffness').value = ""; 
-        //         }
-
-        //     if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
-        //     if(data.notes) document.getElementById('notes').value = data.notes;
-
-        //     // 2. Ratings (Die bunten Boxen)
-        //     const ratingMap = {
-        //         'moodRating': 'mood-rating',
-        //         'neckPainRating': 'neck-pain-rating',
-        //         'shoulderPainRating': 'shoulder-pain-rating',
-        //         'upperBodyPainRating': 'upper-body-pain-rating',
-        //         'lowerBodyPainRating': 'lower-body-pain-rating',
-        //         'movementFlowPainRating': 'movement-flow-pain-rating',
-        //         'immunesystemRating': 'immunesystem',
-        //         'morningStiffnessValue': 'morningStiffness',
-        //         'crpValue': 'crpInput'
-        //     };
-
-        //     for (const [dbField, htmlId] of Object.entries(ratingMap)) {
-        //         if (data[dbField]) {
-        //             // Erst alle 'selected' entfernen
-        //             const container = document.getElementById(htmlId);
-        //             Array.from(container.children).forEach(b => b.classList.remove('selected'));
-        //             // Dann den richtigen auswählen
-        //             const boxToSelect = container.querySelector(`.rating-box[data-value="${data[dbField]}"]`);
-        //             if (boxToSelect) boxToSelect.classList.add('selected');
-        //         }
-        //     }
-        //     calculateOverallAverage(); // Durchschnitt neu berechnen
-
-        //     // 3. Checkboxen (Sport, Meds, etc.) zurücksetzen und neu setzen
-        //     // Das ist etwas komplexer, da du Arrays speicherst.
-        //     // Hier eine vereinfachte Logik für deine Struktur:
-            
-        //     // Hilfsfunktion zum Zurücksetzen einer Gruppe
-        //     const resetGroup = (selector) => {
-        //         document.querySelectorAll(selector).forEach(cb => {
-        //             cb.checked = false; 
-        //             cb.closest('.sport-checkbox').classList.remove('selected');
-        //         });
-        //     };
-
-        //     // Sport laden
-        //     if (data.selectedSports) {
-        //         resetGroup('.sport-options-group input');
-        //         data.selectedSports.forEach(sportName => {
-        //             const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
-        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //         });
-        //     }
-
-        //     // Schmerzmittel laden
-        //     if (data.selectedPainmeds) {
-        //         resetGroup('.painmed-options-group input');
-        //         data.selectedPainmeds.forEach(medName => {
-        //             const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
-        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //         });
-        //     }
-
-        //     // Tags laden
-        //     if (data.selectedNotesTags) {
-        //         document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
-        //         data.selectedNotesTags.forEach(tag => {
-        //             const btn = document.querySelector(`.notes-tag-button[data-tag="${tag}"]`);
-        //             if(btn) btn.classList.add('selected');
-        //         });
-        //     }
-
-        //     // Single Choice Gruppen (Dehnen, Gluten, Milch)
-        //     const setSingleChoice = (groupClass, dbValue, dataAttribute) => {
-        //         if (!dbValue) return;
-        //         resetGroup(`.${groupClass} input`);
-        //         const cb = document.querySelector(`.${groupClass} input[${dataAttribute}="${dbValue}"]`);
-        //         if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //     };
-
-        //     setSingleChoice('stretching-options-group', data.stretchingStatus, 'data-stretching-name');
-        //     setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
-        //     setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
-        // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+     
         function fillFormWithData(data) {
             // 1. Zeiten setzen
             document.getElementById('bedTime').value = data.bedTime || '';
@@ -1427,22 +1320,6 @@
             submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
         }
@@ -1467,14 +1344,6 @@
         function closeStatsPopup() {
             document.getElementById('statsOverlay').style.display = 'none';
         }
-
-
-
-
-
-
-
-
 
         // NEU HINZUGEFÜGT: Funktion zum Zurücksetzen des gesamten Formulars
         function resetForm() {
@@ -1509,21 +1378,6 @@
             submitBtn.textContent = 'Speichern';
             submitBtn.style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)"; // Zurück zur Originalfarbe
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         async function loadEntryByDate() {
             const dateInput = document.getElementById('searchDate').value;
