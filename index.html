@@ -1922,7 +1922,7 @@
 
                 const link = document.createElement("a");
                 link.href = url;
-                link.download = `daily_entries_export_${new Date().toISOString().slice(0,10)}.json`;
+                link.download = `daily_entries_export.json`; //_${new Date().toISOString().slice(0,10)}
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
