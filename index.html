@@ -2124,13 +2124,12 @@
         from sklearn.cluster import KMeans
         from sklearn.preprocessing import StandardScaler
 
-        # --- COLAB EINSTELLUNGEN ---
+        # READ-ME: activate conda
+        # Zeile 467 beachten - zusätzliche Daten einblenden
+
+        # --- COLAB EINSTELLUNGEN einkommentieren---
         %matplotlib inline
         plt.rcParams['figure.figsize'] = [15, 7]
-
-        # READ-ME: activate conda
-        # Zeile 484 beachten - zusätzliche Daten einblenden
-        # WICHTIG: Datum an Filename anpassen in Zeile 14
 
         # 1. Daten laden 
         filename = 'daily_entries_export.json' 
@@ -2148,20 +2147,46 @@
         df = df.dropna(subset=['date']).sort_values('date')
         df['date'] = df['date'].dt.tz_localize(None)
 
-        binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Nicht gemacht': 0}
+        binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio': 1, 'Nicht gemacht': 0}
+        # Beachte: Die spezifischen Sport- und Schmerzmittelnamen sind hier nicht mehr nötig,
+        # da wir eine andere Logik für die Listen anwenden.
+        # 'Kein Sport': 0, 'Fitnessstudio': 1, 'Fußball': 1, 'Radfahren': 1,
+        # 'Keine': 0, 'IBU': 1,'Etoricoxib_60': 1,'Etoricoxib_120': 1,'Biologika': 1
+
+
+        # --- Spalten, die einfache String-Werte enthalten ---
         for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
             if col in df.columns:
-                df[col + '_num'] = df[col].map(binary_map)
+                # Sicherstellen, dass die Spalte nicht leer ist, bevor map() aufgerufen wird
+                # .fillna('') hilft, TypeError bei NaN zu vermeiden, falls map() auf NaN trifft und es kein Schlüssel im dict ist
+                df[col + '_num'] = df[col].fillna('').map(binary_map)
+
+        # --- Spalten, die Listen enthalten (selectedSports, selectedPainmeds) ---
+        # Hier müssen wir eine andere Logik anwenden, um eine binäre 0/1 Spalte zu erstellen.
+
+        # Für 'selectedSports': 1, wenn Sport gemacht wurde (d.h., die Liste ist nicht leer UND enthält nicht nur 'Kein Sport')
+        if 'selectedSports' in df.columns:
+            df['sport_binary'] = df['selectedSports'].apply(
+                lambda x: 1 if isinstance(x, list) and len(x) > 0 and 'Kein Sport' not in x else 0
+            )
+
+        # Für 'selectedPainmeds': 1, wenn Schmerzmittel genommen wurden (d.h., die Liste ist nicht leer UND enthält nicht nur 'Keine')
+        if 'selectedPainmeds' in df.columns:
+            df['meds_binary'] = df['selectedPainmeds'].apply(
+                lambda x: 1 if isinstance(x, list) and len(x) > 0 and 'Keine' not in x else 0
+            )
 
         def parse_sleep(s):
             try:
                 if not isinstance(s, str): return None
                 parts = s.split()
                 return int(parts[1]) + int(parts[3])/60
-            except: return None
+            except (AttributeError, ValueError, IndexError): # Mehr Fehler abfangen
+                return None
 
         df['sleep_hours'] = df['sleepDuration'].apply(parse_sleep)
 
+        """
         # ---------------------------------------------------------
         # ANALYSE 1.0: Wohlbefinden - TREND MIT REGRESSIONSGERADE
         # ---------------------------------------------------------
@@ -2375,87 +2400,97 @@
         # ------------------------------------------------------------------
         # ANALYSE 1.5: Bewegungsöffnung / Flow - TREND MIT REGRESSIONSGERADE
         # ------------------------------------------------------------------
-        # Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
-        """df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
 
-        # Berechnung der Regressionsgeraden (y = mx + b)
-        m, b = np.polyfit(df['days_since_start'], df['movementFlowPainRating'], 1)
-        df['regression_line'] = m * df['days_since_start'] + b
+        # WICHTIG: Erstelle ein temporäres DataFrame OHNE NaN-Werte für diese spezifische Regression
+        # Das verhindert Fehler, wenn nur wenige Datenpunkte vorhanden sind.
+        df_movement = df.dropna(subset=['movementFlowPainRating', 'days_since_start']).copy()
 
-        plt.figure(figsize=(15, 7))
+        # Stelle sicher, dass genügend Datenpunkte vorhanden sind
+        if len(df_movement) >= 2: # Mindestens 2 Punkte für eine Linie
+            # Berechnung der Regressionsgeraden (y = mx + b)
+            m, b = np.polyfit(df_movement['days_since_start'], df_movement['movementFlowPainRating'], 1)
+            df_movement['regression_line'] = m * df_movement['days_since_start'] + b
 
-        # Die tatsächlichen Werte
-        plt.scatter(df['date'], df['movementFlowPainRating'], alpha=0.3, label='Tageswert (Bewegungsöffnung / Flow)', color='gray')
+            plt.figure(figsize=(15, 7))
 
-        # Der gleitende Durchschnitt (7 Tage)
-        df['rolling_avg'] = df['movementFlowPainRating'].rolling(window=7).mean()
-        plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+            # Die tatsächlichen Werte
+            plt.scatter(df_movement['date'], df_movement['movementFlowPainRating'], alpha=0.3, label='Tageswert (Bewegungsöffnung / Flow)', color='gray')
 
-        # Die Regressionsgerade
-        plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
-                color='red', linestyle='--', linewidth=3)
+            # Der gleitende Durchschnitt (7 Tage)
+            # Hier solltest du den gleitenden Durchschnitt ebenfalls auf df_movement anwenden
+            df_movement['rolling_avg'] = df_movement['movementFlowPainRating'].rolling(window=7, min_periods=1).mean() # min_periods=1 für Startwerte
+            plt.plot(df_movement['date'], df_movement['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
 
-        plt.title('Langzeit-Trend der Bewegungsöffnung / Flow (10 = schmerzfrei)')
-        plt.ylabel('Bewegungsöffnung / Flow (1-10)')
-        plt.grid(True, alpha=0.2)
-        plt.legend()
+            # Die Regressionsgerade
+            plt.plot(df_movement['date'], df_movement['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+                    color='red', linestyle='--', linewidth=3)
 
-        # Interpretation der Steigung ausgeben
-        if m > 0:
-            status = "Verbesserung"
-            trend_color = "grün"
+            plt.title('Langzeit-Trend der Bewegungsöffnung / Flow (10 = schmerzfrei)')
+            plt.ylabel('Bewegungsöffnung / Flow (1-10)')
+            plt.grid(True, alpha=0.2)
+            plt.legend()
+
+            # Interpretation der Steigung ausgeben
+            if m > 0:
+                status = "Verbesserung"
+                trend_color = "grün"
+            else:
+                status = "Verschlechterung"
+                trend_color = "rot"
+
+            print(f"\n--- TREND-ANALYSE (Bewegungsöffnung / Flow) ---") # Titel präzisiert
+            print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+            print(f"Das bedeutet, pro Tag verändert sich deine/deinen Bewegungsöffnung / Flow im Schnitt um {m:.4f} Punkte.")
+
+            plt.show()
         else:
-            status = "Verschlechterung"
-            trend_color = "rot"
-
-        print(f"\n--- TREND-ANALYSE ---")
-        print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
-        print(f"Das bedeutet, pro Tag verändert sich deine/deinen Bewegungsöffnung / Flow im Schnitt um {m:.4f} Punkte.")
-
-        plt.show()"""
+            print(f"\n--- TREND-ANALYSE (Bewegungsöffnung / Flow) ---")
+            print("Nicht genügend Datenpunkte (mind. 2) für 'movementFlowPainRating' vorhanden, um Regression zu berechnen.")
+            # Optional: Trotzdem einen leeren Plot oder eine Meldung anzeigen
+            # plt.figure(figsize=(15, 7))
+            # plt.title('Nicht genügend Daten für Bewegungsöffnung / Flow Trend')
+            # plt.show()
 
         # ------------------------------------------------------------------
         # ANALYSE 1.6: Immunsystem - TREND MIT REGRESSIONSGERADE
         # ------------------------------------------------------------------
-        # Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
-        """df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
+        df_immune = df.dropna(subset=['immunesystemRating', 'days_since_start']).copy()
 
-        # Berechnung der Regressionsgeraden (y = mx + b)
-        m, b = np.polyfit(df['days_since_start'], df['immunesystemRating'], 1)
-        df['regression_line'] = m * df['days_since_start'] + b
+        if len(df_immune) >= 2:
+            m, b = np.polyfit(df_immune['days_since_start'], df_immune['immunesystemRating'], 1)
+            df_immune['regression_line'] = m * df_immune['days_since_start'] + b
 
-        plt.figure(figsize=(15, 7))
+            plt.figure(figsize=(15, 7))
+            plt.scatter(df_immune['date'], df_immune['immunesystemRating'], alpha=0.3, label='Tageswert (Immunsystem)', color='gray')
+            df_immune['rolling_avg'] = df_immune['immunesystemRating'].rolling(window=7, min_periods=1).mean()
+            plt.plot(df_immune['date'], df_immune['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+            plt.plot(df_immune['date'], df_immune['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+                    color='red', linestyle='--', linewidth=3)
+            plt.title('Langzeit-Trend des Immunsystems (10 = schmerzfrei)')
+            plt.ylabel('Immunsystem (1-10)')
+            plt.grid(True, alpha=0.2)
+            plt.legend()
 
-        # Die tatsächlichen Werte
-        plt.scatter(df['date'], df['immunesystemRating'], alpha=0.3, label='Tageswert (Immunsystem)', color='gray')
+            if m > 0:
+                status = "Verbesserung"
+                trend_color = "grün"
+            else:
+                status = "Verschlechterung"
+                trend_color = "rot"
 
-        # Der gleitende Durchschnitt (7 Tage)
-        df['rolling_avg'] = df['immunesystemRating'].rolling(window=7).mean()
-        plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+            print(f"\n--- TREND-ANALYSE (Immunsystem) ---")
+            print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+            print(f"Das bedeutet, pro Tag verändert sich dein Immunsystem im Schnitt um {m:.4f} Punkte.")
 
-        # Die Regressionsgerade
-        plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
-                color='red', linestyle='--', linewidth=3)
-
-        plt.title('Langzeit-Trend des Immunsystems (10 = schmerzfrei)')
-        plt.ylabel('Immunsystem (1-10)')
-        plt.grid(True, alpha=0.2)
-        plt.legend()
-
-        # Interpretation der Steigung ausgeben
-        if m > 0:
-            status = "Verbesserung"
-            trend_color = "grün"
+            plt.show()
         else:
-            status = "Verschlechterung"
-            trend_color = "rot"
+            print(f"\n--- TREND-ANALYSE (Immunsystem) ---")
+            print("Nicht genügend Datenpunkte (mind. 2) für 'immunesystemRating' vorhanden, um Regression zu berechnen.")
+            # plt.figure(figsize=(15, 7))
+            # plt.title('Nicht genügend Daten für Immunsystem Trend')
+            # plt.show()
 
-        print(f"\n--- TREND-ANALYSE ---")
-        print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
-        print(f"Das bedeutet, pro Tag verändert sich dein Immunsystem im Schnitt um {m:.4f} Punkte.")
-
-        plt.show()"""
-
+        """
         # ---------------------------------------------------------
         # ANALYSE 1.7: Gesamtbilanz - TREND MIT REGRESSIONSGERADE
         # ---------------------------------------------------------
@@ -2499,7 +2534,7 @@
         plt.show()
 
         # ---------------------------------------------------------
-        # ANALYSE 2: WOCHENTAGS-VERGLEICH
+        # ANALYSE 2: WOCHENTAGSVERGLEICH
         # ---------------------------------------------------------
         df['weekday'] = df['date'].dt.day_name()
         weekday_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -2511,6 +2546,8 @@
         plt.title('Schmerzverteilung nach Wochentagen')
         plt.ylabel('Gesamtschmerz')
         plt.show()
+
+        """
 
         # ---------------------------------------------------------
         # ANALYSE 3: TAG-AUSWIRKUNG (RANKING DER "GUTEN" TAGE)
@@ -2538,7 +2575,7 @@
             plt.axvline(df['overallAverage'].mean(), color='blue', linestyle='--', label='Gesamtschnitt')
             plt.title('Welche Tags stehen für gute Tage? (Rechts = Besser)')
             plt.xlabel('Durchschnittliches Wohlbefinden (10 = Bestwert)')
-            plt.show()
+            plt.show()"""
 
         # ---------------------------------------------------------
         # ANALYSE 4: SCHLAF VS. SCHMERZ
@@ -2550,43 +2587,9 @@
             plt.xlabel('Schlafstunden')
             plt.ylabel('Schmerz-Score')
             plt.show()
-
-        # ---------------------------------------------------------
-        # ANALYSE 5: CLUSTER-ANALYSE (TAGESTYPEN)
-        # ---------------------------------------------------------
-        cluster_cols = ['neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 'lowerBodyPainRating']
-        cluster_labels = ['Nacken', 'Schulter', 'Oberkörper', 'Unterkörper']
-        cluster_data = df[cluster_cols].dropna()
-
-        if len(cluster_data) > 10:
-            scaler = StandardScaler()
-            scaled_data = scaler.fit_transform(cluster_data)
-            kmeans = KMeans(n_clusters=3, random_state=42, n_init=10).fit(scaled_data)
-            cluster_data['Typ'] = kmeans.labels_
-            cluster_profiles = cluster_data.groupby('Typ').mean()
-
-            angles = np.linspace(0, 2 * np.pi, len(cluster_labels), endpoint=False).tolist()
-            angles += angles[:1]
-
-            fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-            colors = ['#2ca02c', '#ff7f0e', '#1f77b4'] # Grün, Orange, Blau
-            
-            for i in range(len(cluster_profiles)):
-                values = cluster_profiles.iloc[i].tolist()
-                values += values[:1]
-                ax.plot(angles, values, color=colors[i], linewidth=2, label=f'Cluster {i}')
-                ax.fill(angles, values, color=colors[i], alpha=0.2)
-
-            ax.set_theta_offset(np.pi / 2)
-            ax.set_theta_direction(-1)
-            ax.set_thetagrids(np.degrees(angles[:-1]), cluster_labels)
-            ax.set_ylim(0, 10) # Feste Skala 1-10
-            plt.title('Dein Wohlbefinden nach Körperregionen\n(Größere Fläche = Weniger Schmerz)', y=1.1)
-            plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
-            plt.show()
             
         # ---------------------------------------------------------
-        # ANALYSE 6: Korrelations-Heatmap
+        # ANALYSE 5: Korrelations-Heatmap
         # ---------------------------------------------------------
             
         # 1. Daten laden
@@ -2599,7 +2602,7 @@
         df['sport_binary'] = df['selectedSports'].apply(lambda x: 1 if x and 'Kein Sport' not in x else 0)
         df['meds_binary'] = df['selectedPainmeds'].apply(lambda x: 1 if x and 'Keine' not in x else 0)
 
-        binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Nicht gemacht': 0}
+        binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio' : 1, 'Nicht gemacht': 0}
         for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
             if col in df.columns:
                 df[col + '_num'] = df[col].map(binary_map)
@@ -2616,6 +2619,8 @@
             'lowerBodyPainRating',
             'overallAverage',
             'overallAverage_tomorrow',
+            'movementFlowPainRating',
+            'immunesystemRating',
             'sport_binary',
             'stretchingStatus_num',
             'meds_binary',
@@ -2635,13 +2640,15 @@
             'shoulderPainRating': 'Schulterschmerzen',
             'upperBodyPainRating': 'Oberkörperschmerz',
             'lowerBodyPainRating': 'Unterkörperschmerz',
-            'overallAverage': 'Gesamtschmerz Heute',
-            'sport_binary': 'Sport (Ja/Nein)',
-            'meds_binary': 'Medikamente (Ja/Nein)',
-            'stretchingStatus_num': 'Dehnen (Ja/Nein)',
-            'glutenStatus_num': 'Gluten Heute',
-            'milkStatus_num': 'Milch Heute',
-            'overallAverage_tomorrow': 'Gesamtschmerz Morgen'
+            'overallAverage': 'Gesamtschmerz heute',
+            'sport_binary': 'Sport',
+            'meds_binary': 'Medikamente',
+            'stretchingStatus_num': 'Dehnen/Physio',
+            'glutenStatus_num': 'Gluteneinnahme',
+            'milkStatus_num': 'Milcheinnahme',
+            'overallAverage_tomorrow': 'Gesamtschmerz morgen',
+            'movementFlowPainRating': 'Bewegungsöffnung / Flow',
+            'immunesystemRating':'Immunsystem'
         }
 
         # Ersetze die Namen in der Korrelationsmatrix nur für die Anzeige
@@ -2658,10 +2665,10 @@
 
         # 6. Textausgabe (bleibt zur Sicherheit im Original für Vergleiche)
         print("\n--- Korrelationen zum Gesamtschmerz am nächsten Tag ---")
-        print(display_matrix['Gesamtschmerz Morgen'].sort_values(ascending=False))
+        print(display_matrix['Gesamtschmerz morgen'].sort_values(ascending=False))
 
         # ---------------------------------------------------------
-        # ANALYSE 7: K-Means Cluster-Analyse
+        # ANALYSE 6: K-Means Cluster-Analyse
         # ---------------------------------------------------------
 
         # WICHTIG: --- Cluster Profile (Durchschnittswerte pro Gruppe) --- in Terminal interpretieren (Werte*100 = Prozent)
@@ -2669,77 +2676,135 @@
         from sklearn.cluster import KMeans
         from sklearn.preprocessing import StandardScaler
 
-        # --- NEU: Integration deiner Top-Tags ---
-        top_tags = [
-            "Bosch-Kantine", "Schokolade", "Eis", "Müsli", "Stuhl", "Shake", "Proteinriegel", 
-            "Bauch gespannt", "Bauch gebläht", "Nackensperre", "Atemsperre", "Beinsperre", "Nierenschmerz", "Zeh links", "Zeh rechts", "Zähne",
-            "Erreger", "Allergie", "Creme Arme", "Creme Füße", "Creme Hüfte", "Gläschen", "Vitamin D3", "Omega3", "Mouthtape", "Biologika Spritze"
-        ]
+        # --- NEU: Dynamische Integration deiner Tags ---
+        # ... (dieser Teil bleibt gleich wie in der letzten Version) ...
+        # Extrahiere alle einzigartigen Tags aus der 'selectedNotesTags'-Spalte
+        all_tags_flat = []
+        for tags_list in df['selectedNotesTags'].dropna():
+            if isinstance(tags_list, list):
+                all_tags_flat.extend(tags_list)
+
+        top_tags = sorted(list(set(all_tags_flat)))
+
+        # print(f"Dynamisch gefundene Tags für Analyse: {top_tags}") # Zur Überprüfung
 
         # Tags in binäre Spalten umwandeln (0 oder 1)
         tag_features = []
         for tag in top_tags:
-            # Sauberen Spaltennamen erstellen (z.B. tag_bauch_gebläht)
-            col_name = f"tag_{tag.replace(' ', '_').replace('-', '_').lower()}"
+            cleaned_tag = "".join([c if c.isalnum() else "_" for c in tag]).lower()
+            col_name = f"tag_{cleaned_tag}"
             df[col_name] = df['selectedNotesTags'].apply(
                 lambda x: 1 if isinstance(x, list) and tag in x else 0
             )
             tag_features.append(col_name)
 
+
         # 1. Auswahl der Features
         features = [
             'moodRating', 'overallAverage', 'neckPainRating', 'shoulderPainRating', 
             'upperBodyPainRating', 'lowerBodyPainRating', 
+            'immunesystemRating', # Jetzt korrekt als Rating behandelt
+            'movementFlowPainRating', # Jetzt korrekt als Rating behandelt
             'glutenStatus_num', 'milkStatus_num', 'stretchingStatus_num', 
             'sport_binary', 'meds_binary'
         ] + tag_features
 
+
         # --- KORREKTUR START ---
-        # Anstatt zu löschen, füllen wir fehlende Tag-Werte mit 0
-        # Nur bei den Kern-Schmerzwerten löschen wir (falls mal ein Tag gar nicht ausgefüllt wurde)
-        core_metrics = ['overallAverage', 'neckPainRating', 'lowerBodyPainRating']
-        df = df.dropna(subset=core_metrics) 
+        # Wir müssen die Behandlung von NaN-Werten für Ratings und binäre Features trennen.
 
-        # Alle anderen (Tags, Sport, Meds) auf 0 setzen, falls leer
-        df[features] = df[features].fillna(0)
+        # 1. Definiere die Rating-Features und die Binär-Features
+        rating_features = [
+            'moodRating', 'overallAverage', 'neckPainRating', 'shoulderPainRating', 
+            'upperBodyPainRating', 'lowerBodyPainRating', 
+            'immunesystemRating', 'movementFlowPainRating'
+        ]
 
+        # Binäre Features sind alle Tag-Features sowie die festen binären
+        binary_features = [
+            'glutenStatus_num', 'milkStatus_num', 'stretchingStatus_num', 
+            'sport_binary', 'meds_binary'
+        ] + tag_features
+
+
+        # 2. Schritt: Drop rows where CRITICAL_RATING_FEATURES are NaN
+        # Nur wenn KEINE der Kern-Ratings vorhanden ist, droppen wir die Zeile.
+        # Wenn nur immunesystemRating fehlt, aber der Rest da ist, soll die Zeile nicht komplett gelöscht werden.
+        # Es ist sinnvoller, nur die Zeilen zu löschen, wo wirklich Kern-Features fehlen,
+        # und andere fehlende Werte (wie immunesystemRating, wenn es nicht immer ausgefüllt wird) zu imputieren.
+        # Für die Cluster-Analyse ist es besser, so viele Tage wie möglich zu behalten.
+        # Daher: Dropna nur auf einen kleinen Satz von absoluten Kern-Metriken anwenden.
+        # Oder gar kein dropna() hier, wenn wir alle Features imputieren wollen.
+
+        # Für die Cluster-Analyse ist es am besten, ein eigenes DataFrame zu erstellen und
+        # fehlende Werte (NaNs) dort zu behandeln.
         cluster_df = df.copy()
 
-        # 2. Daten skalieren
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(cluster_df[features])
+        # Fülle fehlende Werte für RATING_FEATURES mit dem MEAN (Durchschnitt)
+        # Das ist besser als 0, da 0 ein Extremwert auf der Skala 1-10 ist.
+        # Wenn du KEINE fehlenden Ratings imputieren willst, müsstest du diese Zeilen droppen.
+        for col in rating_features:
+            # Nur füllen, wenn die Spalte existiert und fehlende Werte hat
+            if col in cluster_df.columns and cluster_df[col].isnull().any():
+                cluster_df[col] = cluster_df[col].fillna(cluster_df[col].mean())
 
-        # 3. K-Means Modell (wir suchen nach 3 Clustern: z.B. Gut, Mittel, Schlecht)
-        kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-        cluster_df['Cluster'] = kmeans.fit_predict(scaled_data)
+        # Fülle fehlende Werte für BINÄRE_FEATURES mit 0 (Tag nicht vorhanden)
+        for col in binary_features:
+            if col in cluster_df.columns and cluster_df[col].isnull().any():
+                cluster_df[col] = cluster_df[col].fillna(0)
 
-        # 4. Auswertung der Cluster-Profile
-        # .T dreht die Tabelle, damit du die vielen Features (Tags) besser untereinander lesen kannst
-        cluster_summary = cluster_df.groupby('Cluster')[features].mean().T
-        print("\n--- Cluster Profile (Durchschnittswerte pro Gruppe) ---")
-        print(cluster_summary)
+        # Nun müssen wir sicherstellen, dass die FEATURES-Liste nur Spalten enthält, die auch wirklich im cluster_df sind
+        # (falls z.B. eine Spalte in der Rohdaten nie auftauchte)
+        actual_features_for_clustering = [f for f in features if f in cluster_df.columns]
 
-        # 5. Visualisierung
-        plt.figure(figsize=(12, 6))
+        # WICHTIG: Entferne Zeilen mit NaN, die nach der Imputation noch existieren könnten (unwahrscheinlich, aber sicher ist sicher)
+        # Dies ist relevant, falls z.B. der Mittelwert nicht berechnet werden konnte, weil die Spalte komplett NaN war.
+        # Aber nach dem fillna() sollten keine NaNs mehr in den relevanten Spalten sein.
+        cluster_df = cluster_df.dropna(subset=actual_features_for_clustering)
 
-        # Wir plotten die Zeit gegen den Schmerz und färben nach Clustern
-        sns.scatterplot(
-            data=cluster_df, 
-            x='date', 
-            y='overallAverage', 
-            hue='Cluster', 
-            palette='viridis', 
-            s=100, 
-            style='Cluster'
-        )
+        # Stelle sicher, dass genügend Datenpunkte für die Cluster-Analyse vorhanden sind
+        if len(cluster_df) < 3: # KMeans benötigt mindestens n_clusters Datenpunkte
+            print("Nicht genügend Datenpunkte für die Cluster-Analyse nach NaN-Behandlung.")
+            print(cluster_summary) # Oder eine andere Fallback-Aktion
+        else:
+            # 2. Daten skalieren (NUR die tatsächlichen Features, die verwendet werden)
+            scaler = StandardScaler()
+            scaled_data = scaler.fit_transform(cluster_df[actual_features_for_clustering])
 
-        plt.title('Cluster-Analyse inkl. Tags: Automatische Gruppierung deiner Tage', fontsize=15)
-        plt.ylabel('Gesamtschmerz Score (10 = schmerzfrei)')
-        plt.xlabel('Datum')
-        plt.legend(title='Tag-Typ (Cluster)', bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.grid(alpha=0.3)
-        plt.tight_layout()
-        plt.show()`;
+            # 3. K-Means Modell (wir suchen nach 3 Clustern: z.B. Gut, Mittel, Schlecht)
+            kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+            cluster_df['Cluster'] = kmeans.fit_predict(scaled_data)
+
+            # 4. Auswertung der Cluster-Profile
+            # .T dreht die Tabelle, damit du die vielen Features (Tags) besser untereinander lesen kannst
+            # Hier verwenden wir wieder die "features" Liste, aber stellen sicher, dass alle drin sind
+            cluster_summary = cluster_df.groupby('Cluster')[actual_features_for_clustering].mean().T
+            print("\n--- Cluster Profile (Durchschnittswerte pro Gruppe) ---")
+            print(cluster_summary)
+
+            # 5. Visualisierung
+            plt.figure(figsize=(12, 6))
+
+            # Wir plotten die Zeit gegen den Schmerz und färben nach Clustern
+            sns.scatterplot(
+                data=cluster_df, 
+                x='date', 
+                y='overallAverage', 
+                hue='Cluster', 
+                palette='viridis', 
+                s=100, 
+                style='Cluster'
+            )
+
+            plt.title('Cluster-Analyse inkl. Tags: Automatische Gruppierung deiner Tage', fontsize=15)
+            plt.ylabel('Gesamtschmerz Score (10 = schmerzfrei)')
+            plt.xlabel('Datum')
+            plt.legend(title='Tag-Typ (Cluster)', bbox_to_anchor=(1.05, 1), loc='upper left')
+            plt.grid(alpha=0.3)
+            plt.tight_layout()
+            plt.show()
+
+        # Auswertung der CLuster-Analyse mithilfe der KI`;
 
                 await navigator.clipboard.writeText(pythonCode);
                 console.log("Python-Code in Zwischenablage kopiert.");
