@@ -6,12 +6,15 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
+# --- COLAB EINSTELLUNGEN ---
+# %matplotlib inline
+# plt.rcParams['figure.figsize'] = [15, 7]
+
 # READ-ME: activate conda
 # Zeile 484 beachten - zusätzliche Daten einblenden
-# WICHTIG: Datum an Filename anpassen in Zeile 14
 
 # 1. Daten laden 
-filename = 'daily_entries_export_2026-02-16.json' 
+filename = 'daily_entries_export.json' 
 try:
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -253,86 +256,95 @@ plt.show()
 # ------------------------------------------------------------------
 # ANALYSE 1.5: Bewegungsöffnung / Flow - TREND MIT REGRESSIONSGERADE
 # ------------------------------------------------------------------
-# Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
-"""df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
 
-# Berechnung der Regressionsgeraden (y = mx + b)
-m, b = np.polyfit(df['days_since_start'], df['movementFlowPainRating'], 1)
-df['regression_line'] = m * df['days_since_start'] + b
+# WICHTIG: Erstelle ein temporäres DataFrame OHNE NaN-Werte für diese spezifische Regression
+# Das verhindert Fehler, wenn nur wenige Datenpunkte vorhanden sind.
+df_movement = df.dropna(subset=['movementFlowPainRating', 'days_since_start']).copy()
 
-plt.figure(figsize=(15, 7))
+# Stelle sicher, dass genügend Datenpunkte vorhanden sind
+if len(df_movement) >= 2: # Mindestens 2 Punkte für eine Linie
+    # Berechnung der Regressionsgeraden (y = mx + b)
+    m, b = np.polyfit(df_movement['days_since_start'], df_movement['movementFlowPainRating'], 1)
+    df_movement['regression_line'] = m * df_movement['days_since_start'] + b
 
-# Die tatsächlichen Werte
-plt.scatter(df['date'], df['movementFlowPainRating'], alpha=0.3, label='Tageswert (Bewegungsöffnung / Flow)', color='gray')
+    plt.figure(figsize=(15, 7))
 
-# Der gleitende Durchschnitt (7 Tage)
-df['rolling_avg'] = df['movementFlowPainRating'].rolling(window=7).mean()
-plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+    # Die tatsächlichen Werte
+    plt.scatter(df_movement['date'], df_movement['movementFlowPainRating'], alpha=0.3, label='Tageswert (Bewegungsöffnung / Flow)', color='gray')
 
-# Die Regressionsgerade
-plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
-         color='red', linestyle='--', linewidth=3)
+    # Der gleitende Durchschnitt (7 Tage)
+    # Hier solltest du den gleitenden Durchschnitt ebenfalls auf df_movement anwenden
+    df_movement['rolling_avg'] = df_movement['movementFlowPainRating'].rolling(window=7, min_periods=1).mean() # min_periods=1 für Startwerte
+    plt.plot(df_movement['date'], df_movement['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
 
-plt.title('Langzeit-Trend der Bewegungsöffnung / Flow (10 = schmerzfrei)')
-plt.ylabel('Bewegungsöffnung / Flow (1-10)')
-plt.grid(True, alpha=0.2)
-plt.legend()
+    # Die Regressionsgerade
+    plt.plot(df_movement['date'], df_movement['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+             color='red', linestyle='--', linewidth=3)
 
-# Interpretation der Steigung ausgeben
-if m > 0:
-    status = "Verbesserung"
-    trend_color = "grün"
+    plt.title('Langzeit-Trend der Bewegungsöffnung / Flow (10 = schmerzfrei)')
+    plt.ylabel('Bewegungsöffnung / Flow (1-10)')
+    plt.grid(True, alpha=0.2)
+    plt.legend()
+
+    # Interpretation der Steigung ausgeben
+    if m > 0:
+        status = "Verbesserung"
+        trend_color = "grün"
+    else:
+        status = "Verschlechterung"
+        trend_color = "rot"
+
+    print(f"\n--- TREND-ANALYSE (Bewegungsöffnung / Flow) ---") # Titel präzisiert
+    print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+    print(f"Das bedeutet, pro Tag verändert sich deine/deinen Bewegungsöffnung / Flow im Schnitt um {m:.4f} Punkte.")
+
+    plt.show()
 else:
-    status = "Verschlechterung"
-    trend_color = "rot"
-
-print(f"\n--- TREND-ANALYSE ---")
-print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
-print(f"Das bedeutet, pro Tag verändert sich deine/deinen Bewegungsöffnung / Flow im Schnitt um {m:.4f} Punkte.")
-
-plt.show()"""
+    print(f"\n--- TREND-ANALYSE (Bewegungsöffnung / Flow) ---")
+    print("Nicht genügend Datenpunkte (mind. 2) für 'movementFlowPainRating' vorhanden, um Regression zu berechnen.")
+    # Optional: Trotzdem einen leeren Plot oder eine Meldung anzeigen
+    # plt.figure(figsize=(15, 7))
+    # plt.title('Nicht genügend Daten für Bewegungsöffnung / Flow Trend')
+    # plt.show()
 
 # ------------------------------------------------------------------
 # ANALYSE 1.6: Immunsystem - TREND MIT REGRESSIONSGERADE
 # ------------------------------------------------------------------
-# Wir wandeln das Datum in eine Zahl um (Tage seit Beginn), um die Regression zu berechnen
-"""df['days_since_start'] = (df['date'] - df['date'].min()).dt.days
+df_immune = df.dropna(subset=['immunesystemRating', 'days_since_start']).copy()
 
-# Berechnung der Regressionsgeraden (y = mx + b)
-m, b = np.polyfit(df['days_since_start'], df['immunesystemRating'], 1)
-df['regression_line'] = m * df['days_since_start'] + b
+if len(df_immune) >= 2:
+    m, b = np.polyfit(df_immune['days_since_start'], df_immune['immunesystemRating'], 1)
+    df_immune['regression_line'] = m * df_immune['days_since_start'] + b
 
-plt.figure(figsize=(15, 7))
+    plt.figure(figsize=(15, 7))
+    plt.scatter(df_immune['date'], df_immune['immunesystemRating'], alpha=0.3, label='Tageswert (Immunsystem)', color='gray')
+    df_immune['rolling_avg'] = df_immune['immunesystemRating'].rolling(window=7, min_periods=1).mean()
+    plt.plot(df_immune['date'], df_immune['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+    plt.plot(df_immune['date'], df_immune['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
+             color='red', linestyle='--', linewidth=3)
+    plt.title('Langzeit-Trend des Immunsystems (10 = schmerzfrei)')
+    plt.ylabel('Immunsystem (1-10)')
+    plt.grid(True, alpha=0.2)
+    plt.legend()
 
-# Die tatsächlichen Werte
-plt.scatter(df['date'], df['immunesystemRating'], alpha=0.3, label='Tageswert (Immunsystem)', color='gray')
+    if m > 0:
+        status = "Verbesserung"
+        trend_color = "grün"
+    else:
+        status = "Verschlechterung"
+        trend_color = "rot"
 
-# Der gleitende Durchschnitt (7 Tage)
-df['rolling_avg'] = df['immunesystemRating'].rolling(window=7).mean()
-plt.plot(df['date'], df['rolling_avg'], label='7-Tage-Trend', color='green', linewidth=2, alpha=0.7)
+    print(f"\n--- TREND-ANALYSE (Immunsystem) ---")
+    print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
+    print(f"Das bedeutet, pro Tag verändert sich dein Immunsystem im Schnitt um {m:.4f} Punkte.")
 
-# Die Regressionsgerade
-plt.plot(df['date'], df['regression_line'], label=f'Lineare Regression (Steigung: {m:.4f})', 
-         color='red', linestyle='--', linewidth=3)
-
-plt.title('Langzeit-Trend des Immunsystems (10 = schmerzfrei)')
-plt.ylabel('Immunsystem (1-10)')
-plt.grid(True, alpha=0.2)
-plt.legend()
-
-# Interpretation der Steigung ausgeben
-if m > 0:
-    status = "Verbesserung"
-    trend_color = "grün"
+    plt.show()
 else:
-    status = "Verschlechterung"
-    trend_color = "rot"
-
-print(f"\n--- TREND-ANALYSE ---")
-print(f"Die statistische Tendenz zeigt eine {status} (Steigung: {m:.4f}).")
-print(f"Das bedeutet, pro Tag verändert sich dein Immunsystem im Schnitt um {m:.4f} Punkte.")
-
-plt.show()"""
+    print(f"\n--- TREND-ANALYSE (Immunsystem) ---")
+    print("Nicht genügend Datenpunkte (mind. 2) für 'immunesystemRating' vorhanden, um Regression zu berechnen.")
+    # plt.figure(figsize=(15, 7))
+    # plt.title('Nicht genügend Daten für Immunsystem Trend')
+    # plt.show()
 
 # ---------------------------------------------------------
 # ANALYSE 1.7: Gesamtbilanz - TREND MIT REGRESSIONSGERADE
@@ -477,7 +489,7 @@ df = pd.DataFrame(data)
 df['sport_binary'] = df['selectedSports'].apply(lambda x: 1 if x and 'Kein Sport' not in x else 0)
 df['meds_binary'] = df['selectedPainmeds'].apply(lambda x: 1 if x and 'Keine' not in x else 0)
 
-binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Nicht gemacht': 0}
+binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio' : 1, 'Nicht gemacht': 0}
 for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
     if col in df.columns:
         df[col + '_num'] = df[col].map(binary_map)
@@ -494,6 +506,8 @@ cols_to_analyze = [
     'lowerBodyPainRating',
     'overallAverage',
     'overallAverage_tomorrow',
+    'movementFlowPainRating',
+    'immunesystem',
     'sport_binary',
     'stretchingStatus_num',
     'meds_binary',
@@ -519,7 +533,9 @@ label_dict = {
     'stretchingStatus_num': 'Dehnen (Ja/Nein)',
     'glutenStatus_num': 'Gluten Heute',
     'milkStatus_num': 'Milch Heute',
-    'overallAverage_tomorrow': 'Gesamtschmerz Morgen'
+    'overallAverage_tomorrow': 'Gesamtschmerz Morgen',
+    'movementFlowPainRating': 'Bewegungsöffnung / Flow',
+    'immunesystem':'Immunsystem'
 }
 
 # Ersetze die Namen in der Korrelationsmatrix nur für die Anzeige
@@ -618,76 +634,3 @@ plt.legend(title='Tag-Typ (Cluster)', bbox_to_anchor=(1.05, 1), loc='upper left'
 plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
-
-"""
-Beispiel-Auswertung 16.02.2026
-
---- Cluster Profile (Durchschnittswerte pro Gruppe) ---
-Cluster                       0        1         2
-moodRating             7.668712  7.18750  6.753846
-overallAverage         7.307975  7.26875  6.280000
-neckPainRating         7.006135  7.00000  5.707692
-shoulderPainRating     6.957055  7.37500  5.723077
-upperBodyPainRating    7.319018  7.18750  6.169231
-lowerBodyPainRating    7.588957  7.56250  7.046154
-glutenStatus_num       0.012270  0.06250  0.323077
-milkStatus_num         0.233129  0.18750  0.430769
-stretchingStatus_num   0.288344  0.43750  0.123077
-sport_binary           0.638037  0.75000  0.400000
-meds_binary            0.122699  0.75000  0.307692
-tag_bosch_kantine      0.085890  0.00000  0.169231
-tag_schokolade         0.073620  0.00000  0.215385
-tag_eis                0.067485  0.00000  0.153846
-tag_müsli              0.000000  0.75000  0.000000
-tag_stuhl              0.042945  0.00000  0.061538
-tag_shake              0.490798  0.68750  0.092308
-tag_proteinriegel      0.000000  0.56250  0.000000
-tag_bauch_gespannt     0.245399  0.37500  0.200000
-tag_bauch_gebläht      0.012270  0.00000  0.046154
-tag_nackensperre       0.073620  0.25000  0.215385
-tag_atemsperre         0.000000  0.00000  0.015385
-tag_beinsperre         0.024540  0.00000  0.015385
-tag_nierenschmerz      0.030675  0.00000  0.015385
-tag_zeh_links          0.000000  0.00000  0.000000
-tag_zeh_rechts         0.000000  0.00000  0.000000
-tag_zähne              0.012270  0.00000  0.000000
-tag_erreger            0.055215  0.00000  0.123077
-tag_allergie           0.000000  0.00000  0.015385
-tag_creme_arme         0.466258  0.25000  0.215385
-tag_creme_füße         0.490798  0.50000  0.123077
-tag_creme_hüfte        0.000000  0.00000  0.000000
-tag_gläschen           0.705521  0.12500  0.261538
-tag_vitamin_d3         0.184049  0.18750  0.153846
-tag_omega3             0.000000  0.00000  0.000000
-tag_mouthtape          0.895706  1.00000  0.507692
-tag_biologika_spritze  0.000000  0.00000  0.000000
-
-Cluster 0: Der "Clean-Life & Routine" Modus (Dein bester Zustand)
-Wohlbefinden: Hier hast du die beste Stimmung (7.67) und die höchste Schmerzfreiheit (7.31).
-Ernährung: Fast 0 % Gluten und moderate Milchwerte.
-Der "Gläschen-Effekt": Das Tag gläschen ist hier mit 70 % extrem dominant. Es scheint für dich ein absolut sicheres "Safe-Food" zu sein, das mit hoher Schmerzfreiheit korreliert.
-Lifestyle: Du nutzt hier fast immer das Mouthtape (89 %) und cremst dich regelmäßig ein.
-Interpretation: Das ist dein stabiler Alltag. Wenig Experimente, gute Routine, kaum Schmerzen und fast keine Medikamente (nur 12 %).
-
-Cluster 1: Das "Müsli- & Medikamenten-Hoch" (Die Leistungs-Falle)
-Wohlbefinden: Schmerzwerte sind fast so gut wie in Cluster 0, aber...
-Der Preis: Du nimmst an 75 % dieser Tage Medikamente.
-Die Trigger: Dieses Cluster wird zu 75 % von Müsli und zu 56 % von Proteinriegeln dominiert.
-Körper-Feedback: Obwohl der Schmerzwert okay ist, hast du hier den höchsten Wert für "Bauch gespannt" (37 %).
-Interpretation: Das sind Tage, an denen du sehr aktiv bist (höchste Sport-Quote: 75 % und bestes Stretching: 43 %). Es scheint, als würdest du die negativen Effekte von Müsli/Proteinriegeln (gespannter Bauch) durch Sport und Medikamente "niederringen". Du bist leistungsfähig, aber dein System steht unter Stress.
-
-Cluster 2: Die "Entzündungs-Abwärtsspirale" (Der Gefahrenbereich)
-Wohlbefinden: Dein schlechtester Zustand. Schmerzfreiheit sinkt auf 6.28. Besonders Nacken (5.7) und Schulter (5.7) sind betroffen.
-Die Ursachen-Kombi:
-Ernährung: Höchste Werte bei Gluten (32 %), Milch (43 %), Schokolade (21 %) und Eis (15 %).
-Mechanik: Die niedrigste Stretching-Rate (12 %) und die niedrigste Mouthtape-Quote (50 %).
-Immunsystem: Hier sind die meisten Erreger (12 %) im Spiel.
-Interpretation: Das ist der "Perfect Storm". Schlechtes Essen (Zucker/Gluten), wenig Bewegung und eventuell ein aufkeimender Infekt führen sofort zu einer Verschlechterung der Bechterew-Symptomatik im Oberkörper.
-Die wichtigsten Erkenntnisse für dein Management:
-Mouthtape & Nacken: Schau dir den Zusammenhang an: In Cluster 0 (Mouthtape 89 %) ist der Nacken super (7.0). In Cluster 2 (Mouthtape nur 50 %) ist der Nacken schlecht (5.7). Es gibt eine starke Korrelation zwischen nächtlicher Nasenatmung und Nackenentspannung bei dir.
-
-Müsli vs. Gläschen: Dein Körper reagiert völlig unterschiedlich. Das "Gläschen" (Cluster 0) bringt schmerzfreie Ruhe ohne Medikamente. Das "Müsli" (Cluster 1) treibt dich zwar an, benötigt aber Medikamente und spannt den Bauch an.
-
-Die "Bosch-Kantine" (Cluster 2): Hier ist die Quote mit 17 % am höchsten. Die Kombination aus Kantinenessen, Schokolade und wenig Dehnen scheint dein direkter Weg in den Schmerzschub zu sein.
-
-"""
