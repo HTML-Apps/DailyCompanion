@@ -1929,8 +1929,23 @@
                     scales: {
                         x: {
                             type: 'time',
-                            time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy' },
-                            ticks: { color: '#888', autoSkip: true, maxTicksLimit: 10 },
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'dd.MM.yyyy',
+                                // HIER IST DIE ANPASSUNG FÜR DIE ANZEIGE AUF DER ACHSE SELBST
+                                displayFormats: {
+                                    day: 'dd.MM.yyyy',
+                                    week: 'dd.MM.yyyy', // Optional: Auch für Wochen
+                                    month: 'MM.yyyy',   // Optional: Für Monate
+                                    quarter: '[Q]Q.yyyy', // Optional: Für Quartale
+                                    year: 'yyyy'        // Optional: Für Jahre
+                                }
+                            },
+                            ticks: {
+                                color: '#888',
+                                autoSkip: true, // Behält die automatische Tick-Auslassung bei
+                                maxTicksLimit: 10 // Maximale Anzahl der angezeigten Ticks
+                            },
                             grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
