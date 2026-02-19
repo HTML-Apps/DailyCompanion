@@ -1226,98 +1226,222 @@
         }
 
         // Funktion, um Daten aus der DB wieder in das HTML-Formular zu laden
-        function populateFormWithData(data) {
-            // 1. Einfache Text/Time/Number Felder
-            if(data.wakeUpTime) document.getElementById('wakeUpTime').value = data.wakeUpTime;
-            if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
-            calculateSleepDuration(); // Dauer neu berechnen
+        // function populateFormWithData(data) {
+        //     // 1. Einfache Text/Time/Number Felder
+        //     if(data.wakeUpTime) document.getElementById('wakeUpTime').value = data.wakeUpTime;
+        //     if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
+        //     calculateSleepDuration(); // Dauer neu berechnen
 
-            if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
-                    document.getElementById('morningStiffness').value = data.morningStiffness;
-                } else {
-                    // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
-                    document.getElementById('morningStiffness').value = ""; 
-                }
+        //     if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
+        //             document.getElementById('morningStiffness').value = data.morningStiffness;
+        //         } else {
+        //             // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
+        //             document.getElementById('morningStiffness').value = ""; 
+        //         }
 
-            if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
-            if(data.notes) document.getElementById('notes').value = data.notes;
+        //     if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
+        //     if(data.notes) document.getElementById('notes').value = data.notes;
 
-            // 2. Ratings (Die bunten Boxen)
-            const ratingMap = {
-                'moodRating': 'mood-rating',
-                'neckPainRating': 'neck-pain-rating',
-                'shoulderPainRating': 'shoulder-pain-rating',
-                'upperBodyPainRating': 'upper-body-pain-rating',
-                'lowerBodyPainRating': 'lower-body-pain-rating',
-                'movementFlowPainRating': 'movement-flow-pain-rating',
-                'immunesystemRating': 'immunesystem',
-                'morningStiffnessValue': 'morningStiffness',
-                'crpValue': 'crpInput'
-            };
+        //     // 2. Ratings (Die bunten Boxen)
+        //     const ratingMap = {
+        //         'moodRating': 'mood-rating',
+        //         'neckPainRating': 'neck-pain-rating',
+        //         'shoulderPainRating': 'shoulder-pain-rating',
+        //         'upperBodyPainRating': 'upper-body-pain-rating',
+        //         'lowerBodyPainRating': 'lower-body-pain-rating',
+        //         'movementFlowPainRating': 'movement-flow-pain-rating',
+        //         'immunesystemRating': 'immunesystem',
+        //         'morningStiffnessValue': 'morningStiffness',
+        //         'crpValue': 'crpInput'
+        //     };
 
-            for (const [dbField, htmlId] of Object.entries(ratingMap)) {
-                if (data[dbField]) {
-                    // Erst alle 'selected' entfernen
-                    const container = document.getElementById(htmlId);
-                    Array.from(container.children).forEach(b => b.classList.remove('selected'));
-                    // Dann den richtigen auswählen
-                    const boxToSelect = container.querySelector(`.rating-box[data-value="${data[dbField]}"]`);
-                    if (boxToSelect) boxToSelect.classList.add('selected');
-                }
-            }
-            calculateOverallAverage(); // Durchschnitt neu berechnen
+        //     for (const [dbField, htmlId] of Object.entries(ratingMap)) {
+        //         if (data[dbField]) {
+        //             // Erst alle 'selected' entfernen
+        //             const container = document.getElementById(htmlId);
+        //             Array.from(container.children).forEach(b => b.classList.remove('selected'));
+        //             // Dann den richtigen auswählen
+        //             const boxToSelect = container.querySelector(`.rating-box[data-value="${data[dbField]}"]`);
+        //             if (boxToSelect) boxToSelect.classList.add('selected');
+        //         }
+        //     }
+        //     calculateOverallAverage(); // Durchschnitt neu berechnen
 
-            // 3. Checkboxen (Sport, Meds, etc.) zurücksetzen und neu setzen
-            // Das ist etwas komplexer, da du Arrays speicherst.
-            // Hier eine vereinfachte Logik für deine Struktur:
+        //     // 3. Checkboxen (Sport, Meds, etc.) zurücksetzen und neu setzen
+        //     // Das ist etwas komplexer, da du Arrays speicherst.
+        //     // Hier eine vereinfachte Logik für deine Struktur:
             
-            // Hilfsfunktion zum Zurücksetzen einer Gruppe
-            const resetGroup = (selector) => {
-                document.querySelectorAll(selector).forEach(cb => {
-                    cb.checked = false; 
-                    cb.closest('.sport-checkbox').classList.remove('selected');
-                });
-            };
+        //     // Hilfsfunktion zum Zurücksetzen einer Gruppe
+        //     const resetGroup = (selector) => {
+        //         document.querySelectorAll(selector).forEach(cb => {
+        //             cb.checked = false; 
+        //             cb.closest('.sport-checkbox').classList.remove('selected');
+        //         });
+        //     };
 
-            // Sport laden
-            if (data.selectedSports) {
-                resetGroup('.sport-options-group input');
+        //     // Sport laden
+        //     if (data.selectedSports) {
+        //         resetGroup('.sport-options-group input');
+        //         data.selectedSports.forEach(sportName => {
+        //             const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
+        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+        //         });
+        //     }
+
+        //     // Schmerzmittel laden
+        //     if (data.selectedPainmeds) {
+        //         resetGroup('.painmed-options-group input');
+        //         data.selectedPainmeds.forEach(medName => {
+        //             const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
+        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+        //         });
+        //     }
+
+        //     // Tags laden
+        //     if (data.selectedNotesTags) {
+        //         document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
+        //         data.selectedNotesTags.forEach(tag => {
+        //             const btn = document.querySelector(`.notes-tag-button[data-tag="${tag}"]`);
+        //             if(btn) btn.classList.add('selected');
+        //         });
+        //     }
+
+        //     // Single Choice Gruppen (Dehnen, Gluten, Milch)
+        //     const setSingleChoice = (groupClass, dbValue, dataAttribute) => {
+        //         if (!dbValue) return;
+        //         resetGroup(`.${groupClass} input`);
+        //         const cb = document.querySelector(`.${groupClass} input[${dataAttribute}="${dbValue}"]`);
+        //         if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+        //     };
+
+        //     setSingleChoice('stretching-options-group', data.stretchingStatus, 'data-stretching-name');
+        //     setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
+        //     setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
+        // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function fillFormWithData(data) {
+            // 1. Zeiten setzen
+            document.getElementById('bedTime').value = data.bedTime || '';
+            document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
+            calculateSleepDuration(); // Dauer neu berechnen lassen
+
+            // 2. Morgensteifigkeit und CRP
+            document.getElementById('morningStiffness').value = (data.morningStiffness !== undefined && data.morningStiffness !== null) ? data.morningStiffness : '';
+            document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
+
+            // 3. Textarea
+            document.getElementById('notes').value = data.notes || '';
+
+            // 4. Reset aller Checkboxen und Rating-Boxen vor dem Setzen
+            // Reset aller Sport/Dehnen/Gluten/Milch/Schmerzmittel Checkboxen
+            document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                const parentLabel = cb.closest('.sport-checkbox');
+                if (parentLabel) parentLabel.classList.remove('selected');
+            });
+            // Reset aller Rating-Boxen
+            document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
+            // Reset aller Tag-Buttons
+            document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
+
+
+            // 5. Sport Checkboxen wiederherstellen
+            if (data.selectedSports && Array.isArray(data.selectedSports)) {
                 data.selectedSports.forEach(sportName => {
+                    // Finde die Checkbox anhand des data-sport-name
                     const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
-                    if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
                 });
             }
 
-            // Schmerzmittel laden
-            if (data.selectedPainmeds) {
-                resetGroup('.painmed-options-group input');
+            // 6. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
+            const setSingleSelect = (groupClass, dataValue, dataAttributeName) => {
+                if (dataValue) {
+                    const cb = document.querySelector(`.${groupClass} input[data-${dataAttributeName}-name="${dataValue}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
+                }
+            };
+            setSingleSelect('stretching-options-group', data.stretchingStatus, 'stretching');
+            setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
+            setSingleSelect('milk-options-group', data.milkStatus, 'milk');
+
+            // 7. Schmerzmittel
+            if (data.selectedPainmeds && Array.isArray(data.selectedPainmeds)) {
                 data.selectedPainmeds.forEach(medName => {
                     const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
-                    if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+                    if (cb) {
+                        cb.checked = true;
+                        cb.closest('.sport-checkbox').classList.add('selected');
+                    }
                 });
             }
 
-            // Tags laden
-            if (data.selectedNotesTags) {
-                document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
-                data.selectedNotesTags.forEach(tag => {
-                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tag}"]`);
-                    if(btn) btn.classList.add('selected');
-                });
-            }
-
-            // Single Choice Gruppen (Dehnen, Gluten, Milch)
-            const setSingleChoice = (groupClass, dbValue, dataAttribute) => {
-                if (!dbValue) return;
-                resetGroup(`.${groupClass} input`);
-                const cb = document.querySelector(`.${groupClass} input[${dataAttribute}="${dbValue}"]`);
-                if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
+            // 8. Ratings wiederherstellen
+            const setRating = (containerId, value) => {
+                if (value !== undefined && value !== null) { // Prüfe auf vorhandenen Wert
+                    const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
+                    if (box) box.classList.add('selected');
+                }
             };
+            setRating('mood-rating', data.moodRating);
+            setRating('neck-pain-rating', data.neckPainRating);
+            setRating('shoulder-pain-rating', data.shoulderPainRating);
+            setRating('upper-body-pain-rating', data.upperBodyPainRating);
+            setRating('lower-body-pain-rating', data.lowerBodyPainRating);
+            setRating('movement-flow-pain-rating', data.movementFlowPainRating);
+            setRating('immunesystem', data.immunesystemRating); // Korrektur hier
 
-            setSingleChoice('stretching-options-group', data.stretchingStatus, 'data-stretching-name');
-            setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
-            setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
+            // Gesamtwert neu berechnen
+            calculateOverallAverage();
+
+            // 9. Tags wiederherstellen
+            if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
+                data.selectedNotesTags.forEach(tagName => {
+                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
+                    if (btn) btn.classList.add('selected');
+                });
+            }
+
+            // 10. Button Text ändern, damit man sieht, dass man im "Edit Modus" ist
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = "Eintrag aktualisieren";
+            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
@@ -1345,6 +1469,62 @@
         }
 
 
+
+
+
+
+
+
+
+        // NEU HINZUGEFÜGT: Funktion zum Zurücksetzen des gesamten Formulars
+        function resetForm() {
+            // Textfelder und Dropdowns zurücksetzen
+            document.getElementById('bedTime').value = '';
+            document.getElementById('wakeUpTime').value = '';
+            document.getElementById('sleepDurationDisplay').textContent = '';
+            document.getElementById('morningStiffness').value = ''; // Setzt den Placeholder
+            document.getElementById('crpInput').value = '';
+            document.getElementById('notes').value = '';
+
+            // Alle Checkboxen zurücksetzen (Sport, Dehnen, Gluten, Milch, Schmerzmittel)
+            document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                const parentLabel = cb.closest('.sport-checkbox');
+                if (parentLabel) parentLabel.classList.remove('selected');
+            });
+
+            // Alle Rating-Boxen zurücksetzen
+            document.querySelectorAll('.rating-box').forEach(box => box.classList.remove('selected'));
+            document.getElementById('overallAverageDisplay').textContent = '--'; // Durchschnittsanzeige zurücksetzen
+
+            // Alle Notes-Tag-Buttons zurücksetzen
+            document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
+
+            // Aktuellen Bearbeitungsmodus zurücksetzen
+            currentEntryId = null;
+            currentEditingDate = new Date(); // Setzt das aktuelle Bearbeitungsdatum auf heute
+            updateSleepTimeLabel(); // Aktualisiert das Datums-Label oben
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Speichern';
+            submitBtn.style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)"; // Zurück zur Originalfarbe
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         async function loadEntryByDate() {
             const dateInput = document.getElementById('searchDate').value;
             const user = auth.currentUser;
@@ -1352,46 +1532,55 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Reset der ID bei neuer Suche
-            currentEntryId = null;
-            document.getElementById('submitBtn').textContent = "Speichern"; // Reset Button Text
+            // Reset der ID und des Formulars bei jeder neuen Suche
+            currentEntryId = null; // WICHTIG: Reset vor neuer Suche
+            resetForm(); // Formular leeren
 
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1;
+            const month = parseInt(parts[1]) - 1; // Monate sind 0-indiziert
             const day = parseInt(parts[2]);
 
-            const start = new Date(year, month, day, 0, 0, 0, 0);
-            const end = new Date(year, month, day, 23, 59, 59, 999);
+            // Das currentEditingDate auf das ausgewählte Datum setzen
+            currentEditingDate = new Date(year, month, day, 12, 0, 0, 0); 
+            updateSleepTimeLabel(); // Label anpassen
+
+            // Zeitfenster für die Suche definieren (Start/Ende des ausgewählten Tages)
+            const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
+            const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
 
             try {
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
-                    .where("date", ">=", start)
-                    .where("date", "<=", end)
+                    .where("date", ">=", startOfDay)
+                    .where("date", "<=", endOfDay)
                     .limit(1)
                     .get();
 
                 if (snapshot.empty) {
-                    alert("Kein Eintrag für dieses Datum gefunden.");
+                    alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
+                    // Formular ist bereits durch resetForm() geleert
+                    document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
+                    document.getElementById('submitBtn').style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)"; // Originalfarbe
                 } else {
                     const doc = snapshot.docs[0];
                     const data = doc.data();
                     
-                    // WICHTIG: ID speichern!
+                    // WICHTIG: Die ID des gefundenen Dokuments speichern!
                     currentEntryId = doc.id; 
                     
-                    // Formular befüllen
-                    fillFormWithData(data);
+                    // Formular mit den geladenen Daten befüllen
+                    fillFormWithData(data); // Verwendet die neue Funktion
                     
+                    // Feedback an den Benutzer
                     alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
 
                     // Optional: Nach oben scrollen, damit man das Formular sieht
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Fehler:", error);
-                alert("Fehler beim Laden: " + error.message);
+                console.error("Fehler beim Laden des Eintrags:", error);
+                alert("Fehler beim Laden des Eintrags: " + error.message);
             }
         }
 
@@ -2664,6 +2853,7 @@
             calculateOverallAverage();
 
             // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
+                        // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const user = auth.currentUser;
                 if (!user) {
@@ -2679,7 +2869,7 @@
 
                 let missingFields = [];
 
-                // Daten sammeln
+                // Daten sammeln (dieser Teil bleibt größtenteils gleich)
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
@@ -2736,22 +2926,15 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
-                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); } //if (!morningStiffness) missingFields.push('morningStiffness');
+                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
                     return;
                 }
-
-                // --- WICHTIG: Datum aus der globalen Variable holen, nicht einfach "new Date()" ---
-                // Wir klonen das Datum, um sicherzugehen
-                const targetDate = new Date(currentEditingDate); 
-                const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-                const endOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999);
-                // ---------------------------------------------------------------------------------
-
-                const data = {
-                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                
+                // Bereite die Daten vor
+                const dataToSave = { 
                     userId: user.uid,
                     wakeUpTime,
                     bedTime,
@@ -2761,7 +2944,7 @@
                     glutenStatus,
                     milkStatus,
                     selectedPainmeds,
-                    morningStiffness: morningStiffnessValue !== "" ? morningStiffnessValue : null,
+                    morningStiffness: morningStiffnessValue !== "" ? parseInt(morningStiffnessValue) : null,
                     crpValue: crpValue,
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
@@ -2777,33 +2960,30 @@
 
                 try {
                     if (currentEntryId) {
-                        // UPDATE MODUS (Bestehender Eintrag)
-                        // Wir fügen KEIN neues Datum hinzu, damit das alte Datum erhalten bleibt!
-                        // 'data' enthält jetzt kein 'date'-Feld, also bleibt das Feld in der DB unberührt.
-                        
-                        await db.collection("dailyEntries").doc(currentEntryId).update(data);
+                        // UPDATE MODUS: Wenn currentEntryId gesetzt ist, aktualisiere den bestehenden Eintrag
+                        // Wichtig: Beim Update wollen wir das ursprüngliche 'date'-Feld NICHT überschreiben!
+                        // Es wird also kein 'date' Feld in dataToSave mitgegeben, wenn aktualisiert wird.
+                        await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
                         alert("Eintrag erfolgreich aktualisiert!");
                         
-                        // Optional: Nach Update wieder in den "Neu"-Modus wechseln
-                        currentEntryId = null;
-                        document.getElementById('submitBtn').textContent = "Speichern";
-                        document.getElementById('submitBtn').style.background = ""; // Style reset
-                        
+                        // Nach dem Update: Formular zurücksetzen und in den "Neu erstellen"-Modus wechseln
+                        resetForm(); 
                     } else {
-                        // CREATE MODUS (Neuer Eintrag)
-                        // Hier fügen wir das aktuelle Datum hinzu
-                        data.date = firebase.firestore.FieldValue.serverTimestamp();
+                        // CREATE MODUS: Wenn currentEntryId null ist, erstelle einen neuen Eintrag
+                        // Setze das Datum für den neuen Eintrag.
+                        // Wenn der Tag heute ist, nimm serverTimestamp. Wenn es ein geladenes Vergangenheitsdatum ist, nimm das.
+                        dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
-                        await db.collection("dailyEntries").add(data);
-                        alert("Neuer Eintrag erfolgreich gespeichert!");
+                        await db.collection("dailyEntries").add(dataToSave);
+                        alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
+                        
+                        // Nach dem Speichern: Formular zurücksetzen
+                        resetForm(); 
                     }
                     
-                    // Nach Speichern Formular leeren oder so lassen? Deine Entscheidung.
-                    // showPopup(data); // Kannst du drinnen lassen zur Bestätigung
-
                 } catch (e) {
-                    console.error("Fehler:", e);
-                    alert("Fehler beim Speichern: " + e.message);
+                    console.error("Fehler beim Speichern/Aktualisieren: ", e);
+                    alert("Fehler: " + e.message);
                 }
             });
 
@@ -2860,17 +3040,28 @@
 
                         if (!snapshot.empty) {
                             console.log("Eintrag für heute gefunden. Lade Daten...");
-                            const data = snapshot.docs[0].data();
-                            populateFormWithData(data); 
+                            const doc = snapshot.docs[0]; // Das Dokument selbst holen
+                            const data = doc.data();
+
+                            currentEntryId = doc.id; // WICHTIG: ID des heutigen Eintrags speichern
+                            fillFormWithData(data); // Formular mit den geladenen Daten befüllen
+                            
                             userInfoDiv.textContent += " (Eintrag von heute geladen ✏️)";
-                            document.getElementById('submitBtn').textContent = "Eintrag aktualisieren";
+                        } else {
+                            // Wenn kein Eintrag für heute gefunden wird, das Formular leeren
+                            // (falls zuvor Daten aus der Historie geladen oder manuell eingegeben waren)
+                            resetForm(); 
                         }
                     } catch (e) {
                         console.error("Fehler beim Laden des heutigen Eintrags:", e);
+                        // Im Fehlerfall auch zurücksetzen
+                        resetForm();
                     }
                 } else {
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
+                    // Wenn Benutzer abgemeldet, Formular leeren und in Grundzustand versetzen
+                    resetForm(); 
                 }
             });
         });
