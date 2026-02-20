@@ -687,3 +687,309 @@ else:
     plt.show()
 
 # Auswertung der Cluster-Analyse mithilfe der KI
+
+# ---------------------------------------------------------
+# ANALYSE 7: Vorhersagemodell
+# ---------------------------------------------------------
+
+import pandas as pd
+import json
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def run_feature_importance_analysis(file_path='daily_entries_export.json'):
+    """
+    Loads data, trains a RandomForest model to predict tomorrow's well-being,
+    and plots the most important features.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Fehler: Die Datei '{file_path}' wurde nicht gefunden.")
+        return
+
+    df = pd.DataFrame(data)
+
+    # --- Datenaufbereitung ---
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    df = df.dropna(subset=['date']).sort_values('date').reset_index(drop=True)
+
+    binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio': 1, 'Nicht gemacht': 0}
+    df['sport_binary'] = df['selectedSports'].apply(lambda x: 1 if isinstance(x, list) and 'Kein Sport' not in x and x else 0)
+    df['meds_binary'] = df['selectedPainmeds'].apply(lambda x: 1 if isinstance(x, list) and 'Keine' not in x and x else 0)
+    for col in ['glutenStatus', 'milkStatus', 'stretchingStatus']:
+        if col in df.columns:
+            df[col + '_num'] = df[col].map(binary_map).fillna(0)
+
+    # One-Hot Encoding für Tags
+    all_tags = set(tag for tags_list in df['selectedNotesTags'].dropna() if isinstance(tags_list, list) for tag in tags_list)
+    tag_col_map = {}
+    for tag in all_tags:
+        clean_tag = ''.join(e for e in tag if e.isalnum())
+        col_name = f'tag_{clean_tag}'
+        tag_col_map[tag] = col_name
+        df[col_name] = df['selectedNotesTags'].apply(lambda x: 1 if isinstance(x, list) and tag in x else 0)
+
+    # Zielvariable und Features vorbereiten
+    df['overallAverage_tomorrow'] = df['overallAverage'].shift(-1)
+    
+    rating_cols = ['moodRating', 'neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 'lowerBodyPainRating', 'overallAverage']
+    for col in rating_cols:
+         if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(df[col].mean())
+
+    features_cols = rating_cols + ['sport_binary', 'meds_binary', 'glutenStatus_num', 'milkStatus_num', 'stretchingStatus_num'] + list(tag_col_map.values())
+    features_cols = [col for col in features_cols if col in df.columns]
+
+    model_df = df.dropna(subset=features_cols + ['overallAverage_tomorrow'])
+    
+    if len(model_df) < 10:
+        print("Nicht genügend vollständige Daten für die Feature-Importance-Analyse vorhanden.")
+        return
+        
+    X = model_df[features_cols]
+    y = model_df['overallAverage_tomorrow']
+
+    # Modell trainieren und Wichtigkeit extrahieren
+    rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+    rf.fit(X, y)
+    
+    importances = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
+
+    # Visualisierung
+    plt.figure(figsize=(12, 10))
+    top_features = importances.head(25)
+    sns.barplot(x=top_features.values, y=top_features.index, palette='viridis')
+    plt.title('Top 25 Einflussfaktoren auf das Wohlbefinden am Folgetag', fontsize=16)
+    plt.xlabel('Wichtigkeit (Feature Importance)')
+    plt.ylabel('Faktor')
+    plt.tight_layout()
+    plt.show()
+    
+    print("Analyse der Merkmalswichtigkeit (Feature Importance):\n")
+    print(top_features)
+
+# Führen Sie diese Funktion aus.
+run_feature_importance_analysis()
+
+# ---------------------------------------------------------
+# ANALYSE 8: Apriori-Analyse
+# ---------------------------------------------------------
+
+import pandas as pd
+import json
+# WICHTIG: Führen Sie `pip install mlxtend` aus, falls noch nicht geschehen.
+from mlxtend.frequent_patterns import apriori, association_rules
+
+def run_association_rules(file_path='daily_entries_export.json'):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Fehler: Die Datei '{file_path}' wurde nicht gefunden.")
+        return
+    except ImportError:
+        print("Fehler: Die Bibliothek 'mlxtend' wurde nicht gefunden.")
+        print("Bitte installieren Sie sie mit: pip install mlxtend")
+        return
+
+    df = pd.DataFrame(data)
+
+    # --- Datenaufbereitung für Assoziationsregeln ---
+    # Wir erstellen für jeden Tag eine "Transaktion" von Ereignissen
+    df['sport_event'] = df['selectedSports'].apply(lambda x: 'Sport' if isinstance(x, list) and 'Kein Sport' not in x and x else 'Kein Sport')
+    df['gluten_event'] = df['glutenStatus'].apply(lambda x: 'Gluten_Ja' if x == 'Ja' else 'Gluten_Nein')
+    df['milk_event'] = df['milkStatus'].apply(lambda x: 'Milch_Ja' if x == 'Ja' else 'Milch_Nein')
+    df['stretching_event'] = df['stretchingStatus'].apply(lambda x: 'Gedehnt' if x in ['Gemacht', 'Physio'] else 'Nicht gedehnt')
+
+    # Wir definieren "gute" und "schlechte" Tage basierend auf dem Durchschnitt
+    avg_pain = df['overallAverage'].mean()
+    df['tages_kategorie'] = df['overallAverage'].apply(lambda x: 'Guter_Tag' if x > avg_pain else 'Schlechter_Tag')
+
+    # Alle relevanten "Items" für die Analyse in eine Spalte packen
+    item_cols = ['sport_event', 'gluten_event', 'milk_event', 'stretching_event', 'tages_kategorie']
+    
+    # Tags hinzufügen
+    df['tags_list'] = df['selectedNotesTags'].apply(lambda x: x if isinstance(x, list) else [])
+    
+    transactions_df = df[item_cols + ['tags_list']].copy()
+
+    # One-Hot-Encoding durchführen
+    transactions_encoded = transactions_df.drop(columns=['tags_list']).join(transactions_df.tags_list.str.join('|').str.get_dummies())
+    
+    # Konvertiere alle Spalten zu booleans (True/False) für apriori
+    # get_dummies hat bereits 0/1 erstellt, wir müssen nur die anderen Spalten umwandeln
+    for col in item_cols:
+        dummies = pd.get_dummies(transactions_df[col], prefix=col)
+        transactions_encoded = pd.concat([transactions_encoded, dummies], axis=1)
+    
+    # Entferne die ursprünglichen Text-Spalten
+    transactions_encoded = transactions_encoded.drop(columns=item_cols)
+    transactions_encoded = transactions_encoded.astype(bool)
+
+    # --- Apriori-Algorithmus anwenden ---
+    frequent_itemsets = apriori(transactions_encoded, min_support=0.3, use_colnames=True)
+    
+    if frequent_itemsets.empty:
+        print("Keine häufigen Itemsets mit dem gewählten Support gefunden. Versuchen Sie einen niedrigeren 'min_support'-Wert.")
+        return
+
+    # Assoziationsregeln ableiten
+    rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.1)
+
+    # Regeln filtern, die auf "Guter_Tag" oder "Schlechter_Tag" hinauslaufen
+    rules_filtered = rules[rules['consequents'].astype(str).str.contains('tages_kategorie')]
+
+    print("--- Assoziationsregeln für gute/schlechte Tage ---\n")
+    print("Antecedents: Die Auslöser-Kombination")
+    print("Consequents: Die Folge")
+    print("Lift: > 1 bedeutet, dass die Folge wahrscheinlicher auftritt, wenn die Auslöser vorhanden sind.\n")
+    
+    pd.set_option('display.max_colwidth', 100)
+    print(rules_filtered[['antecedents', 'consequents', 'support', 'confidence', 'lift']].sort_values(by='lift', ascending=False))
+
+# Führen Sie diese Funktion aus.
+run_association_rules()
+
+# ---------------------------------------------------------
+# ANALYSE 9: Anomalieerkennung
+# ---------------------------------------------------------
+
+import pandas as pd
+import json
+import numpy as np
+from sklearn.ensemble import IsolationForest
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def run_anomaly_detection(file_path='daily_entries_export.json'):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Fehler: Die Datei '{file_path}' wurde nicht gefunden.")
+        return
+
+    df = pd.DataFrame(data)
+
+    # --- Datenaufbereitung (ähnlich wie bei Random Forest) ---
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    df = df.dropna(subset=['date']).sort_values('date').reset_index(drop=True)
+    
+    binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio': 1, 'Nicht gemacht': 0}
+    df['sport_binary'] = df['selectedSports'].apply(lambda x: 1 if isinstance(x, list) and 'Kein Sport' not in x and x else 0)
+    df['meds_binary'] = df['selectedPainmeds'].apply(lambda x: 1 if isinstance(x, list) and 'Keine' not in x and x else 0)
+    
+    rating_cols = ['moodRating', 'neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 'lowerBodyPainRating', 'overallAverage']
+    feature_cols = rating_cols + ['sport_binary', 'meds_binary']
+    
+    analysis_df = df.copy()
+    
+    for col in feature_cols:
+        if col in analysis_df.columns:
+            analysis_df[col] = pd.to_numeric(analysis_df[col], errors='coerce')
+    
+    analysis_df = analysis_df.dropna(subset=feature_cols)
+
+    if len(analysis_df) < 5:
+        print("Nicht genügend Daten für die Anomalieerkennung vorhanden.")
+        return
+        
+    X = analysis_df[feature_cols]
+
+    # --- Isolation Forest Modell ---
+    # contamination='auto' ist eine gute Standardeinstellung
+    iso_forest = IsolationForest(contamination='auto', random_state=42)
+    analysis_df['anomaly'] = iso_forest.fit_predict(X)
+    
+    # Anomalien sind mit -1 markiert
+    anomalies = analysis_df[analysis_df['anomaly'] == -1]
+
+    # --- Visualisierung ---
+    plt.figure(figsize=(15, 7))
+    sns.scatterplot(data=analysis_df, x='date', y='overallAverage', hue='anomaly', style='anomaly', s=100, palette={1: 'blue', -1: 'red'})
+    plt.title('Anomalieerkennung: Ungewöhnliche Tage', fontsize=16)
+    plt.xlabel('Datum')
+    plt.ylabel('Gesamtschmerz (overallAverage)')
+    plt.legend(title='Typ', labels=['Normal', 'Anomalie'])
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+    print(f"--- {len(anomalies)} anomale Tage gefunden ---")
+    
+    # Spalten für die Anzeige auswählen
+    display_cols = ['date', 'overallAverage', 'moodRating', 'selectedSports', 'selectedPainmeds', 'selectedNotesTags', 'notes']
+    display_cols = [col for col in display_cols if col in anomalies.columns]
+    print("Diese Tage weichen vom gewohnten Muster ab und sind eine genauere Untersuchung wert:")
+    print(anomalies[display_cols])
+
+# Führen Sie diese Funktion aus.
+run_anomaly_detection()
+
+# ---------------------------------------------------------
+# ANALYSE 10: Interaktive-Plots
+# ---------------------------------------------------------
+
+import pandas as pd
+import json
+import plotly.express as px
+
+def run_interactive_plot(file_path='daily_entries_export.json'):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Fehler: Die Datei '{file_path}' wurde nicht gefunden.")
+        return
+    except ImportError:
+        print("Fehler: Die Bibliothek 'plotly' wurde nicht gefunden.")
+        print("Bitte installieren Sie sie mit: pip install plotly")
+        return
+
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    df = df.dropna(subset=['date', 'overallAverage']).sort_values('date')
+    
+    # Listen in Strings umwandeln für die Hover-Anzeige
+    for col in ['selectedNotesTags', 'selectedSports', 'selectedPainmeds']:
+        if col in df.columns:
+            df[col] = df[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else 'Keine Angabe')
+
+    # --- Interaktiven Plot erstellen ---
+    fig = px.scatter(
+        df,
+        x='date',
+        y='overallAverage',
+        title='Interaktive Analyse des Wohlbefindens über die Zeit',
+        color='moodRating', # Färbe Punkte nach Stimmungs-Rating
+        color_continuous_scale=px.colors.sequential.Viridis,
+        size='moodRating', # Mache Punkte mit besserer Stimmung grösser
+        hover_data={ # Diese Daten werden angezeigt, wenn man mit der Maus darüber fährt
+            'date': '|%d. %B %Y',
+            'overallAverage': ':.2f',
+            'notes': True,
+            'selectedNotesTags': True,
+            'selectedSports': True,
+            'selectedPainmeds': True,
+            'stretchingStatus': True,
+            'glutenStatus': True,
+            'milkStatus': True
+        }
+    )
+
+    fig.update_layout(
+        xaxis_title='Datum',
+        yaxis_title='Gesamtschmerz (10 = schmerzfrei)',
+        coloraxis_colorbar_title_text='Stimmung'
+    )
+
+    # Die Grafik wird als HTML-Datei gespeichert. Öffnen Sie diese in Ihrem Browser.
+    fig.write_html("interaktive_analyse.html")
+    print("Die interaktive Analyse wurde als 'interaktive_analyse.html' gespeichert. Bitte öffnen Sie diese Datei in einem Webbrowser.")
+
+# Führen Sie diese Funktion aus.
+run_interactive_plot()
+
