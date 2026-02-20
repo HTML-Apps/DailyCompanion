@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 # Zeile 467 beachten - zusätzliche Daten einblenden
 
 # --- COLAB EINSTELLUNGEN einkommentieren---
-# %matplotlib inline
-# plt.rcParams['figure.figsize'] = [15, 7]
+%matplotlib inline
+plt.rcParams['figure.figsize'] = [15, 7]
 
 # 1. Daten laden 
 filename = 'daily_entries_export.json' 
@@ -686,4 +686,4 @@ else:
     plt.tight_layout()
     plt.show()
 
-# Auswertung der CLuster-Analyse mithilfe der KI
+# Auswertung der Cluster-Analyse mithilfe der KI
