@@ -862,23 +862,31 @@ import pandas as pd
 import json
 import numpy as np
 from sklearn.ensemble import IsolationForest
-import matplotlib.pyplot as plt
-import seaborn as sns
+# WICHTIG: Führen Sie `pip install plotly` aus, falls noch nicht geschehen.
+import plotly.express as px
 
-def run_anomaly_detection(file_path='daily_entries_export.json'):
+def run_interactive_anomaly_detection(file_path='daily_entries_export.json'):
+    """
+    Findet anomale Tage und erstellt eine interaktive Plotly-Grafik,
+    die detaillierte Informationen beim Hovern anzeigt.
+    """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except FileNotFoundError:
         print(f"Fehler: Die Datei '{file_path}' wurde nicht gefunden.")
         return
+    except ImportError:
+        print("Fehler: Die Bibliothek 'plotly' wurde nicht gefunden.")
+        print("Bitte installieren Sie sie mit: pip install plotly")
+        return
 
     df = pd.DataFrame(data)
 
-    # --- Datenaufbereitung (ähnlich wie bei Random Forest) ---
+    # --- 1. Datenaufbereitung ---
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
     df = df.dropna(subset=['date']).sort_values('date').reset_index(drop=True)
-    
+
     binary_map = {'Ja': 1, 'Nein': 0, 'Gemacht': 1, 'Physio': 1, 'Nicht gemacht': 0}
     df['sport_binary'] = df['selectedSports'].apply(lambda x: 1 if isinstance(x, list) and 'Kein Sport' not in x and x else 0)
     df['meds_binary'] = df['selectedPainmeds'].apply(lambda x: 1 if isinstance(x, list) and 'Keine' not in x and x else 0)
@@ -900,34 +908,69 @@ def run_anomaly_detection(file_path='daily_entries_export.json'):
         
     X = analysis_df[feature_cols]
 
-    # --- Isolation Forest Modell ---
-    # contamination='auto' ist eine gute Standardeinstellung
+    # --- 2. Anomalieerkennung durchführen ---
     iso_forest = IsolationForest(contamination='auto', random_state=42)
-    analysis_df['anomaly'] = iso_forest.fit_predict(X)
-    
-    # Anomalien sind mit -1 markiert
-    anomalies = analysis_df[analysis_df['anomaly'] == -1]
+    analysis_df['anomaly_val'] = iso_forest.fit_predict(X)
 
-    # --- Visualisierung ---
-    plt.figure(figsize=(15, 7))
-    sns.scatterplot(data=analysis_df, x='date', y='overallAverage', hue='anomaly', style='anomaly', s=100, palette={1: 'blue', -1: 'red'})
-    plt.title('Anomalieerkennung: Ungewöhnliche Tage', fontsize=16)
-    plt.xlabel('Datum')
-    plt.ylabel('Gesamtschmerz (overallAverage)')
-    plt.legend(title='Typ', labels=['Normal', 'Anomalie'])
-    plt.grid(True, alpha=0.3)
-    plt.show()
+    # --- 3. Daten für die interaktive Visualisierung vorbereiten ---
+    # Lesbare Labels für die Legende und Hover-Infos erstellen
+    analysis_df['Status'] = np.where(analysis_df['anomaly_val'] == -1, 'Anomalie', 'Normaler Tag')
 
-    print(f"--- {len(anomalies)} anomale Tage gefunden ---")
-    
-    # Spalten für die Anzeige auswählen
-    display_cols = ['date', 'overallAverage', 'moodRating', 'selectedSports', 'selectedPainmeds', 'selectedNotesTags', 'notes']
-    display_cols = [col for col in display_cols if col in anomalies.columns]
-    print("Diese Tage weichen vom gewohnten Muster ab und sind eine genauere Untersuchung wert:")
-    print(anomalies[display_cols])
+    # Listen in lesbare Strings für die Hover-Anzeige umwandeln
+    for col in ['selectedNotesTags', 'selectedSports', 'selectedPainmeds']:
+        if col in analysis_df.columns:
+            analysis_df[col] = analysis_df[col].apply(lambda x: ', '.join(x) if isinstance(x, list) and x else 'Keine Angabe')
+
+    # --- 4. Interaktiven Plot mit Plotly erstellen ---
+    fig = px.scatter(
+        analysis_df,
+        x='date',
+        y='overallAverage',
+        title='Interaktive Anomalie-Analyse',
+        # Farb-, Symbol- und Größenzuordnung basierend auf dem Anomalie-Status
+        color='Status',
+        symbol='Status',
+        size=np.where(analysis_df['Status'] == 'Anomalie', 12, 5), # Anomalien größer
+        color_discrete_map={
+            'Normaler Tag': 'cornflowerblue',
+            'Anomalie': 'orangered'
+        },
+        symbol_map={
+            'Normaler Tag': 'circle',
+            'Anomalie': 'x'
+        },
+        # HIER WERDEN DIE INFORMATIONEN FÜR DAS HOVER-FENSTER DEFINIERT:
+        hover_data={
+            'date': '|%d. %B %Y', # Datum schön formatieren
+            'Status': True,
+            'overallAverage': ':.2f',
+            'moodRating': True,
+            'notes': True,
+            'selectedSports': True,
+            'selectedPainmeds': True,
+            'stretchingStatus': True,
+            'glutenStatus': True,
+            'milkStatus': True
+        }
+    )
+
+    # Layout und Design der Grafik verfeinern
+    fig.update_layout(
+        title_font_size=22,
+        xaxis_title='Datum',
+        yaxis_title='Gesamtwert (höher = besser)',
+        legend_title_text='Tages-Typ',
+        legend=dict(font=dict(size=12))
+    )
+    fig.update_traces(marker=dict(line=dict(width=1, color='DarkSlateGrey')))
+
+    # Die Grafik wird als HTML-Datei gespeichert. Öffnen Sie diese in Ihrem Browser.
+    fig.write_html("interaktive_anomalie_analyse.html")
+    print("\n✅ Die interaktive Analyse wurde erfolgreich als 'interaktive_anomalie_analyse.html' gespeichert.")
+    print("   Bitte öffnen Sie diese Datei in einem Webbrowser, um die Grafik zu sehen und zu interagieren.")
 
 # Führen Sie diese Funktion aus.
-run_anomaly_detection()
+run_interactive_anomaly_detection()
 
 # ---------------------------------------------------------
 # ANALYSE 10: Interaktive-Plots
