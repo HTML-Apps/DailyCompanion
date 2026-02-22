@@ -11,7 +11,9 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
     <style>
@@ -94,12 +96,13 @@
             text-align: center;
         }
 
+        /* Styling für das Dropdown und das Nummernfeld */
         .rating-group select, 
         .rating-group input[type="number"] {
             width: 100%;
             padding: 12px;
             margin-top: 8px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05); /* Dezenter Glas-Effekt */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             color: white;
@@ -107,10 +110,11 @@
             font-size: 1rem;
             outline: none;
             transition: all 0.3s ease;
-            -webkit-appearance: none;
+            -webkit-appearance: none; /* Entfernt Standard-Styling bei iOS */
             appearance: none;
         }
 
+        /* Fokus-Effekt wie bei deinen Slidern */
         .rating-group select:focus, 
         .rating-group input[type="number"]:focus {
             border-color: #00f2fe;
@@ -118,14 +122,16 @@
             box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
 
+        /* Speziell für das CRP-Feld: Die kleinen Pfeile ausblenden (optional für cleanen Look) */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
+        /* Styling für die Dropdown-Optionen (Hintergrund im Menü) */
         .rating-group select option {
-            background: #1a1a2e;
+            background: #1a1a2e; /* Dunkler Hintergrund für die Liste */
             color: white;
         }
 
@@ -370,6 +376,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
+        /* NEU: Styling für History & Stats Controls */
         .history-controls {
             display: flex;
             flex-direction: column;
@@ -422,6 +429,7 @@
             filter: brightness(1.1);
         }
 
+        /* Chart Container in Popup */
         .chart-container {
             position: relative;
             height: 500px;
@@ -447,15 +455,19 @@
             font-weight: bold;
         }
 
+
         @media (max-width: 480px) {
             body { padding: 0; }
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
             .header-fixed h1 { font-size: 2em; }
             .container { padding: 15px; width: 100%; margin-top: 0; margin-bottom: 5px; }
+
             .category-item { padding: 15px; margin-bottom: 15px; padding-right: 5px; padding-left: 5px;}
             .category-item label { font-size: 1.3em; margin-bottom: 15px; }
+
             .rating-group { padding: 15px; margin-bottom: 15px; }
             .rating-group label { font-size: 1.3em; margin-bottom: 15px; }
+
             .time-input-group { flex-direction: row; gap: 8px; justify-content: center; }
             .time-entry { font-size: 1.1em; }
             .time-entry input[type="time"] { font-size: 0.9em; padding: 6px 10px; width: 90px; }
@@ -468,6 +480,8 @@
             .overall-average-display { font-size: 1.8em; }
             textarea { width: calc(100% - 30px); font-size: 0.9em; min-height: 60px; margin-left: 4px;}
             .submit-button { padding: 15px; font-size: 1.3em; }
+            
+            /* Responsive Popup */
             .popup { padding: 20px; width: 95%; }
             .popup h2 { font-size: 1.7em; }
             .chart-container { height: 250px; }
@@ -544,8 +558,8 @@
         }
 
         .tag-category {
-            width: 100%;
-            color: #00f2fe;
+            width: 100%; /* Erzwingt den Umbruch */
+            color: #00f2fe; /* Deine Akzentfarbe */
             font-size: 0.8em;
             font-weight: bold;
             text-transform: uppercase;
@@ -555,10 +569,11 @@
             padding-bottom: 3px;
         }
 
+        /* Neues Styling für Inputs, damit sie zum Theme passen */
         .styled-input {
             width: 100%;
             padding: 12px;
-            background-color: #2a2a4a;
+            background-color: #2a2a4a; /* Dein Standard-Dunkelblau */
             border: 1px solid #45456a;
             border-radius: 10px;
             color: #FFFFFF;
@@ -566,15 +581,16 @@
             font-size: 1.1em;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
             outline: none;
-            appearance: none;
+            appearance: none; /* Entfernt Standard-Browser-Styling */
             -webkit-appearance: none;
         }
 
         .styled-input:focus {
-            border-color: #00f2fe;
+            border-color: #00f2fe; /* Deine Akzentfarbe beim Klicken */
             box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
 
+        /* Pfeil im Select-Menü wieder sichtbar machen (da appearance: none ihn versteckt) */
         select.styled-input {
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300f2fe%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
             background-repeat: no-repeat;
@@ -582,6 +598,7 @@
             background-size: .65em auto;
         }
 
+        /* --- NEU: STYLING FÜR SCHMERZKARTE --- */
         #painMapPopup {
             width: 96vw;
             height: 98vh;
@@ -596,7 +613,7 @@
             flex-grow: 1;
             display: flex;
             gap: 15px;
-            min-height: 0;
+            min-height: 0; /* Wichtig für Flexbox-Verhalten */
         }
 
         .painmap-controls {
@@ -630,10 +647,12 @@
 
         .painmap-canvas-wrapper {
             flex-grow: 1;
+            /*display: flex;
+            justify-content: center;*/
             align-items: center;
             background-color: rgb(255, 255, 255);
             border-radius: 15px;
-            overflow: hidden;
+            overflow: hidden; /* Stellt sicher, dass das Canvas nicht überläuft */
             height: 540px;
         }
         
@@ -641,9 +660,11 @@
             cursor: crosshair;
             max-width: 100%;
             max-height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* Sorgt dafür, dass das Seitenverhältnis beibehalten wird */
         }
+        /* --- ENDE NEUES STYLING --- */
 
+        /* --- NEU: STYLING FÜR PAINMAP-NAVIGATION --- */
         .popup-header-nav {
             display: flex;
             justify-content: space-between;
@@ -677,105 +698,10 @@
             flex-grow: 1;
             text-align: center;
         }
-        
-        /* --- NEU: DESKTOP LAYOUT --- */
-        .desktop-layout {
-            display: contents; /* Standardmäßig keine Auswirkung, wird bei Desktop aktiv */
-        }
+        /* --- ENDE --- */
 
-        @media (min-width: 1200px) {
-            body {
-                /* Auf Desktop wird der Body selbst kein Flex-Container mehr sein */
-                display: block;
-            }
 
-            .desktop-layout {
-                display: flex;
-                width: 100%;
-                max-width: 1800px;
-                margin: 20px auto;
-                padding: 0 20px;
-                gap: 20px;
-                box-sizing: border-box;
-                align-items: flex-start;
-            }
 
-            .left-column, .right-column {
-                position: -webkit-sticky;
-                position: sticky;
-                top: 90px; /* Höhe des Headers + Puffer */
-                height: calc(100vh - 110px);
-                overflow-y: auto;
-                flex-shrink: 0;
-            }
-
-            .left-column {
-                flex-basis: 30%;
-                width: 30%;
-            }
-
-            .main-column {
-                flex-basis: 50%;
-                width: 50%;
-            }
-
-            .right-column {
-                flex-basis: 20%;
-                width: 20%;
-            }
-
-            /* Verstecke den Button, der die PainMap im Popup öffnet */
-            #painMapBtn {
-                display: none;
-            }
-
-            /* Style für die Sidebar-Container, damit sie wie die anderen Kacheln aussehen */
-            .sidebar-content-wrapper {
-                background: rgba(15, 15, 25, 0.95);
-                border-radius: 25px;
-                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-                padding: 25px;
-                box-sizing: border-box;
-            }
-
-            /* Anpassungen für die Schmerzkarte in der linken Spalte */
-            .left-column #painMapPopup {
-                /* Popup-Styling zurücksetzen */
-                position: relative;
-                width: 100%;
-                max-width: none;
-                height: auto;
-                max-height: none;
-                box-shadow: none;
-                padding: 0;
-                animation: none;
-                border: none;
-                background: transparent;
-                overflow-y: visible;
-            }
-            .left-column .close-btn {
-                display: none; /* Schließen-Button in der Sidebar ausblenden */
-            }
-            .left-column .painmap-main-container {
-                flex-direction: column;
-                height: auto;
-            }
-            .left-column .painmap-controls {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .left-column .painmap-canvas-wrapper {
-                width: 100%;
-                height: auto;
-                margin-top: 15px;
-            }
-             .left-column #painMapCanvas {
-                width: 100%;
-                height: auto;
-            }
-        }
-        /* --- ENDE DESKTOP LAYOUT --- */
     </style>
 </head>
 <body>
@@ -803,273 +729,260 @@
         color: #27272700;
     ">Nicht angemeldet.</div>
     
-    <!-- NEUER WRAPPER FÜR DESKTOP LAYOUT -->
-    <div class="desktop-layout">
-        <!-- LINKE SPALTE (wird per JS befüllt) -->
-        <div class="left-column"></div>
-
-        <!-- MITTLERE (HAUPT-)SPALTE -->
-        <div class="main-column">
-            <div class="container">
-                <div class="category-item">
-                    <label id="sleepTimeLabel">Schlafzeiten 😴</label>
-                    <div class="time-input-group">
-                        <div class="time-entry">
-                            <span class="icon">🌙</span>
-                            <input type="time" id="bedTime">
-                        </div>
-                        <div class="time-entry">
-                            <span class="icon">☀️</span>
-                            <input type="time" id="wakeUpTime">
-                        </div>
-                    </div>
-                    <div class="sleep-duration" id="sleepDurationDisplay"></div>
+    <div class="container">
+        <div class="category-item">
+            <label id="sleepTimeLabel">Schlafzeiten 😴</label>
+            <div class="time-input-group">
+                <div class="time-entry">
+                    <span class="icon">🌙</span>
+                    <input type="time" id="bedTime">
                 </div>
-
-                <div class="category-item">
-                    <label>Sport-Aktivitäten</label>
-                    <div class="sport-options-group">
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="sportGym" data-sport-type="active" data-sport-name="Fitnessstudio">
-                            <span class="icon">🏋🏻</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="sportFootball" data-sport-type="active" data-sport-name="Fußball">
-                            <span class="icon">⚽</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="sportCycling" data-sport-type="active" data-sport-name="Radfahren">
-                            <span class="icon">🚴‍♂️</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="sportNone" data-sport-type="none" data-sport-name="Kein Sport">
-                            <span class="icon">❌</span>
-                        </label>
-                    </div>
+                <div class="time-entry">
+                    <span class="icon">☀️</span>
+                    <input type="time" id="wakeUpTime">
                 </div>
+            </div>
+            <div class="sleep-duration" id="sleepDurationDisplay"></div>
+        </div>
 
-                <div class="category-item">
-                    <label>Dehnübungen</label>
-                    <div class="stretching-options-group">
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Gemacht">
-                            <span class="icon">✅</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Physio">
-                            <span class="icon">Physio</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="stretchingNotDone" data-stretching-type="none" data-stretching-name="Nicht gemacht">
-                            <span class="icon">❌</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="category-item">
-                    <label>Gluten 🍞</label>
-                    <div class="gluten-options-group">
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="glutenYes" data-gluten-type="yes" data-gluten-name="Ja">
-                            <span class="icon">✅</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="glutenNo" data-gluten-type="no" data-gluten-name="Nein">
-                            <span class="icon">❌</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="category-item">
-                    <label>Milch 🥛</label>
-                    <div class="milk-options-group">
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="milkYes" data-milk-type="yes" data-milk-name="Ja">
-                            <span class="icon">✅</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="milkNo" data-milk-type="no" data-milk-name="Nein">
-                            <span class="icon">❌</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="category-item">
-                    <label>Schmerzmittel</label>
-                    <div class="painmed-options-group">
-                        <label class="sport-checkbox"> <input type="checkbox" id="painmedIbu" data-painmed-type="active" data-painmed-name="IBU">
-                            <span class="icon">IBU 400</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="painmedDiclo25" data-painbox-type="active" data-painmed-name="Diclo">
-                            <span class="icon">Diclo 25</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="painmedEto60" data-painbox-type="active" data-painmed-name="Etoricoxib_60">
-                            <span class="icon">Etori 60</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="painmedEto120" data-painbox-type="active" data-painmed-name="Etoricoxib_120">
-                            <span class="icon">Etori 120</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="painmedBiologika" data-painbox-type="active" data-painmed-name="Biologika">
-                            <span class="icon">Biologika</span>
-                        </label>
-                        <label class="sport-checkbox">
-                            <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine">
-                            <span class="icon">❌</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="category-item">
-                    <label for="mood-rating">Stimmung / Schmerzeinfluss</label>
-                    <div class="rating-scale" id="mood-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="neck-pain-rating">Schmerzen Nacken</label>
-                    <div class="rating-scale" id="neck-pain-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="shoulder-pain-rating">Schmerzen Schultern</label>
-                    <div class="rating-scale" id="shoulder-pain-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="upper-body-pain-rating">Schmerzen Oberkörper</label>
-                    <div class="rating-scale" id="upper-body-pain-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="lower-body-pain-rating">Schmerzen Unterkörper</label>
-                    <div class="rating-scale" id="lower-body-pain-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="movement-flow-pain-rating">Bewegungsöffnung / Flow</label>
-                    <div class="rating-scale" id="movement-flow-pain-rating"></div>
-                </div>
-
-                <div class="category-item">
-                    <label for="immunesystem">Immunsystem</label>
-                    <div class="rating-scale" id="immunesystem"></div>
-                </div>
-
-                <div class="category-item">
-                    <label>Morgensteifigkeit</label>
-                    <select id="morningStiffness" class="styled-input">
-                        <option value="" selected disabled hidden>Bitte wählen...</option>
-                        
-                        <option value="0">0 Min (Frei)</option>
-                        <option value="15">15 Min</option>
-                        <option value="30">30 Min</option>
-                        <option value="45">45 Min</option>
-                        <option value="60">1 Std</option>
-                        <option value="90">1,5 Std</option>
-                        <option value="120">2 Std+</option>
-                    </select>
-                </div>
-
-                <div class="category-item">
-                    <label>CRP-Wert (mg/L)</label>
-                    <div class="crp-input-container">
-                        <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0" class="styled-input">
-                    </div>
-                </div>
-
-                <div class="category-item">
-                    <label>Gesamttagesbilanz</label>
-                    <div class="overall-average-display" id="overallAverageDisplay">--</div>
-                </div>
-
-                <div class="category-item">
-                    <label for="notes">Anmerkungen 🏷️</label>
-                    <div class="notes-tags-group">
-                        <div class="tag-category"style="text-align:center; margin-top = 0px;">Ernährung / Magen</div>
-                        <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Kantine</button>
-                        <button type="button" class="notes-tag-button" data-tag="Schokolade">Schoko</button>
-                        <button type="button" class="notes-tag-button" data-tag="Eis">Eis</button>
-                        <button type="button" class="notes-tag-button" data-tag="Müsli">Müsli</button>
-                        <button type="button" class="notes-tag-button" data-tag="Shake">Shake</button>
-                        <button type="button" class="notes-tag-button" data-tag="Proteinriegel">Proteinriegel</button>
-                        <button type="button" class="notes-tag-button" data-tag="Stuhl">Stuhl</button>
-                        <button type="button" class="notes-tag-button" data-tag="Verdauung">Digestion</button>
-                        <button type="button" class="notes-tag-button" data-tag="Bauch gespannt">Bauch gespannt</button>
-                        <button type="button" class="notes-tag-button" data-tag="Bauch gebläht">gebläht</button>
-                        
-                        <div class="tag-category" style="text-align:center">Schmerzen / Entzündungen</div>
-                        <button type="button" class="notes-tag-button" data-tag="Nackensperre">Nackenblock</button>
-                        <button type="button" class="notes-tag-button" data-tag="Atemsperre">Atems</button>
-                        <button type="button" class="notes-tag-button" data-tag="Beinsperre">Bein</button>
-                        <button type="button" class="notes-tag-button" data-tag="Nierenschmerz">Niere</button>
-                        <button type="button" class="notes-tag-button" data-tag="Zeh links">Zeh links</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Zeh rechts">Zeh rechts</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Zähne">Zähne</button>
-                        <button type="button" class="notes-tag-button" data-tag="Sehne Schulter links">Sehne Schulter links</button>
-                        <button type="button" class="notes-tag-button" data-tag="Sehne Schulter rechts">Sehne rechts</button> 
-
-                        <div class="tag-category" style="text-align:center">Immunsystem / Psoriasis</div>
-                        <button type="button" class="notes-tag-button" data-tag="Erreger">Erreger</button>
-                        <button type="button" class="notes-tag-button" data-tag="Allergie">Allergie</button>
-                        <button type="button" class="notes-tag-button" data-tag="Erkältung">Infekt</button>
-                        <button type="button" class="notes-tag-button" data-tag="Fieber">Fieber</button>
-                        <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
-                        <button type="button" class="notes-tag-button" data-tag="Creme Füße">Füße</button>
-                        <button type="button" class="notes-tag-button" data-tag="Creme Hüfte">Hüfte</button>
-                        <button type="button" class="notes-tag-button" data-tag="Halsschmerz">Hals</button>
-                        <button type="button" class="notes-tag-button" data-tag="Husten">Husten</button>
-                        <button type="button" class="notes-tag-button" data-tag="Haut geschlossen">Haut geschlossen</button>
-                        <button type="button" class="notes-tag-button" data-tag="Haut offen">offen</button>
-
-                        <div class="tag-category" style="text-align:center">Supplements / GD / Schlaf</div>
-                        <button type="button" class="notes-tag-button" data-tag="Gläschen">Gläschen</button>
-                        <button type="button" class="notes-tag-button" data-tag="Vitamin D3">Vitamin D3</button>
-                        <button type="button" class="notes-tag-button" data-tag="Omega3">Omega3</button>
-                        <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Schlaf schlecht">Schlaf schlecht</button>
-
-                        <div class="tag-category" style="text-align:center">Biologika / JAK</div>
-                        <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button>
-                        <button type="button" class="notes-tag-button" data-tag="Brainfog / Kopfweh">Brainfog/Kopfweh</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Rötung Spritze / Schmerzen">Rötung</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Wirkung schwach">Wirkung: schwach</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Wirkung mittel">mittel</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Wirkung stark">stark</button> 
-                        <button type="button" class="notes-tag-button" data-tag="Spritze Bauch links">Spritze Bauch links</button>
-                        <button type="button" class="notes-tag-button" data-tag="Spritze Bauch rechts">Spritze Bauch rechts</button>
-                        <button type="button" class="notes-tag-button" data-tag="Spritze Femur links">Spritze Femur links</button>
-                        <button type="button" class="notes-tag-button" data-tag="Spritze Femur rechts">Spritze Femur rechts</button>
-                        
-                        <div class="tag-category" style="text-align:center">Anmerkungen</div> 
-                    </div>
-                    <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
-                </div>
-
-                <!-- WICHTIG: DIESEM ITEM WURDE EINE ID GEGEBEN -->
-                <div class="category-item" id="history-item">
-                    <label>Historie & Statistik 📊</label>
-                    <div class="history-controls">
-                        <div class="history-search-group">
-                            <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
-                            <button class="action-button btn-search" id="searchBtn">Laden</button>
-                        </div>
-                        <button class="action-button btn-stats" id="painMapBtn">Schmerzkarte bearbeiten</button>
-                        <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
-                        <button class="action-button btn-stats" onclick="exportDailyEntries()">Auswertung Google Colab (.py)</button>
-                    </div>
-                </div>
-
-                <button class="submit-button" id="submitBtn">Speichern</button>
+        <div class="category-item">
+            <label>Sport-Aktivitäten</label>
+            <div class="sport-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportGym" data-sport-type="active" data-sport-name="Fitnessstudio">
+                    <span class="icon">🏋🏻</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportFootball" data-sport-type="active" data-sport-name="Fußball">
+                    <span class="icon">⚽</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportCycling" data-sport-type="active" data-sport-name="Radfahren">
+                    <span class="icon">🚴‍♂️</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportNone" data-sport-type="none" data-sport-name="Kein Sport">
+                    <span class="icon">❌</span>
+                </label>
             </div>
         </div>
 
-        <!-- RECHTE SPALTE (wird per JS befüllt) -->
-        <div class="right-column"></div>
-    </div>
+        <div class="category-item">
+            <label>Dehnübungen</label>
+            <div class="stretching-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Gemacht">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Physio">
+                    <span class="icon">Physio</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="stretchingNotDone" data-stretching-type="none" data-stretching-name="Nicht gemacht">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
 
+        <div class="category-item">
+            <label>Gluten 🍞</label>
+            <div class="gluten-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="glutenYes" data-gluten-type="yes" data-gluten-name="Ja">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="glutenNo" data-gluten-type="no" data-gluten-name="Nein">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label>Milch 🥛</label>
+            <div class="milk-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="milkYes" data-milk-type="yes" data-milk-name="Ja">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="milkNo" data-milk-type="no" data-milk-name="Nein">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label>Schmerzmittel</label>
+            <div class="painmed-options-group">
+                <label class="sport-checkbox"> <input type="checkbox" id="painmedIbu" data-painmed-type="active" data-painmed-name="IBU">
+                    <span class="icon">IBU 400</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedDiclo25" data-painbox-type="active" data-painmed-name="Diclo">
+                    <span class="icon">Diclo 25</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedEto60" data-painbox-type="active" data-painmed-name="Etoricoxib_60">
+                    <span class="icon">Etori 60</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedEto120" data-painbox-type="active" data-painmed-name="Etoricoxib_120">
+                    <span class="icon">Etori 120</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedBiologika" data-painbox-type="active" data-painmed-name="Biologika">
+                    <span class="icon">Biologika</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label for="mood-rating">Stimmung / Schmerzeinfluss</label>
+            <div class="rating-scale" id="mood-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="neck-pain-rating">Schmerzen Nacken</label>
+            <div class="rating-scale" id="neck-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="shoulder-pain-rating">Schmerzen Schultern</label>
+            <div class="rating-scale" id="shoulder-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="upper-body-pain-rating">Schmerzen Oberkörper</label>
+            <div class="rating-scale" id="upper-body-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="lower-body-pain-rating">Schmerzen Unterkörper</label>
+            <div class="rating-scale" id="lower-body-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="movement-flow-pain-rating">Bewegungsöffnung / Flow</label>
+            <div class="rating-scale" id="movement-flow-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="immunesystem">Immunsystem</label>
+            <div class="rating-scale" id="immunesystem"></div>
+        </div>
+
+        <div class="category-item">
+            <label>Morgensteifigkeit</label>
+            <select id="morningStiffness" class="styled-input">
+                <option value="" selected disabled hidden>Bitte wählen...</option>
+                
+                <option value="0">0 Min (Frei)</option>
+                <option value="15">15 Min</option>
+                <option value="30">30 Min</option>
+                <option value="45">45 Min</option>
+                <option value="60">1 Std</option>
+                <option value="90">1,5 Std</option>
+                <option value="120">2 Std+</option>
+            </select>
+        </div>
+
+        <div class="category-item">
+            <label>CRP-Wert (mg/L)</label>
+            <div class="crp-input-container">
+                <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0" class="styled-input">
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label>Gesamttagesbilanz</label>
+            <div class="overall-average-display" id="overallAverageDisplay">--</div>
+        </div>
+
+        <div class="category-item">
+            <label for="notes">Anmerkungen 🏷️</label>
+            <div class="notes-tags-group">
+                <div class="tag-category"style="text-align:center; margin-top = 0px;">Ernährung / Magen</div>
+                <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Kantine</button>
+                <button type="button" class="notes-tag-button" data-tag="Schokolade">Schoko</button>
+                <button type="button" class="notes-tag-button" data-tag="Eis">Eis</button>
+                <button type="button" class="notes-tag-button" data-tag="Müsli">Müsli</button>
+                <button type="button" class="notes-tag-button" data-tag="Shake">Shake</button>
+                <button type="button" class="notes-tag-button" data-tag="Proteinriegel">Proteinriegel</button>
+                <button type="button" class="notes-tag-button" data-tag="Stuhl">Stuhl</button>
+                <button type="button" class="notes-tag-button" data-tag="Verdauung">Digestion</button>
+                <button type="button" class="notes-tag-button" data-tag="Bauch gespannt">Bauch gespannt</button>
+                <button type="button" class="notes-tag-button" data-tag="Bauch gebläht">gebläht</button>
+                
+                <div class="tag-category" style="text-align:center">Schmerzen / Entzündungen</div>
+                <button type="button" class="notes-tag-button" data-tag="Nackensperre">Nackenblock</button>
+                <button type="button" class="notes-tag-button" data-tag="Atemsperre">Atems</button>
+                <button type="button" class="notes-tag-button" data-tag="Beinsperre">Bein</button>
+                <button type="button" class="notes-tag-button" data-tag="Nierenschmerz">Niere</button>
+                <button type="button" class="notes-tag-button" data-tag="Zeh links">Zeh links</button> 
+                <button type="button" class="notes-tag-button" data-tag="Zeh rechts">Zeh rechts</button> 
+                <button type="button" class="notes-tag-button" data-tag="Zähne">Zähne</button>
+                <button type="button" class="notes-tag-button" data-tag="Sehne Schulter links">Sehne Schulter links</button>
+                <button type="button" class="notes-tag-button" data-tag="Sehne Schulter rechts">Sehne rechts</button> 
+
+                <div class="tag-category" style="text-align:center">Immunsystem / Psoriasis</div>
+                <button type="button" class="notes-tag-button" data-tag="Erreger">Erreger</button>
+                <button type="button" class="notes-tag-button" data-tag="Allergie">Allergie</button>
+                <button type="button" class="notes-tag-button" data-tag="Erkältung">Infekt</button>
+                <button type="button" class="notes-tag-button" data-tag="Fieber">Fieber</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Arme">Creme Arme</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Füße">Füße</button>
+                <button type="button" class="notes-tag-button" data-tag="Creme Hüfte">Hüfte</button>
+                <button type="button" class="notes-tag-button" data-tag="Halsschmerz">Hals</button>
+                <button type="button" class="notes-tag-button" data-tag="Husten">Husten</button>
+                <button type="button" class="notes-tag-button" data-tag="Haut geschlossen">Haut geschlossen</button>
+                <button type="button" class="notes-tag-button" data-tag="Haut offen">offen</button>
+
+                <div class="tag-category" style="text-align:center">Supplements / GD / Schlaf</div>
+                <button type="button" class="notes-tag-button" data-tag="Gläschen">Gläschen</button>
+                <button type="button" class="notes-tag-button" data-tag="Vitamin D3">Vitamin D3</button>
+                <button type="button" class="notes-tag-button" data-tag="Omega3">Omega3</button>
+                <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
+                <button type="button" class="notes-tag-button" data-tag="Schlaf schlecht">Schlaf schlecht</button>
+
+                <div class="tag-category" style="text-align:center">Biologika / JAK</div>
+                <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button>
+                <button type="button" class="notes-tag-button" data-tag="Brainfog / Kopfweh">Brainfog/Kopfweh</button> 
+                <button type="button" class="notes-tag-button" data-tag="Rötung Spritze / Schmerzen">Rötung</button> 
+                <button type="button" class="notes-tag-button" data-tag="Wirkung schwach">Wirkung: schwach</button> 
+                <button type="button" class="notes-tag-button" data-tag="Wirkung mittel">mittel</button> 
+                <button type="button" class="notes-tag-button" data-tag="Wirkung stark">stark</button> 
+                <button type="button" class="notes-tag-button" data-tag="Spritze Bauch links">Spritze Bauch links</button>
+                <button type="button" class="notes-tag-button" data-tag="Spritze Bauch rechts">Spritze Bauch rechts</button>
+                <button type="button" class="notes-tag-button" data-tag="Spritze Femur links">Spritze Femur links</button>
+                <button type="button" class="notes-tag-button" data-tag="Spritze Femur rechts">Spritze Femur rechts</button>
+                
+                <div class="tag-category" style="text-align:center">Anmerkungen</div> 
+            </div>
+            <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
+        </div>
+
+        <div class="category-item">
+            <label>Historie & Statistik 📊</label>
+            <div class="history-controls">
+                <div class="history-search-group">
+                    <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
+                    <button class="action-button btn-search" id="searchBtn">Laden</button>
+                </div>
+                <!-- NEUER BUTTON HINZUGEFÜGT -->
+                <button class="action-button btn-stats" id="painMapBtn">Schmerzkarte bearbeiten</button>
+                <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
+                <button class="action-button btn-stats" onclick="exportDailyEntries()">Auswertung Google Colab (.py)</button>
+            </div>
+        </div>
+
+        <button class="submit-button" id="submitBtn">Speichern</button>
+    </div>
 
     <!-- Popup für Detailansicht -->
     <div class="overlay" id="popupOverlay">
@@ -1142,10 +1055,13 @@
         </div>
     </div>
 
+    <!-- --- NEU: POPUP FÜR SCHMERZKARTE --- -->
     <div class="overlay" id="painMapOverlay">
         <div class="popup" id="painMapPopup">
             <span class="close-btn" id="closePainMapBtn">&times;</span>
+            <h2>Schmerzkarte</h2>
             
+            <!-- NEUER NAVIGATIONS-HEADER FÜR DIE SCHMERZKARTE -->
             <div class="popup-header-nav">
                 <span class="nav-arrow" id="painMapPrevDate">&#9664;</span>
                 <h2 id="painMapTitle">Schmerzkarte bearbeiten</h2>
@@ -1153,6 +1069,7 @@
             </div>
 
             <div class="painmap-main-container">
+
                 <div class="painmap-controls">
                     <p style="color: #ccc; font-size: 0.9em; text-align: center; margin: 0;">Ansicht</p>
                     <button class="control-btn" id="painMapViewFront">Vorderseite</button>
@@ -1177,6 +1094,7 @@
             </div>
         </div>
     </div>
+    <!-- --- ENDE NEUES POPUP --- -->
 
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -1204,10 +1122,13 @@
     
         let currentEntryId = null;
 
+        // --- NEU: VARIABLEN FÜR SCHMERZKARTE ---
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
-        let painMapDateHistory = [];
-        let currentPainMapDate = null;
+
+        // --- NEU: VARIABLEN FÜR SCHMERZKARTEN-HISTORIE ---
+        let painMapDateHistory = []; // Speichert nur die Daten von Einträgen mit einer existierenden Schmerzkarte
+        let currentPainMapDate = null; // Das Datum der aktuell im Popup gezeigten Karte
 
         let currentPainMapView = 'front';
         let currentPainMapSize = 'medium';
@@ -1217,44 +1138,26 @@
             large: { radius: 15, color: 'rgba(255, 0, 0, 0.7)' }
         };
         const frontImage = new Image();
-        frontImage.src = 'body_front.png';
+        frontImage.src = 'body_front.png'; // Pfad zu deinem Bild
         const backImage = new Image();
-        backImage.src = 'body_back.png';
-
-        // --- NEUE FUNKTION FÜR DAS DESKTOP LAYOUT ---
-        function setupLayoutForDesktop() {
-            // Nur ausführen, wenn wir auf einem Desktop-Bildschirm sind
-            if (window.innerWidth < 1200) return;
-
-            // Die Elemente, die verschoben werden sollen
-            const painMapPopup = document.getElementById('painMapPopup');
-            const historyItem = document.getElementById('history-item');
-
-            // Die neuen Container in den Seitenleisten
-            const leftCol = document.querySelector('.left-column');
-            const rightCol = document.querySelector('.right-column');
-
-            if (painMapPopup && leftCol && !leftCol.contains(painMapPopup)) {
-                // Schmerzkarte in die linke Spalte verschieben
-                leftCol.appendChild(painMapPopup);
-            }
-
-            if (historyItem && rightCol && !rightCol.contains(historyItem)) {
-                // "Historie & Statistik" in die rechte Spalte verschieben
-                rightCol.appendChild(historyItem);
-            }
-        }
+        backImage.src = 'body_back.png';   // Pfad zu deinem Bild
+        // --- ENDE NEUE VARIABLEN ---
 
 
         function fillFormWithData(data) {
+            // 1. Zeiten setzen
             document.getElementById('bedTime').value = data.bedTime || '';
             document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
-            calculateSleepDuration();
+            calculateSleepDuration(); // Dauer neu berechnen lassen
 
+            // 2. Morgensteifigkeit und CRP
             document.getElementById('morningStiffness').value = (data.morningStiffness !== undefined && data.morningStiffness !== null) ? data.morningStiffness : '';
             document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
+
+            // 3. Textarea
             document.getElementById('notes').value = data.notes || '';
 
+            // 4. Reset aller Checkboxen, Rating-Boxen und Tag-Buttons
             document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
                 const parentLabel = cb.closest('.sport-checkbox');
@@ -1263,6 +1166,8 @@
             document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
 
+
+            // 5. Sport Checkboxen wiederherstellen
             if (data.selectedSports && Array.isArray(data.selectedSports)) {
                 data.selectedSports.forEach(sportName => {
                     const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
@@ -1273,6 +1178,7 @@
                 });
             }
 
+            // 6. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
             const setSingleSelect = (groupClass, dataValue, dataAttributeName) => {
                 if (dataValue) {
                     const cb = document.querySelector(`.${groupClass} input[data-${dataAttributeName}-name="${dataValue}"]`);
@@ -1286,6 +1192,7 @@
             setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
             setSingleSelect('milk-options-group', data.milkStatus, 'milk');
 
+            // 7. Schmerzmittel
             if (data.selectedPainmeds && Array.isArray(data.selectedPainmeds)) {
                 data.selectedPainmeds.forEach(medName => {
                     const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
@@ -1296,6 +1203,7 @@
                 });
             }
 
+            // 8. Ratings wiederherstellen
             const setRating = (containerId, value) => {
                 if (value !== undefined && value !== null) {
                     const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
@@ -1312,6 +1220,7 @@
 
             calculateOverallAverage();
 
+            // 9. Tags wiederherstellen
             if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
                 data.selectedNotesTags.forEach(tagName => {
                     const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
@@ -1319,12 +1228,17 @@
                 });
             }
             
+            // --- NEU: Schmerzkarte laden ---
             if (data.painMap) {
+                // Wichtig: Eine tiefe Kopie erstellen, um Referenzprobleme zu vermeiden
                 painMapData = JSON.parse(JSON.stringify(data.painMap));
             } else {
+                // Zurücksetzen, falls der geladene Eintrag keine Kartendaten hat
                 painMapData = { frontPoints: [], backPoints: [] };
             }
+            // --- ENDE ---
 
+            // 10. Button Text ändern
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.textContent = "Eintrag aktualisieren";
             submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
@@ -1544,7 +1458,9 @@
 
             document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
 
+            // --- NEU: Schmerzkarte zurücksetzen ---
             painMapData = { frontPoints: [], backPoints: [] };
+            // --- ENDE ---
 
             currentEntryId = null;
             currentEditingDate = new Date();
@@ -1883,19 +1799,23 @@
             }
         }
         
+        // --- GEÄNDERT: Funktion `openPainMapPopup` ---
         async function openPainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'flex';
             
+            // Lade die gefilterte Datumshistorie nur einmal, falls noch nicht geschehen
             if (painMapDateHistory.length === 0 && auth.currentUser) {
                 try {
                     const snapshot = await db.collection("dailyEntries")
                         .where("userId", "==", auth.currentUser.uid)
-                        .orderBy("date", "asc")
+                        .orderBy("date", "asc") // Wichtig: nach Datum sortieren
                         .get();
                     
+                    // Filtere die Einträge: Nur die behalten, die eine Schmerzkarte mit Punkten haben
                     painMapDateHistory = snapshot.docs
                         .filter(doc => {
                             const data = doc.data();
+                            // Eine Schmerzkarte "existiert", wenn das Objekt da ist und mindestens einen Punkt hat.
                             return data.painMap && (data.painMap.frontPoints?.length > 0 || data.painMap.backPoints?.length > 0);
                         })
                         .map(doc => doc.data().date.toDate());
@@ -1905,14 +1825,23 @@
                 }
             }
 
+            // Starte immer mit dem Datum aus dem Hauptformular
             currentPainMapDate = new Date(currentEditingDate);
             
+            // Lade die Schmerzkarte für diesen Tag (kann auch leer sein)
             await loadPainMapForDate(currentPainMapDate);
             
+            // Setze die Ansicht zurück und aktualisiere die Buttons
             currentPainMapView = 'front';
             updatePainMapControls();
         }
 
+
+
+
+
+        // --- NEU: Funktion zur Aktualisierung der Painmap-Anzeige (Titel & Pfeile) ---
+                // --- GEÄNDERT: Funktion zur Aktualisierung der Painmap-Anzeige (Titel & Pfeile) ---
         function updatePainMapDisplayForDate(dateToShow) {
             const titleEl = document.getElementById('painMapTitle');
             const prevArrow = document.getElementById('painMapPrevDate');
@@ -1923,13 +1852,22 @@
 
             titleEl.innerHTML = `Karte vom ${tempDate.toLocaleDateString('de-DE')}`;
             
+            // Finde den letzten existierenden Eintrag VOR dem aktuellen Datum
             const prevDateInHistory = painMapDateHistory.filter(d => d < tempDate).pop();
+
+            // Finde den ersten existierenden Eintrag NACH dem aktuellen Datum
             const nextDateInHistory = painMapDateHistory.find(d => d > tempDate);
 
+            // Deaktiviere den "Zurück"-Pfeil, wenn es keinen früheren Eintrag gibt
             prevArrow.classList.toggle('disabled', !prevDateInHistory);
+            
+            // Deaktiviere den "Weiter"-Pfeil, wenn es keinen späteren Eintrag gibt
             nextArrow.classList.toggle('disabled', !nextDateInHistory);
         }
 
+
+
+        // --- NEU: Funktion zum Laden einer spezifischen Schmerzkarte aus der DB ---
         async function loadPainMapForDate(dateToLoad) {
             if (!auth.currentUser) return;
 
@@ -1958,6 +1896,10 @@
             }
         }
 
+
+
+
+
         function closePainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'none';
         }
@@ -1968,17 +1910,22 @@
             const imageToDraw = currentPainMapView === 'front' ? frontImage : backImage;
             const pointsToDraw = currentPainMapView === 'front' ? painMapData.frontPoints : painMapData.backPoints;
 
+            // Canvas leeren
             painMapCtx.clearRect(0, 0, painMapCanvas.width, painMapCanvas.height);
 
+            // Hintergrundbild zeichnen (sobald es geladen ist)
             if (imageToDraw.complete) {
                 painMapCtx.drawImage(imageToDraw, 0, 0, painMapCanvas.width, painMapCanvas.height);
             } else {
+                // Falls das Bild noch lädt, erneut versuchen
                 imageToDraw.onload = () => redrawPainMapCanvas();
             }
 
+            // Punkte zeichnen
             if (pointsToDraw) {
                 pointsToDraw.forEach(p => {
                     const config = painPointConfig[p.size];
+                    // Relative Koordinaten in absolute Pixel umrechnen
                     const x = p.x * painMapCanvas.width;
                     const y = p.y * painMapCanvas.height;
 
@@ -1994,19 +1941,24 @@
         }
 
         function handlePainMapClick(event) {
+            // Position relativ zum Canvas berechnen
             const rect = painMapCanvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
+            // In relative Koordinaten (0-1) umrechnen
             const relativeX = x / painMapCanvas.clientWidth;
             const relativeY = y / painMapCanvas.clientHeight;
 
+            // Punkt zum richtigen Array hinzufügen
             const newPoint = { x: relativeX, y: relativeY, size: currentPainMapSize };
             if (currentPainMapView === 'front') {
                 painMapData.frontPoints.push(newPoint);
             } else {
                 painMapData.backPoints.push(newPoint);
             }
+
+            // Canvas neu zeichnen
             redrawPainMapCanvas();
         }
 
@@ -2020,17 +1972,18 @@
         }
 
         function updatePainMapControls() {
+            // Ansicht-Buttons aktualisieren
             document.getElementById('painMapViewFront').classList.toggle('selected', currentPainMapView === 'front');
             document.getElementById('painMapViewBack').classList.toggle('selected', currentPainMapView === 'back');
+            // Größe-Buttons aktualisieren
             document.getElementById('painMapSizeSmall').classList.toggle('selected', currentPainMapSize === 'small');
             document.getElementById('painMapSizeMedium').classList.toggle('selected', currentPainMapSize === 'medium');
             document.getElementById('painMapSizeLarge').classList.toggle('selected', currentPainMapSize === 'large');
         }
+        // --- ENDE NEUE FUNKTIONEN ---
+
 
         document.addEventListener('DOMContentLoaded', () => {
-            // --- NEU: Layout anpassen ---
-            setupLayoutForDesktop();
-
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
@@ -2176,6 +2129,7 @@
                     immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes, selectedNotesTags,
+                    // --- NEU: Schmerzkarte-Daten hinzufügen ---
                     painMap: painMapData
                 };
 
@@ -2202,14 +2156,18 @@
             document.getElementById('closeStatsBtn').addEventListener('click', closeStatsPopup);
             document.getElementById('statsOverlay').addEventListener('click', (event) => { if(event.target.id === 'statsOverlay') closeStatsPopup(); });
 
+            // --- NEU: EVENT HANDLER FÜR SCHMERZKARTE ---
             painMapCanvas = document.getElementById('painMapCanvas');
             painMapCtx = painMapCanvas.getContext('2d');
             
             document.getElementById('painMapBtn').addEventListener('click', openPainMapPopup);
 
+            // --- NEU: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
+            // --- GEÄNDERT: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
             document.getElementById('painMapPrevDate').addEventListener('click', () => {
                 if (document.getElementById('painMapPrevDate').classList.contains('disabled')) return;
                 
+                // Finde den letzten Eintrag in der Verlaufsliste, der vor dem aktuellen Datum liegt
                 const prevDate = painMapDateHistory.filter(d => d < currentPainMapDate).pop();
 
                 if (prevDate) {
@@ -2221,6 +2179,7 @@
             document.getElementById('painMapNextDate').addEventListener('click', () => {
                 if (document.getElementById('painMapNextDate').classList.contains('disabled')) return;
                 
+                // Finde den ersten Eintrag in der Verlaufsliste, der nach dem aktuellen Datum liegt
                 const nextDate = painMapDateHistory.find(d => d > currentPainMapDate);
 
                 if (nextDate) {
@@ -2228,6 +2187,9 @@
                     loadPainMapForDate(currentPainMapDate);
                 }
             });
+
+
+
 
             document.getElementById('closePainMapBtn').addEventListener('click', closePainMapPopup);
             document.getElementById('painMapOverlay').addEventListener('click', (event) => { if (event.target.id === 'painMapOverlay') closePainMapPopup(); });
@@ -2241,6 +2203,7 @@
             document.getElementById('painMapSizeLarge').addEventListener('click', () => { currentPainMapSize = 'large'; updatePainMapControls(); });
             document.getElementById('painMapUndo').addEventListener('click', undoLastPainPoint);
             document.getElementById('painMapSaveAndClose').addEventListener('click', closePainMapPopup);
+            // --- ENDE EVENT HANDLER ---
 
             const signInButton = document.getElementById('signInButton');
             const userInfoDiv = document.getElementById('userInfo'); 
