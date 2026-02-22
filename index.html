@@ -663,6 +663,43 @@
         }
         /* --- ENDE NEUES STYLING --- */
 
+        /* --- NEU: STYLING FÜR PAINMAP-NAVIGATION --- */
+        .popup-header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .nav-arrow {
+            font-size: 2.2em;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            padding: 0 15px;
+        }
+
+        .nav-arrow:hover {
+            color: #00f2fe;
+            transform: scale(1.1);
+        }
+        
+        .nav-arrow.disabled {
+            color: #444;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        #painMapTitle {
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+        }
+        /* --- ENDE --- */
+
+
 
     </style>
 </head>
@@ -1021,8 +1058,16 @@
     <div class="overlay" id="painMapOverlay">
         <div class="popup" id="painMapPopup">
             <span class="close-btn" id="closePainMapBtn">&times;</span>
-            <h2 id="painMapTitle">Schmerzkarte bearbeiten</h2>
+            
+            <!-- NEUER NAVIGATIONS-HEADER FÜR DIE SCHMERZKARTE -->
+            <div class="popup-header-nav">
+                <span class="nav-arrow" id="painMapPrevDate">&#9664;</span>
+                <h2 id="painMapTitle">Schmerzkarte bearbeiten</h2>
+                <span class="nav-arrow" id="painMapNextDate">&#9654;</span>
+            </div>
+
             <div class="painmap-main-container">
+
                 <div class="painmap-controls">
                     <p style="color: #ccc; font-size: 0.9em; text-align: center; margin: 0;">Ansicht</p>
                     <button class="control-btn" id="painMapViewFront">Vorderseite</button>
@@ -1078,6 +1123,11 @@
         // --- NEU: VARIABLEN FÜR SCHMERZKARTE ---
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
+
+        // --- NEU: VARIABLEN FÜR SCHMERZKARTEN-HISTORIE ---
+        let allEntryDates = []; // Wird mit allen Daten von Einträgen gefüllt
+        let currentPainMapDate = null; // Das Datum der aktuell im Popup gezeigten Karte
+
         let currentPainMapView = 'front';
         let currentPainMapSize = 'medium';
         const painPointConfig = {
@@ -1747,14 +1797,104 @@
             }
         }
         
-        // --- NEUE FUNKTIONEN FÜR DIE SCHMERZKARTE ---
-        function openPainMapPopup() {
+        // --- GEÄNDERT: Funktion `openPainMapPopup` ---
+        async function openPainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'flex';
-            // Setzt die korrekte Ansicht und Größe beim Öffnen
+            
+            // Lade die Datumshistorie nur einmal, falls noch nicht geschehen
+            if (allEntryDates.length === 0 && auth.currentUser) {
+                try {
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", auth.currentUser.uid)
+                        .orderBy("date", "asc") // Wichtig: nach Datum sortieren
+                        .get();
+                    
+                    allEntryDates = snapshot.docs.map(doc => doc.data().date.toDate());
+                } catch (error) {
+                    console.error("Fehler beim Laden der Datumshistorie:", error);
+                }
+            }
+
+            // Starte mit dem Datum aus dem Hauptformular (wichtig: Kopie erstellen)
+            currentPainMapDate = new Date(currentEditingDate);
+            
+            // Die UI (Titel, Pfeile) für das aktuelle Datum aktualisieren.
+            updatePainMapDisplayForDate(currentPainMapDate);
+            
+            // Die Ansicht auf "Vorderseite" zurücksetzen und Canvas neu zeichnen.
+            currentPainMapView = 'front';
             updatePainMapControls();
-            // Stellt sicher, dass das Canvas neu gezeichnet wird, falls sich die Daten geändert haben
             redrawPainMapCanvas(); 
         }
+
+
+
+        // --- NEU: Funktion zur Aktualisierung der Painmap-Anzeige (Titel & Pfeile) ---
+        function updatePainMapDisplayForDate(dateToShow) {
+            const titleEl = document.getElementById('painMapTitle');
+            const prevArrow = document.getElementById('painMapPrevDate');
+            const nextArrow = document.getElementById('painMapNextDate');
+
+            const tempDate = new Date(dateToShow);
+            tempDate.setHours(0, 0, 0, 0);
+
+            titleEl.innerHTML = `Karte vom ${tempDate.toLocaleDateString('de-DE')}`;
+            
+            const currentIndex = allEntryDates.findIndex(d => {
+                const dTemp = new Date(d);
+                dTemp.setHours(0, 0, 0, 0);
+                return dTemp.getTime() === tempDate.getTime();
+            });
+
+            prevArrow.style.visibility = 'visible';
+            nextArrow.style.visibility = 'visible';
+            
+            // Linker Pfeil: deaktivieren, wenn am Anfang
+            if (currentIndex <= 0) {
+                prevArrow.classList.add('disabled');
+            } else {
+                prevArrow.classList.remove('disabled');
+            }
+            // Rechter Pfeil: deaktivieren, wenn am Ende
+            if (currentIndex >= allEntryDates.length - 1) {
+                nextArrow.classList.add('disabled');
+            } else {
+                nextArrow.classList.remove('disabled');
+            }
+        }
+
+        // --- NEU: Funktion zum Laden einer spezifischen Schmerzkarte aus der DB ---
+        async function loadPainMapForDate(dateToLoad) {
+            if (!auth.currentUser) return;
+
+            const startOfDay = new Date(dateToLoad.getFullYear(), dateToLoad.getMonth(), dateToLoad.getDate(), 0, 0, 0, 0);
+            const endOfDay = new Date(dateToLoad.getFullYear(), dateToLoad.getMonth(), dateToLoad.getDate(), 23, 59, 59, 999);
+
+            try {
+                const snapshot = await db.collection("dailyEntries")
+                    .where("userId", "==", auth.currentUser.uid)
+                    .where("date", ">=", startOfDay)
+                    .where("date", "<=", endOfDay)
+                    .limit(1)
+                    .get();
+
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    painMapData = data.painMap ? JSON.parse(JSON.stringify(data.painMap)) : { frontPoints: [], backPoints: [] };
+                } else {
+                    painMapData = { frontPoints: [], backPoints: [] };
+                }
+                updatePainMapDisplayForDate(dateToLoad);
+                redrawPainMapCanvas();
+
+            } catch (error) {
+                console.error(`Fehler beim Laden der Schmerzkarte für ${dateToLoad.toLocaleDateString()}:`, error);
+            }
+        }
+
+
+
+
 
         function closePainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'none';
@@ -2017,6 +2157,39 @@
             painMapCtx = painMapCanvas.getContext('2d');
             
             document.getElementById('painMapBtn').addEventListener('click', openPainMapPopup);
+
+                        // --- NEU: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
+            document.getElementById('painMapPrevDate').addEventListener('click', () => {
+                const prevArrow = document.getElementById('painMapPrevDate');
+                if (prevArrow.classList.contains('disabled')) return;
+
+                const tempDate = new Date(currentPainMapDate);
+                tempDate.setHours(0,0,0,0);
+                const currentIndex = allEntryDates.findIndex(d => new Date(d).setHours(0,0,0,0) === tempDate.getTime());
+                
+                if (currentIndex > 0) {
+                    currentPainMapDate = new Date(allEntryDates[currentIndex - 1]);
+                    loadPainMapForDate(currentPainMapDate);
+                }
+            });
+
+            document.getElementById('painMapNextDate').addEventListener('click', () => {
+                const nextArrow = document.getElementById('painMapNextDate');
+                if (nextArrow.classList.contains('disabled')) return;
+                
+                const tempDate = new Date(currentPainMapDate);
+                tempDate.setHours(0,0,0,0);
+                const currentIndex = allEntryDates.findIndex(d => new Date(d).setHours(0,0,0,0) === tempDate.getTime());
+
+                if (currentIndex !== -1 && currentIndex < allEntryDates.length - 1) {
+                    currentPainMapDate = new Date(allEntryDates[currentIndex + 1]);
+                    loadPainMapForDate(currentPainMapDate);
+                }
+            });
+
+
+
+
             document.getElementById('closePainMapBtn').addEventListener('click', closePainMapPopup);
             document.getElementById('painMapOverlay').addEventListener('click', (event) => { if (event.target.id === 'painMapOverlay') closePainMapPopup(); });
 
