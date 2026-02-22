@@ -597,6 +597,73 @@
             background-position: right .7em top 50%;
             background-size: .65em auto;
         }
+
+        /* --- NEU: STYLING FÜR SCHMERZKARTE --- */
+        #painMapPopup {
+            width: 96vw;
+            height: 98vh;
+            max-width: none;
+            max-height: none;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .painmap-main-container {
+            flex-grow: 1;
+            display: flex;
+            gap: 15px;
+            min-height: 0; /* Wichtig für Flexbox-Verhalten */
+        }
+
+        .painmap-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .control-btn:hover {
+            background-color: #3a3a5a;
+        }
+
+        .control-btn.selected {
+            background-color: #00f2fe;
+            border-color: #4facfe;
+            color: #0a0a1a;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+        }
+
+        .painmap-canvas-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden; /* Stellt sicher, dass das Canvas nicht überläuft */
+        }
+        
+        #painMapCanvas {
+            cursor: crosshair;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Sorgt dafür, dass das Seitenverhältnis beibehalten wird */
+        }
+        /* --- ENDE NEUES STYLING --- */
+
+
     </style>
 </head>
 <body>
@@ -857,7 +924,6 @@
                 <button type="button" class="notes-tag-button" data-tag="Spritze Femur links">Spritze Femur links</button>
                 <button type="button" class="notes-tag-button" data-tag="Spritze Femur rechts">Spritze Femur rechts</button>
                 
-
                 <div class="tag-category" style="text-align:center">Anmerkungen</div> 
             </div>
             <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
@@ -870,6 +936,8 @@
                     <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                     <button class="action-button btn-search" id="searchBtn">Laden</button>
                 </div>
+                <!-- NEUER BUTTON HINZUGEFÜGT -->
+                <button class="action-button btn-stats" id="painMapBtn">Schmerzkarte bearbeiten</button>
                 <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
                 <button class="action-button btn-stats" onclick="exportDailyEntries()">Auswertung Google Colab (.py)</button>
             </div>
@@ -878,6 +946,7 @@
         <button class="submit-button" id="submitBtn">Speichern</button>
     </div>
 
+    <!-- Popup für Detailansicht -->
     <div class="overlay" id="popupOverlay">
         <div class="popup" id="dataPopup">
             <span class="close-btn" id="closePopupBtn">&times;</span>
@@ -887,6 +956,7 @@
         </div>
     </div>
 
+    <!-- Popup für Statistik -->
     <div class="overlay" id="statsOverlay">
         <div class="popup" id="statsPopup" style="max-width: 1800px;">
             <span class="close-btn" id="closeStatsBtn">&times;</span>
@@ -919,10 +989,8 @@
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
                         <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
                         <option value="immunesystemRating">Immunsystem</option>
-                        <option value="morningStiffness">Morgensteifigkeit (Min)</option> <!-- Klarere Bezeichnung -->
-                        <option value="crpValue">CRP-Wert (mg/L)</option> <!-- Geändert zu 'crpValue' -->
-
-                        <!-- NEUE OPTIONEN -->
+                        <option value="morningStiffness">Morgensteifigkeit (Min)</option>
+                        <option value="crpValue">CRP-Wert (mg/L)</option>
                         <option value="sport">Sport</option>
                         <option value="painmeds">Schmerzmitteleinnahme</option>
                         <option value="stretching">Dehnung/Physio</option>
@@ -949,6 +1017,39 @@
         </div>
     </div>
 
+    <!-- --- NEU: POPUP FÜR SCHMERZKARTE --- -->
+    <div class="overlay" id="painMapOverlay">
+        <div class="popup" id="painMapPopup">
+            <span class="close-btn" id="closePainMapBtn">&times;</span>
+            <h2 id="painMapTitle">Schmerzkarte bearbeiten</h2>
+            <div class="painmap-main-container">
+                <div class="painmap-controls">
+                    <p style="color: #ccc; font-size: 0.9em; text-align: center; margin: 0;">Ansicht</p>
+                    <button class="control-btn" id="painMapViewFront">Vorderseite</button>
+                    <button class="control-btn" id="painMapViewBack">Rückseite</button>
+                    
+                    <hr style="width:100%; border-color: rgba(255,255,255,0.1);">
+
+                    <p style="color: #ccc; font-size: 0.9em; text-align: center; margin: 0;">Größe</p>
+                    <button class="control-btn" id="painMapSizeSmall">Klein</button>
+                    <button class="control-btn" id="painMapSizeMedium">Mittel</button>
+                    <button class="control-btn" id="painMapSizeLarge">Groß</button>
+
+                    <hr style="width:100%; border-color: rgba(255,255,255,0.1);">
+                    
+                    <p style="color: #ccc; font-size: 0.9em; text-align: center; margin: 0;">Aktion</p>
+                    <button class="control-btn" id="painMapUndo">Rückgängig</button>
+                    <button class="control-btn" id="painMapSaveAndClose" style="background-color: #007bff;">Übernehmen</button>
+                </div>
+                <div class="painmap-canvas-wrapper">
+                    <canvas id="painMapCanvas" width="370" height="810"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- --- ENDE NEUES POPUP --- -->
+
+
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -968,11 +1069,28 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
         
-        let statsChartInstance = null; // Globale Variable für das Chart
-        let tagChartInstance = null; // Neue globale Variable
-        let currentEditingDate = new Date(); // Globale Variable für das aktuell bearbeitete Datum
+        let statsChartInstance = null;
+        let tagChartInstance = null;
+        let currentEditingDate = new Date();
     
-        let currentEntryId = null; // NEU: Variable zum Speichern der ID des aktuell bearbeiteten Eintrags
+        let currentEntryId = null;
+
+        // --- NEU: VARIABLEN FÜR SCHMERZKARTE ---
+        let painMapCanvas, painMapCtx;
+        let painMapData = { frontPoints: [], backPoints: [] };
+        let currentPainMapView = 'front';
+        let currentPainMapSize = 'medium';
+        const painPointConfig = {
+            small: { radius: 7, color: 'rgba(255, 255, 0, 0.7)' },
+            medium: { radius: 12, color: 'rgba(255, 165, 0, 0.7)' },
+            large: { radius: 20, color: 'rgba(255, 0, 0, 0.7)' }
+        };
+        const frontImage = new Image();
+        frontImage.src = 'body_front.png'; // Pfad zu deinem Bild
+        const backImage = new Image();
+        backImage.src = 'body_back.png';   // Pfad zu deinem Bild
+        // --- ENDE NEUE VARIABLEN ---
+
 
         function fillFormWithData(data) {
             // 1. Zeiten setzen
@@ -980,21 +1098,26 @@
             document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
             calculateSleepDuration(); // Dauer neu berechnen lassen
 
-            // 2. Textarea
+            // 2. Morgensteifigkeit und CRP
+            document.getElementById('morningStiffness').value = (data.morningStiffness !== undefined && data.morningStiffness !== null) ? data.morningStiffness : '';
+            document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
+
+            // 3. Textarea
             document.getElementById('notes').value = data.notes || '';
 
-            // 3. Reset aller Checkboxen und Rating-Boxen vor dem Setzen
-            document.querySelectorAll('.sport-checkbox input').forEach(cb => {
+            // 4. Reset aller Checkboxen, Rating-Boxen und Tag-Buttons
+            document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
-                cb.closest('.sport-checkbox').classList.remove('selected');
+                const parentLabel = cb.closest('.sport-checkbox');
+                if (parentLabel) parentLabel.classList.remove('selected');
             });
             document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
 
-            // 4. Sport Checkboxen wiederherstellen
-            if (data.selectedSports) {
+
+            // 5. Sport Checkboxen wiederherstellen
+            if (data.selectedSports && Array.isArray(data.selectedSports)) {
                 data.selectedSports.forEach(sportName => {
-                    // Finde die Checkbox anhand des data-sport-name
                     const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
                     if (cb) {
                         cb.checked = true;
@@ -1003,10 +1126,10 @@
                 });
             }
 
-            // 5. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
-            const setSingleSelect = (groupClass, dataName, attrName) => {
-                if (dataName) {
-                    const cb = document.querySelector(`.${groupClass} input[data-${attrName}-name="${dataName}"]`);
+            // 6. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
+            const setSingleSelect = (groupClass, dataValue, dataAttributeName) => {
+                if (dataValue) {
+                    const cb = document.querySelector(`.${groupClass} input[data-${dataAttributeName}-name="${dataValue}"]`);
                     if (cb) {
                         cb.checked = true;
                         cb.closest('.sport-checkbox').classList.add('selected');
@@ -1017,8 +1140,8 @@
             setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
             setSingleSelect('milk-options-group', data.milkStatus, 'milk');
 
-            // 6. Schmerzmittel
-            if (data.selectedPainmeds) {
+            // 7. Schmerzmittel
+            if (data.selectedPainmeds && Array.isArray(data.selectedPainmeds)) {
                 data.selectedPainmeds.forEach(medName => {
                     const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
                     if (cb) {
@@ -1028,9 +1151,9 @@
                 });
             }
 
-            // 7. Ratings wiederherstellen
+            // 8. Ratings wiederherstellen
             const setRating = (containerId, value) => {
-                if (value) {
+                if (value !== undefined && value !== null) {
                     const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
                     if (box) box.classList.add('selected');
                 }
@@ -1041,22 +1164,32 @@
             setRating('upper-body-pain-rating', data.upperBodyPainRating);
             setRating('lower-body-pain-rating', data.lowerBodyPainRating);
             setRating('movement-flow-pain-rating', data.movementFlowPainRating);
-            
-            // Gesamtwert neu berechnen
+            setRating('immunesystem', data.immunesystemRating);
+
             calculateOverallAverage();
 
-            // 8. Tags wiederherstellen
-            if (data.selectedNotesTags) {
+            // 9. Tags wiederherstellen
+            if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
                 data.selectedNotesTags.forEach(tagName => {
                     const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
                     if (btn) btn.classList.add('selected');
                 });
             }
+            
+            // --- NEU: Schmerzkarte laden ---
+            if (data.painMap) {
+                // Wichtig: Eine tiefe Kopie erstellen, um Referenzprobleme zu vermeiden
+                painMapData = JSON.parse(JSON.stringify(data.painMap));
+            } else {
+                // Zurücksetzen, falls der geladene Eintrag keine Kartendaten hat
+                painMapData = { frontPoints: [], backPoints: [] };
+            }
+            // --- ENDE ---
 
-            // Button Text ändern, damit man sieht, dass man im "Edit Modus" ist
+            // 10. Button Text ändern
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.textContent = "Eintrag aktualisieren";
-            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
+            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
         }
 
         function generateRatingBoxes(containerId) {
@@ -1085,10 +1218,7 @@
             entries.forEach(entry => {
                 if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
                     entry.selectedNotesTags.forEach(tag => {
-                        // Zählen
                         tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-                        
-                        // Letztes Mal finden
                         const entryDate = entry.date;
                         if (!tagLastSeen[tag] || entryDate > tagLastSeen[tag]) {
                             tagLastSeen[tag] = entryDate;
@@ -1099,8 +1229,6 @@
 
             const statsList = document.getElementById('tagStatsList');
             statsList.innerHTML = '';
-
-            // Tags nach Häufigkeit sortieren
             const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
 
             if (sortedTags.length === 0) {
@@ -1189,9 +1317,7 @@
             const popupContent = document.getElementById('popupContent');
             const popupTitle = document.getElementById('popupTitle');
 
-            // Titel anpassen, wenn es ein historischer Eintrag ist
             if(isHistory && data.date) {
-                // Firestore Timestamp zu Datum konvertieren
                 let dateObj = data.date.toDate ? data.date.toDate() : new Date(data.date);
                 popupTitle.innerText = `Eintrag vom ${dateObj.toLocaleDateString('de-DE')}`;
             } else {
@@ -1231,7 +1357,6 @@
             const crpText = data.crpValue ? data.crpValue + ' mg/L' : 'Nicht angegeben';
             popupContentHtml += `<p><strong>CRP-Wert:</strong> ${crpText}</p>`;
             
-
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
 
@@ -1241,281 +1366,57 @@
             popupOverlay.style.display = 'flex';
         }
 
-        // Funktion, um Daten aus der DB wieder in das HTML-Formular zu laden
-        // function populateFormWithData(data) {
-        //     // 1. Einfache Text/Time/Number Felder
-        //     if(data.wakeUpTime) document.getElementById('wakeUpTime').value = data.wakeUpTime;
-        //     if(data.bedTime) document.getElementById('bedTime').value = data.bedTime;
-        //     calculateSleepDuration(); // Dauer neu berechnen
-
-        //     if (data.morningStiffness !== undefined && data.morningStiffness !== null) {
-        //             document.getElementById('morningStiffness').value = data.morningStiffness;
-        //         } else {
-        //             // Falls kein Wert in der DB ist, wieder auf "Bitte wählen" zurücksetzen
-        //             document.getElementById('morningStiffness').value = ""; 
-        //         }
-
-        //     if(data.crpValue) document.getElementById('crpInput').value = data.crpValue;
-        //     if(data.notes) document.getElementById('notes').value = data.notes;
-
-        //     // 2. Ratings (Die bunten Boxen)
-        //     const ratingMap = {
-        //         'moodRating': 'mood-rating',
-        //         'neckPainRating': 'neck-pain-rating',
-        //         'shoulderPainRating': 'shoulder-pain-rating',
-        //         'upperBodyPainRating': 'upper-body-pain-rating',
-        //         'lowerBodyPainRating': 'lower-body-pain-rating',
-        //         'movementFlowPainRating': 'movement-flow-pain-rating',
-        //         'immunesystemRating': 'immunesystem',
-        //         'morningStiffnessValue': 'morningStiffness',
-        //         'crpValue': 'crpInput'
-        //     };
-
-        //     for (const [dbField, htmlId] of Object.entries(ratingMap)) {
-        //         if (data[dbField]) {
-        //             // Erst alle 'selected' entfernen
-        //             const container = document.getElementById(htmlId);
-        //             Array.from(container.children).forEach(b => b.classList.remove('selected'));
-        //             // Dann den richtigen auswählen
-        //             const boxToSelect = container.querySelector(`.rating-box[data-value="${data[dbField]}"]`);
-        //             if (boxToSelect) boxToSelect.classList.add('selected');
-        //         }
-        //     }
-        //     calculateOverallAverage(); // Durchschnitt neu berechnen
-
-        //     // 3. Checkboxen (Sport, Meds, etc.) zurücksetzen und neu setzen
-        //     // Das ist etwas komplexer, da du Arrays speicherst.
-        //     // Hier eine vereinfachte Logik für deine Struktur:
-            
-        //     // Hilfsfunktion zum Zurücksetzen einer Gruppe
-        //     const resetGroup = (selector) => {
-        //         document.querySelectorAll(selector).forEach(cb => {
-        //             cb.checked = false; 
-        //             cb.closest('.sport-checkbox').classList.remove('selected');
-        //         });
-        //     };
-
-        //     // Sport laden
-        //     if (data.selectedSports) {
-        //         resetGroup('.sport-options-group input');
-        //         data.selectedSports.forEach(sportName => {
-        //             const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
-        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //         });
-        //     }
-
-        //     // Schmerzmittel laden
-        //     if (data.selectedPainmeds) {
-        //         resetGroup('.painmed-options-group input');
-        //         data.selectedPainmeds.forEach(medName => {
-        //             const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
-        //             if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //         });
-        //     }
-
-        //     // Tags laden
-        //     if (data.selectedNotesTags) {
-        //         document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
-        //         data.selectedNotesTags.forEach(tag => {
-        //             const btn = document.querySelector(`.notes-tag-button[data-tag="${tag}"]`);
-        //             if(btn) btn.classList.add('selected');
-        //         });
-        //     }
-
-        //     // Single Choice Gruppen (Dehnen, Gluten, Milch)
-        //     const setSingleChoice = (groupClass, dbValue, dataAttribute) => {
-        //         if (!dbValue) return;
-        //         resetGroup(`.${groupClass} input`);
-        //         const cb = document.querySelector(`.${groupClass} input[${dataAttribute}="${dbValue}"]`);
-        //         if(cb) { cb.checked = true; cb.closest('.sport-checkbox').classList.add('selected'); }
-        //     };
-
-        //     setSingleChoice('stretching-options-group', data.stretchingStatus, 'data-stretching-name');
-        //     setSingleChoice('gluten-options-group', data.glutenStatus, 'data-gluten-name');
-        //     setSingleChoice('milk-options-group', data.milkStatus, 'data-milk-name');
-        // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        function fillFormWithData(data) {
-            // 1. Zeiten setzen
-            document.getElementById('bedTime').value = data.bedTime || '';
-            document.getElementById('wakeUpTime').value = data.wakeUpTime || '';
-            calculateSleepDuration(); // Dauer neu berechnen lassen
-
-            // 2. Morgensteifigkeit und CRP
-            document.getElementById('morningStiffness').value = (data.morningStiffness !== undefined && data.morningStiffness !== null) ? data.morningStiffness : '';
-            document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
-
-            // 3. Textarea
-            document.getElementById('notes').value = data.notes || '';
-
-            // 4. Reset aller Checkboxen und Rating-Boxen vor dem Setzen
-            // Reset aller Sport/Dehnen/Gluten/Milch/Schmerzmittel Checkboxen
-            document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-                const parentLabel = cb.closest('.sport-checkbox');
-                if (parentLabel) parentLabel.classList.remove('selected');
-            });
-            // Reset aller Rating-Boxen
-            document.querySelectorAll('.rating-box').forEach(b => b.classList.remove('selected'));
-            // Reset aller Tag-Buttons
-            document.querySelectorAll('.notes-tag-button').forEach(b => b.classList.remove('selected'));
-
-
-            // 5. Sport Checkboxen wiederherstellen
-            if (data.selectedSports && Array.isArray(data.selectedSports)) {
-                data.selectedSports.forEach(sportName => {
-                    // Finde die Checkbox anhand des data-sport-name
-                    const cb = document.querySelector(`.sport-options-group input[data-sport-name="${sportName}"]`);
-                    if (cb) {
-                        cb.checked = true;
-                        cb.closest('.sport-checkbox').classList.add('selected');
-                    }
-                });
-            }
-
-            // 6. Dehnen, Gluten, Milch (Radio-Logic simuliert durch Checkboxen)
-            const setSingleSelect = (groupClass, dataValue, dataAttributeName) => {
-                if (dataValue) {
-                    const cb = document.querySelector(`.${groupClass} input[data-${dataAttributeName}-name="${dataValue}"]`);
-                    if (cb) {
-                        cb.checked = true;
-                        cb.closest('.sport-checkbox').classList.add('selected');
-                    }
-                }
-            };
-            setSingleSelect('stretching-options-group', data.stretchingStatus, 'stretching');
-            setSingleSelect('gluten-options-group', data.glutenStatus, 'gluten');
-            setSingleSelect('milk-options-group', data.milkStatus, 'milk');
-
-            // 7. Schmerzmittel
-            if (data.selectedPainmeds && Array.isArray(data.selectedPainmeds)) {
-                data.selectedPainmeds.forEach(medName => {
-                    const cb = document.querySelector(`.painmed-options-group input[data-painmed-name="${medName}"]`);
-                    if (cb) {
-                        cb.checked = true;
-                        cb.closest('.sport-checkbox').classList.add('selected');
-                    }
-                });
-            }
-
-            // 8. Ratings wiederherstellen
-            const setRating = (containerId, value) => {
-                if (value !== undefined && value !== null) { // Prüfe auf vorhandenen Wert
-                    const box = document.querySelector(`#${containerId} .rating-box[data-value="${value}"]`);
-                    if (box) box.classList.add('selected');
-                }
-            };
-            setRating('mood-rating', data.moodRating);
-            setRating('neck-pain-rating', data.neckPainRating);
-            setRating('shoulder-pain-rating', data.shoulderPainRating);
-            setRating('upper-body-pain-rating', data.upperBodyPainRating);
-            setRating('lower-body-pain-rating', data.lowerBodyPainRating);
-            setRating('movement-flow-pain-rating', data.movementFlowPainRating);
-            setRating('immunesystem', data.immunesystemRating); // Korrektur hier
-
-            // Gesamtwert neu berechnen
-            calculateOverallAverage();
-
-            // 9. Tags wiederherstellen
-            if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
-                data.selectedNotesTags.forEach(tagName => {
-                    const btn = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
-                    if (btn) btn.classList.add('selected');
-                });
-            }
-
-            // 10. Button Text ändern, damit man sieht, dass man im "Edit Modus" ist
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.textContent = "Eintrag aktualisieren";
-            submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)"; // Visuelles Feedback
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
         }
 
-        // NEU: Funktion zum Aktualisieren des Datums im Schlafzeiten-Label
         function updateSleepTimeLabel() {
             const sleepLabel = document.getElementById('sleepTimeLabel');
-            if (!sleepLabel) return; // Sicherheitsabfrage
+            if (!sleepLabel) return;
 
-            // Das Datum aus der globalen Variable holen und im deutschen Format (TT.MM.JJJJ) formatieren
             const formattedDate = currentEditingDate.toLocaleDateString('de-DE', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
 
-            // Den Text des Labels aktualisieren
             sleepLabel.innerHTML = `Schlafzeiten 😴 <span style="font-weight: 600; font-size: 1em; color: #ffffff;">${formattedDate}</span>`;
         }
 
-        // NEU: Funktionen für Statistik und Suche
         function closeStatsPopup() {
             document.getElementById('statsOverlay').style.display = 'none';
         }
 
-        // NEU HINZUGEFÜGT: Funktion zum Zurücksetzen des gesamten Formulars
         function resetForm() {
-            // Textfelder und Dropdowns zurücksetzen
             document.getElementById('bedTime').value = '';
             document.getElementById('wakeUpTime').value = '';
             document.getElementById('sleepDurationDisplay').textContent = '';
-            document.getElementById('morningStiffness').value = ''; // Setzt den Placeholder
+            document.getElementById('morningStiffness').value = '';
             document.getElementById('crpInput').value = '';
             document.getElementById('notes').value = '';
 
-            // Alle Checkboxen zurücksetzen (Sport, Dehnen, Gluten, Milch, Schmerzmittel)
             document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
                 const parentLabel = cb.closest('.sport-checkbox');
                 if (parentLabel) parentLabel.classList.remove('selected');
             });
 
-            // Alle Rating-Boxen zurücksetzen
             document.querySelectorAll('.rating-box').forEach(box => box.classList.remove('selected'));
-            document.getElementById('overallAverageDisplay').textContent = '--'; // Durchschnittsanzeige zurücksetzen
+            document.getElementById('overallAverageDisplay').textContent = '--';
 
-            // Alle Notes-Tag-Buttons zurücksetzen
             document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
 
-            // Aktuellen Bearbeitungsmodus zurücksetzen
+            // --- NEU: Schmerzkarte zurücksetzen ---
+            painMapData = { frontPoints: [], backPoints: [] };
+            // --- ENDE ---
+
             currentEntryId = null;
-            currentEditingDate = new Date(); // Setzt das aktuelle Bearbeitungsdatum auf heute
-            updateSleepTimeLabel(); // Aktualisiert das Datums-Label oben
+            currentEditingDate = new Date();
+            updateSleepTimeLabel();
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.textContent = 'Speichern';
-            submitBtn.style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)"; // Zurück zur Originalfarbe
+            submitBtn.style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)";
         }
 
         async function loadEntryByDate() {
@@ -1525,20 +1426,17 @@
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
 
-            // Reset der ID und des Formulars bei jeder neuen Suche
-            currentEntryId = null; // WICHTIG: Reset vor neuer Suche
-            resetForm(); // Formular leeren
+            currentEntryId = null;
+            resetForm();
 
             const parts = dateInput.split('-');
             const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1; // Monate sind 0-indiziert
+            const month = parseInt(parts[1]) - 1;
             const day = parseInt(parts[2]);
 
-            // Das currentEditingDate auf das ausgewählte Datum setzen
             currentEditingDate = new Date(year, month, day, 12, 0, 0, 0); 
-            updateSleepTimeLabel(); // Label anpassen
+            updateSleepTimeLabel();
 
-            // Zeitfenster für die Suche definieren (Start/Ende des ausgewählten Tages)
             const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
             const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
 
@@ -1552,23 +1450,14 @@
 
                 if (snapshot.empty) {
                     alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
-                    // Formular ist bereits durch resetForm() geleert
                     document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
-                    document.getElementById('submitBtn').style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)"; // Originalfarbe
+                    document.getElementById('submitBtn').style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)";
                 } else {
                     const doc = snapshot.docs[0];
                     const data = doc.data();
-                    
-                    // WICHTIG: Die ID des gefundenen Dokuments speichern!
                     currentEntryId = doc.id; 
-                    
-                    // Formular mit den geladenen Daten befüllen
-                    fillFormWithData(data); // Verwendet die neue Funktion
-                    
-                    // Feedback an den Benutzer
+                    fillFormWithData(data);
                     alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
-
-                    // Optional: Nach oben scrollen, damit man das Formular sieht
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
@@ -1594,25 +1483,17 @@
                     return;
                 }
 
-                let fullEntries = []; // Speichert alle Felder für die Trend-Analyse
-                let scoreEntries = []; // Hilfs-Array für Best Day / Top 5
+                let fullEntries = [];
+                let scoreEntries = [];
 
                 snapshot.forEach(doc => {
                     const d = doc.data();
                     const dateObj = d.date ? d.date.toDate() : new Date();
 
-                    // 1. Daten für Trend-Analyse (alle Metriken)
-                    fullEntries.push({
-                        ...d,
-                        date: dateObj
-                    });
+                    fullEntries.push({ ...d, date: dateObj });
 
-                    // 2. Daten für Best Day / Top 5 (basierend auf overallAverage)
                     if (d.overallAverage !== null && d.overallAverage !== undefined) {
-                        scoreEntries.push({
-                            date: dateObj,
-                            score: parseFloat(d.overallAverage)
-                        });
+                        scoreEntries.push({ date: dateObj, score: parseFloat(d.overallAverage) });
                     }
                 });
 
@@ -1621,7 +1502,6 @@
                     return;
                 }
 
-                // --- Klassische Statistik (Best Day / Chart) ---
                 scoreEntries.sort((a, b) => b.score - a.score);
                 const best = scoreEntries[0];
                 document.getElementById('bestDayDate').innerText = best.date.toLocaleDateString('de-DE');
@@ -1631,11 +1511,7 @@
                 const flop5 = scoreEntries.slice().sort((a, b) => a.score - b.score).slice(0, 5);
                 renderChart(top5, flop5);
 
-                // --- NEU: Trend-Analyse & Regression ---
-                // Initialisiere das Trend-Chart (Standardmäßig mit Gesamtbilanz)
                 renderTrendChart(fullEntries, 'overallAverage');
-
-                // Event Listener für das Dropdown-Menü (Trend-Umschalter)
                 const trendSelector = document.getElementById('trendSelector');
                 if (trendSelector) {
                     trendSelector.onchange = (e) => {
@@ -1643,27 +1519,19 @@
                     };
                 }
 
-                // NEU: Tag-Statistik berechnen und anzeigen
                 renderTagStatistics(fullEntries);
-
-                // Trend Chart initialisieren
                 renderTrendChart(fullEntries, 'overallAverage');
 
-
-                // --- NEU: Tag-Analyse Dropdown befüllen ---
                 const tagSelector = document.getElementById('tagAnalysisSelector');
                 const uniqueTags = new Set();
-
-                // Alle Tags sammeln
                 fullEntries.forEach(entry => {
                     if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
                         entry.selectedNotesTags.forEach(tag => uniqueTags.add(tag));
                     }
                 });
 
-                // Dropdown leeren und neu füllen
                 tagSelector.innerHTML = '<option value="" disabled selected>Bitte Tag wählen...</option>';
-                const sortedTags = Array.from(uniqueTags).sort(); // Alphabetisch sortieren
+                const sortedTags = Array.from(uniqueTags).sort();
 
                 sortedTags.forEach(tag => {
                     const option = document.createElement('option');
@@ -1672,19 +1540,14 @@
                     tagSelector.appendChild(option);
                 });
 
-                // Event Listener für Tag-Auswahl
                 tagSelector.onchange = (e) => {
                     renderTagAnalysisChart(fullEntries, e.target.value);
                 };
 
-                // Falls Tags vorhanden sind, standardmäßig den ersten wählen (optional)
                 if (sortedTags.length > 0) {
                     tagSelector.value = sortedTags[0];
                     renderTagAnalysisChart(fullEntries, sortedTags[0]);
                 }
-
-
-
             } catch (error) {
                 console.error("Stats Error:", error);
                 document.getElementById('bestDayDate').innerText = "Fehler";
@@ -1693,30 +1556,20 @@
 
         function renderChart(top5, flop5) {
             const ctx = document.getElementById('statsChart').getContext('2d');
-
-            // Daten aufbereiten
-            // Wir kombinieren Top 5 und Flop 5 für eine Übersicht, oder zeigen sie gruppiert
-            // Einfachheitshalber: Top 5 links, Flop 5 rechts (als separate Balken)
-            
-            // Labels formatieren
             const topLabels = top5.map(e => "🏆 " + e.date.toLocaleDateString('de-DE').slice(0, 9));
             const topData = top5.map(e => e.score);
-            
             const flopLabels = flop5.map(e => "⚠️ " + e.date.toLocaleDateString('de-DE').slice(0, 9));
             const flopData = flop5.map(e => e.score);
 
             const allLabels = [...topLabels, ...flopLabels];
             const allData = [...topData, ...flopData];
             
-            // Farben: Grün für Top, Rot für Flop
             const bgColors = [
                 ...topData.map(() => 'rgba(46, 204, 113, 0.7)'),
                 ...flopData.map(() => 'rgba(231, 76, 60, 0.7)')
             ];
 
-            if (statsChartInstance) {
-                statsChartInstance.destroy();
-            }
+            if (statsChartInstance) statsChartInstance.destroy();
 
             statsChartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -1734,25 +1587,12 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#ccc' }
-                        },
-                        x: {
-                            ticks: { color: '#ccc', font: {size: 10} }
-                        }
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#ccc' } },
+                        x: { ticks: { color: '#ccc', font: {size: 10} } }
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Score: ${context.raw}`;
-                                }
-                            }
-                        }
+                        tooltip: { callbacks: { label: (context) => `Score: ${context.raw}` } }
                     }
                 }
             });
@@ -1761,24 +1601,16 @@
         let trendChartInstance = null;
 
         function calculateTrend(dataPoints) {
-            // dataPoints Format: [{ x: 1, y: 5 }, { x: 2, y: 6 } ...] (x = Tag-Nummer)
-            
-            // Wir brauchen Arrays für simple-statistics: [[x1, y1], [x2, y2]]
             const regressionData = dataPoints.map(p => [p.x, p.y]);
-            
-            // Berechne Regression (y = mx + b)
             const line = ss.linearRegression(regressionData); 
             const lineFunc = ss.linearRegressionLine(line);
-            const rSquared = ss.rSquared(regressionData, lineFunc); // Bestimmtheitsmaß
+            const rSquared = ss.rSquared(regressionData, lineFunc);
 
-            // Generiere Start- und Endpunkt für die Linie im Chart
             const startX = dataPoints[0].x;
             const endX = dataPoints[dataPoints.length - 1].x;
             
             return {
-                m: line.m, // Steigung
-                b: line.b, // Y-Achsenabschnitt
-                r2: rSquared,
+                m: line.m, b: line.b, r2: rSquared,
                 startPoint: { x: startX, y: lineFunc(startX) },
                 endPoint: { x: endX, y: lineFunc(endX) }
             };
@@ -1787,113 +1619,31 @@
         function renderTrendChart(entries, metricKey) {
             const ctx = document.getElementById('trendChart').getContext('2d');
             const trendText = document.getElementById('trendText');
-            trendText.innerHTML = ""; // Text für jeden neuen Render zurücksetzen
+            trendText.innerHTML = "";
 
-            if (trendChartInstance) {
-                trendChartInstance.destroy(); // Altes Chart immer zuerst zerstören
-            }
+            if (trendChartInstance) trendChartInstance.destroy();
 
-            // --- 1. Konfiguration für jeden Metrik-Typ (ÜBERARBEITET) ---
-            // Definiert, wie jeder Datentyp behandelt und visualisiert wird.
             const metricConfig = {
-                // Standard: Rating-Skala 1-10
-                default: {
-                    chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 10,
-                    yAxisLabel: 'Wert (1-10)',
-                    dataExtractor: (entry) => entry[metricKey] ? parseFloat(entry[metricKey]) : null,
-                    showTrend: true
-                },
-                // Numerische Werte mit eigener Skala
-                morningStiffness: {
-                    chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: 120,
-                    yAxisLabel: 'Minuten',
-                    dataExtractor: (entry) => entry.morningStiffness ? parseInt(entry.morningStiffness) : null,
-                    showTrend: true
-                },
-                crpValue: { // Korrekter Key aus der Datenbank
-                    chartType: 'scatter',
-                    yAxisMin: 0,
-                    yAxisMax: undefined, // undefined lässt Chart.js die Skala automatisch finden
-                    yAxisLabel: 'mg/L',
-                    dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null,
-                    showTrend: true
-                },
-                // NEU: Binäre Werte als "Ereignis-Punkte" (Scatter-Plot)
-                // ANGEPASST: yAxisMin und yAxisMax für Margin, damit Punkte nicht abgeschnitten werden.
-                sport: {
-                    chartType: 'scatter', // Zeigt einen Punkt für jedes "Ja"
-                    yAxisMin: -0.1, // Etwas Puffer unten
-                    yAxisMax: 1.1, // Etwas Puffer oben
-                    yAxisLabel: 'Aktivität',
-                    // Gibt 1 zurück, wenn Sport gemacht wurde, sonst null
-                    dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null,
-                    showTrend: false // Trendlinie macht hier keinen Sinn
-                },
-                painmeds: {
-                    chartType: 'scatter',
-                    yAxisMin: -0.1, // Etwas Puffer unten
-                    yAxisMax: 1.1, // Etwas Puffer oben
-                    yAxisLabel: 'Einnahme',
-                    dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null,
-                    showTrend: false
-                },
-                stretching: {
-                    chartType: 'scatter',
-                    yAxisMin: -0.1, // Etwas Puffer unten
-                    yAxisMax: 1.1, // Etwas Puffer oben
-                    yAxisLabel: 'Aktivität',
-                    dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht' || entry.stretchingStatus === 'Physio') ? 1 : null,
-                    showTrend: false
-                },
-                gluten: {
-                    chartType: 'scatter',
-                    yAxisMin: -0.1, // Etwas Puffer unten
-                    yAxisMax: 1.1, // Etwas Puffer oben
-                    yAxisLabel: 'Konsum',
-                    dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null,
-                    showTrend: false
-                },
-                milk: {
-                    chartType: 'scatter',
-                    yAxisMin: -0.1, // Etwas Puffer unten
-                    yAxisMax: 1.1, // Etwas Puffer oben
-                    yAxisLabel: 'Konsum',
-                    dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null,
-                    showTrend: false
-                }
+                default: { chartType: 'scatter', yAxisMin: 0, yAxisMax: 10, yAxisLabel: 'Wert (1-10)', dataExtractor: (entry) => entry[metricKey] ? parseFloat(entry[metricKey]) : null, showTrend: true },
+                morningStiffness: { chartType: 'scatter', yAxisMin: 0, yAxisMax: 120, yAxisLabel: 'Minuten', dataExtractor: (entry) => entry.morningStiffness ? parseInt(entry.morningStiffness) : null, showTrend: true },
+                crpValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'mg/L', dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null, showTrend: true },
+                sport: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null, showTrend: false },
+                painmeds: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Einnahme', dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null, showTrend: false },
+                stretching: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht' || entry.stretchingStatus === 'Physio') ? 1 : null, showTrend: false },
+                gluten: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Konsum', dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null, showTrend: false },
+                milk: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Konsum', dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null, showTrend: false }
             };
 
-            // Wähle die richtige Konfiguration. Wenn keine spezielle da ist, nimm 'default'.
             const config = metricConfig[metricKey] || metricConfig.default;
-
-            // --- 2. Daten vorbereiten (ROBUSTER GEMACHT) ---
-            // Zuerst alle Einträge nach Datum sortieren. Das ist der wichtigste Fix für das CRP-Problem.
-            // Wichtig: entry.date muss ein Date-Objekt sein, damit die Sortierung funktioniert.
-            // Wenn entry.date ein String ist, muss es erst zu einem Date-Objekt konvertiert werden:
-            // const sortedEntries = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-            // Gehe davon aus, dass entry.date bereits ein Date-Objekt ist.
             const sortedEntries = [...entries].sort((a, b) => a.date - b.date);
 
-
-            // Mit dem dataExtractor aus der Konfiguration wandeln wir die Rohdaten in Chart-Daten um.
-            // Jeder Eintrag wird verarbeitet und nur die mit einem gültigen Y-Wert werden behalten.
-            const chartData = sortedEntries.map(entry => {
-                return {
-                    x: entry.date,
-                    y: config.dataExtractor(entry)
-                };
-            }).filter(point => point.y !== null); // Entfernt alle Einträge, an denen das Ereignis nicht stattfand oder kein Wert da war.
+            const chartData = sortedEntries.map(entry => ({ x: entry.date, y: config.dataExtractor(entry) })).filter(point => point.y !== null);
 
             if (chartData.length < 1) {
                 trendText.innerHTML = "Keine Daten für diese Kategorie vorhanden.";
                 return;
             }
 
-            // --- 3. Datasets und Optionen für das Chart erstellen ---
             let datasets = [{
                 label: document.querySelector(`#trendSelector option[value="${metricKey}"]`).textContent,
                 data: chartData,
@@ -1903,117 +1653,32 @@
                 pointHoverRadius: 8
             }];
 
-            // Regressionstrend nur berechnen, wenn in der Konfiguration erlaubt (showTrend: true)
             if (config.showTrend && chartData.length >= 2) {
-                // ... (Dieser Teil bleibt exakt gleich wie in der vorherigen Version)
                 const mathData = chartData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData);
-
                 const slopePerDay = trend.m * 86400000;
-
                 const isImprovementPositive = ['moodRating', 'overallAverage', 'movementFlowPainRating', 'immunesystemRating'].includes(metricKey);
                 const actualTrendIsUp = slopePerDay > 0;
-
                 let isGoodTrend = isImprovementPositive ? actualTrendIsUp : !actualTrendIsUp;
-
                 const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
                 const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c";
-
                 trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong><br>(Änderung/Tag: ${slopePerDay.toFixed(3)})`;
-
                 datasets.push({
-                    type: 'line',
-                    label: 'Trend',
-                    data: [
-                        { x: new Date(trend.startPoint.x), y: trend.startPoint.y },
-                        { x: new Date(trend.endPoint.x), y: trend.endPoint.y }
-                    ],
-                    borderColor: trendColor,
-                    borderDash: [5, 5],
-                    pointRadius: 0,
-                    fill: false
+                    type: 'line', label: 'Trend',
+                    data: [ { x: new Date(trend.startPoint.x), y: trend.startPoint.y }, { x: new Date(trend.endPoint.x), y: trend.endPoint.y } ],
+                    borderColor: trendColor, borderDash: [5, 5], pointRadius: 0, fill: false
                 });
             }
 
-            // --- 4. Chart zeichnen ---
             trendChartInstance = new Chart(ctx, {
-                type: config.chartType, // Dynamischer Chart-Typ
-                data: { datasets: datasets },
+                type: config.chartType, data: { datasets: datasets },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                tooltipFormat: 'dd.MM.yyyy',
-                                // HIER IST DIE ANPASSUNG FÜR DIE ANZEIGE AUF DER ACHSE SELBST
-                                displayFormats: {
-                                    day: 'dd.MM.yyyy',
-                                    week: 'dd.MM.yyyy', // Optional: Auch für Wochen
-                                    month: 'MM.yyyy',   // Optional: Für Monate
-                                    quarter: '[Q]Q.yyyy', // Optional: Für Quartale
-                                    year: 'yyyy'        // Optional: Für Jahre
-                                }
-                            },
-                            ticks: {
-                                color: '#888',
-                                autoSkip: true, // Behält die automatische Tick-Auslassung bei
-                                maxTicksLimit: 10 // Maximale Anzahl der angezeigten Ticks
-                            },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        y: {
-                            min: config.yAxisMin,
-                            max: config.yAxisMax,
-                            beginAtZero: true,
-                            title: { display: true, text: config.yAxisLabel, color: '#ccc' },
-                            ticks: {
-                                color: '#ccc',
-                                // Spezielle Ticks für die neuen Ja/Nein-Charts
-                                callback: function(value) {
-                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') { // Gilt nur für unsere Ja/Nein-Scatter-Plots, nicht für numerische wie CRP
-                                        if (value === 1) return 'Ja'; // Zeigt "Ja" auf der Y-Achse bei Y=1
-                                        return null; // Blendet alle anderen Ticks (wie die 0) aus
-                                    }
-                                    return value; // Standard-Verhalten für numerische Charts
-                                }
-                            },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                        }
+                        x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy', displayFormats: { day: 'dd.MM.yyyy', week: 'dd.MM.yyyy', month: 'MM.yyyy', quarter: '[Q]Q.yyyy', year: 'yyyy' } }, ticks: { color: '#888', autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { min: config.yAxisMin, max: config.yAxisMax, beginAtZero: true, title: { display: true, text: config.yAxisLabel, color: '#ccc' }, ticks: { color: '#ccc', callback: (value) => (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') ? (value === 1 ? 'Ja' : null) : value }, grid: { color: 'rgba(255,255,255,0.1)' } }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    // Zeigt das Datum als Titel des Tooltips an
-                                    if (context[0] && context[0].parsed && context[0].parsed.x) {
-                                        const date = new Date(context[0].parsed.x);
-                                        return date.toLocaleDateString('de-DE', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                        });
-                                    }
-                                    return '';
-                                },
-                                label: function(context) {
-                                    // Für Ja/Nein-Charts zeigen wir nur den Label-Text
-                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') {
-                                        if (context.parsed.y === 1) {
-                                            return `${context.dataset.label}: Ja`;
-                                        }
-                                        return '';
-                                    }
-                                    // Für numerische Charts zeigen wir Label + Wert
-                                    // `context.parsed.y` ist der numerische Wert
-                                    // `context.dataset.label` ist der Name der Metrik (z.B. "Stimmung")
-                                    return `${context.dataset.label || ''}: ${context.parsed.y}`;
-                                }
-                            }
-                        }
-                    }
+                    plugins: { tooltip: { callbacks: { title: (context) => (context[0] && context[0].parsed && context[0].parsed.x) ? new Date(context[0].parsed.x).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '', label: (context) => (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') ? (context.parsed.y === 1 ? `${context.dataset.label}: Ja` : '') : `${context.dataset.label || ''}: ${context.parsed.y}` } } }
                 }
             });
         }
@@ -2021,24 +1686,11 @@
         function renderTagAnalysisChart(entries, selectedTag) {
             const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
             
-            // 1. Daten filtern: Nur Einträge, die den gewählten Tag enthalten
-            const validEntries = entries
-                .filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag))
-                .sort((a, b) => a.date - b.date);
+            const validEntries = entries.filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag)).sort((a, b) => a.date - b.date);
 
-            // 2. Daten für Chart mappen
-            // Y-Achse: Wir nehmen die 'overallAverage' (Tagesbilanz), damit man sieht, 
-            // ob der Tag an guten oder schlechten Tagen vorkam.
-            // Falls keine Bilanz da ist, setzen wir sie auf 0 oder 5 (Mittelwert).
-            const scatterData = validEntries.map(e => ({
-                x: e.date, 
-                y: e.overallAverage || 0, // Y-Position ist die Tagesbilanz
-                details: e // Speichern für Tooltip
-            }));
+            const scatterData = validEntries.map(e => ({ x: e.date, y: e.overallAverage || 0, details: e }));
 
-            if (tagChartInstance) {
-                tagChartInstance.destroy();
-            }
+            if (tagChartInstance) tagChartInstance.destroy();
 
             tagChartInstance = new Chart(ctx, {
                 type: 'scatter',
@@ -2046,102 +1698,146 @@
                     datasets: [{
                         label: `Vorkommen: ${selectedTag} (${validEntries.length}x)`,
                         data: scatterData,
-                        backgroundColor: '#00f2fe', // Helles Cyan
-                        borderColor: '#00c7ff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8
+                        backgroundColor: '#00f2fe', borderColor: '#00c7ff',
+                        pointRadius: 6, pointHoverRadius: 8
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: { day: 'dd.MM.yyyy' },
-                                tooltipFormat: 'dd.MM.yyyy'
-                            },
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#888' }
-                        },
-                        y: {
-                            min: 0, 
-                            max: 10,
-                            title: { display: true, text: 'Tagesbilanz Score', color: '#666' },
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { color: '#ccc' }
-                        }
+                        x: { type: 'time', time: { unit: 'day', displayFormats: { day: 'dd.MM.yyyy' }, tooltipFormat: 'dd.MM.yyyy' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                        y: { min: 0, max: 10, title: { display: true, text: 'Tagesbilanz Score', color: '#666' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#ccc' } }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const point = context.raw;
-                                    return `Datum: ${point.x.toLocaleDateString('de-DE')} | Score: ${point.y}`;
-                                }
-                            }
-                        }
-                    }
+                    plugins: { tooltip: { callbacks: { label: (context) => `Datum: ${context.raw.x.toLocaleDateString('de-DE')} | Score: ${context.raw.y}` } } }
                 }
             });
         }
 
         async function exportDailyEntries() {
-            // 1. Sicherheits-Abfrage
             const confirmDownload = confirm("Möchten Sie die Daten herunterladen und Google Colab für Ihr Python-Projekt öffnen?");
-            
-            if (!confirmDownload) {
-                console.log("Vorgang abgebrochen.");
-                return;
-            }
+            if (!confirmDownload) return;
 
-            console.log("Starte Datenexport...");
-            
             try {
                 const snapshot = await db.collection("dailyEntries").get();
-                
-                if (snapshot.empty) {
-                    alert("Keine Daten gefunden.");
-                    return;
-                }
+                if (snapshot.empty) { alert("Keine Daten gefunden."); return; }
 
                 const data = [];
                 snapshot.forEach(doc => {
                     const docData = doc.data();
-                    for (let key in docData) {
-                        if (docData[key] && typeof docData[key].toDate === 'function') {
-                            docData[key] = docData[key].toDate().toISOString();
-                        }
-                    }
+                    for (let key in docData) { if (docData[key] && typeof docData[key].toDate === 'function') docData[key] = docData[key].toDate().toISOString(); }
                     data.push({ id: doc.id, ...docData });
                 });
 
-                // 2. JSON-Download (wie bisher)
                 const jsonString = JSON.stringify(data, null, 2);
                 const blob = new Blob([jsonString], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
-
                 const link = document.createElement("a");
                 link.href = url;
-                // Tipp: Dateiname statisch lassen, damit das Python-Skript ihn immer findet
                 link.download = `daily_entries_export.json`; 
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
-                // 3. Google Colab in neuem Tab öffnen
                 const colabUrl = "https://colab.research.google.com/drive/1piBjU0iztd0SxBgdI6V_zY-UTjvcFepM?authuser=0#scrollTo=7PmZkF32yOkM";
                 window.open(colabUrl, '_blank');
-
                 alert(`Export erfolgreich! JSON heruntergeladen. Google Colab geöffnet.`);
-
             } catch (error) {
                 console.error("Fehler:", error);
                 alert("Vorgang fehlgeschlagen!");
             }
         }
+        
+        // --- NEUE FUNKTIONEN FÜR DIE SCHMERZKARTE ---
+        function openPainMapPopup() {
+            document.getElementById('painMapOverlay').style.display = 'flex';
+            // Setzt die korrekte Ansicht und Größe beim Öffnen
+            updatePainMapControls();
+            // Stellt sicher, dass das Canvas neu gezeichnet wird, falls sich die Daten geändert haben
+            redrawPainMapCanvas(); 
+        }
+
+        function closePainMapPopup() {
+            document.getElementById('painMapOverlay').style.display = 'none';
+        }
+
+        function redrawPainMapCanvas() {
+            if (!painMapCtx) return;
+
+            const imageToDraw = currentPainMapView === 'front' ? frontImage : backImage;
+            const pointsToDraw = currentPainMapView === 'front' ? painMapData.frontPoints : painMapData.backPoints;
+
+            // Canvas leeren
+            painMapCtx.clearRect(0, 0, painMapCanvas.width, painMapCanvas.height);
+
+            // Hintergrundbild zeichnen (sobald es geladen ist)
+            if (imageToDraw.complete) {
+                painMapCtx.drawImage(imageToDraw, 0, 0, painMapCanvas.width, painMapCanvas.height);
+            } else {
+                // Falls das Bild noch lädt, erneut versuchen
+                imageToDraw.onload = () => redrawPainMapCanvas();
+            }
+
+            // Punkte zeichnen
+            if (pointsToDraw) {
+                pointsToDraw.forEach(p => {
+                    const config = painPointConfig[p.size];
+                    // Relative Koordinaten in absolute Pixel umrechnen
+                    const x = p.x * painMapCanvas.width;
+                    const y = p.y * painMapCanvas.height;
+
+                    painMapCtx.beginPath();
+                    painMapCtx.arc(x, y, config.radius, 0, 2 * Math.PI, false);
+                    painMapCtx.fillStyle = config.color;
+                    painMapCtx.fill();
+                    painMapCtx.lineWidth = 2;
+                    painMapCtx.strokeStyle = '#FFFFFF';
+                    painMapCtx.stroke();
+                });
+            }
+        }
+
+        function handlePainMapClick(event) {
+            // Position relativ zum Canvas berechnen
+            const rect = painMapCanvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // In relative Koordinaten (0-1) umrechnen
+            const relativeX = x / painMapCanvas.clientWidth;
+            const relativeY = y / painMapCanvas.clientHeight;
+
+            // Punkt zum richtigen Array hinzufügen
+            const newPoint = { x: relativeX, y: relativeY, size: currentPainMapSize };
+            if (currentPainMapView === 'front') {
+                painMapData.frontPoints.push(newPoint);
+            } else {
+                painMapData.backPoints.push(newPoint);
+            }
+
+            // Canvas neu zeichnen
+            redrawPainMapCanvas();
+        }
+
+        function undoLastPainPoint() {
+            if (currentPainMapView === 'front' && painMapData.frontPoints.length > 0) {
+                painMapData.frontPoints.pop();
+            } else if (currentPainMapView === 'back' && painMapData.backPoints.length > 0) {
+                painMapData.backPoints.pop();
+            }
+            redrawPainMapCanvas();
+        }
+
+        function updatePainMapControls() {
+            // Ansicht-Buttons aktualisieren
+            document.getElementById('painMapViewFront').classList.toggle('selected', currentPainMapView === 'front');
+            document.getElementById('painMapViewBack').classList.toggle('selected', currentPainMapView === 'back');
+            // Größe-Buttons aktualisieren
+            document.getElementById('painMapSizeSmall').classList.toggle('selected', currentPainMapSize === 'small');
+            document.getElementById('painMapSizeMedium').classList.toggle('selected', currentPainMapSize === 'medium');
+            document.getElementById('painMapSizeLarge').classList.toggle('selected', currentPainMapSize === 'large');
+        }
+        // --- ENDE NEUE FUNKTIONEN ---
+
 
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
@@ -2155,7 +1851,6 @@
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
 
-            // Checkbox Logik (Sport, Dehnen, etc.)
             const setupExclusiveGroup = (groupClass) => {
                 const checkboxes = document.querySelectorAll(`.${groupClass} .sport-checkbox input[type="checkbox"]`);
                 checkboxes.forEach(checkbox => {
@@ -2180,7 +1875,6 @@
             setupExclusiveGroup('gluten-options-group');
             setupExclusiveGroup('milk-options-group');
 
-            // Sport Logik (Mixed)
             const sportCheckboxes = document.querySelectorAll('.sport-options-group input[type="checkbox"]');
             sportCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -2189,17 +1883,11 @@
                         label.classList.add('selected');
                         if (event.target.id === 'sportNone') {
                             sportCheckboxes.forEach(cb => {
-                                if (cb !== event.target) {
-                                    cb.checked = false;
-                                    cb.closest('.sport-checkbox').classList.remove('selected');
-                                }
+                                if (cb !== event.target) { cb.checked = false; cb.closest('.sport-checkbox').classList.remove('selected'); }
                             });
                         } else {
                             const sportNoneCheckbox = document.getElementById('sportNone');
-                            if (sportNoneCheckbox && sportNoneCheckbox.checked) {
-                                sportNoneCheckbox.checked = false;
-                                sportNoneCheckbox.closest('.sport-checkbox').classList.remove('selected');
-                            }
+                            if (sportNoneCheckbox && sportNoneCheckbox.checked) { sportNoneCheckbox.checked = false; sportNoneCheckbox.closest('.sport-checkbox').classList.remove('selected'); }
                         }
                     } else {
                         label.classList.remove('selected');
@@ -2207,7 +1895,6 @@
                 });
             });
 
-            // Painmeds Logic
             const painmedCheckboxes = document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]');
             painmedCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -2216,17 +1903,11 @@
                         label.classList.add('selected');
                         if (event.target.id === 'painmedNone') {
                             painmedCheckboxes.forEach(cb => {
-                                if (cb !== event.target && cb.dataset.painmedType === 'active') {
-                                    cb.checked = false;
-                                    cb.closest('.sport-checkbox').classList.remove('selected');
-                                }
+                                if (cb !== event.target && cb.dataset.painmedType === 'active') { cb.checked = false; cb.closest('.sport-checkbox').classList.remove('selected'); }
                             });
                         } else if (event.target.dataset.painmedType === 'active') {
                             const painmedNoneCheckbox = document.getElementById('painmedNone');
-                            if (painmedNoneCheckbox && painmedNoneCheckbox.checked) {
-                                painmedNoneCheckbox.checked = false;
-                                painmedNoneCheckbox.closest('.sport-checkbox').classList.remove('selected');
-                            }
+                            if (painmedNoneCheckbox && painmedNoneCheckbox.checked) { painmedNoneCheckbox.checked = false; painmedNoneCheckbox.closest('.sport-checkbox').classList.remove('selected'); }
                         }
                     } else {
                         label.classList.remove('selected');
@@ -2243,52 +1924,24 @@
 
             calculateOverallAverage();
 
-            // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
-                        // --- ANGEPASSTER SPEICHER-BUTTON MIT UPDATE-LOGIK ---
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const user = auth.currentUser;
-                if (!user) {
-                    alert('Bitte anmelden Sie sich zuerst an, um Daten zu speichern.');
-                    return;
-                }
-
+                if (!user) { alert('Bitte anmelden Sie sich zuerst an, um Daten zu speichern.'); return; }
                 const YOUR_UID = "VgrOSS05xEPvvFUXQdybgQTCbX52";
-                if (user.uid !== YOUR_UID) {
-                    alert('Sie sind nicht berechtigt, Daten zu speichern. Bitte verwenden Sie das korrekte Konto.');
-                    return;
-                }
+                if (user.uid !== YOUR_UID) { alert('Sie sind nicht berechtigt, Daten zu speichern.'); return; }
 
                 let missingFields = [];
-
-                // Daten sammeln (dieser Teil bleibt größtenteils gleich)
-                const wakeUpTime = document.getElementById('wakeUpTime').value;
-                const bedTime = document.getElementById('bedTime').value;
-
-                const morningStiffnessSelect = document.getElementById('morningStiffness');
-                const morningStiffnessValue = morningStiffnessSelect.value; // Ist "" wenn "Bitte wählen" aktiv ist
-
-                const crpInput = document.getElementById('crpInput');
-                const crpValue = crpInput.value ? parseFloat(crpInput.value) : null;
-
+                const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
+                const morningStiffnessValue = document.getElementById('morningStiffness').value;
+                const crpValue = document.getElementById('crpInput').value ? parseFloat(document.getElementById('crpInput').value) : null;
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
                 const noSport = document.getElementById('sportNone');
-                if (noSport.checked) {
-                    selectedSports.push(noSport.dataset.sportName);
-                } else if (activeSports.length > 0) {
-                    selectedSports = activeSports.map(cb => cb.dataset.sportName);
-                }
-
-                const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
-                const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
-                const selectedGluten = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked');
-                const glutenStatus = selectedGluten ? selectedGluten.dataset.glutenName : null;
-                const selectedMilk = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked');
-                const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
-
-                const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
-                                            .map(cb => cb.dataset.painmedName);
-
+                if (noSport.checked) { selectedSports.push(noSport.dataset.sportName); } else if (activeSports.length > 0) { selectedSports = activeSports.map(cb => cb.dataset.sportName); }
+                const stretchingStatus = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.stretchingName || null;
+                const glutenStatus = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.glutenName || null;
+                const milkStatus = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.milkName || null;
+                const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked')).map(cb => cb.dataset.painmedName);
                 const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
                 const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
                 const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
@@ -2296,14 +1949,10 @@
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
                 const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
-
-                const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
-                    .map(button => button.dataset.tag);
-
+                const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
-
-                // Validierung
+                
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
@@ -2319,24 +1968,14 @@
                 if (!immunesystemRating) missingFields.push('Immunsystem');
                 if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
-                if (missingFields.length > 0) {
-                    alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`);
-                    return;
-                }
+                if (missingFields.length > 0) { alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
                 
-                // Bereite die Daten vor
                 const dataToSave = { 
-                    userId: user.uid,
-                    wakeUpTime,
-                    bedTime,
+                    userId: user.uid, wakeUpTime, bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
-                    selectedSports,
-                    stretchingStatus,
-                    glutenStatus,
-                    milkStatus,
-                    selectedPainmeds,
+                    selectedSports, stretchingStatus, glutenStatus, milkStatus, selectedPainmeds,
                     morningStiffness: morningStiffnessValue !== "" ? parseInt(morningStiffnessValue) : null,
-                    crpValue: crpValue,
+                    crpValue,
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
@@ -2345,34 +1984,21 @@
                     movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
                     immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
-                    notes,
-                    selectedNotesTags
+                    notes, selectedNotesTags,
+                    // --- NEU: Schmerzkarte-Daten hinzufügen ---
+                    painMap: painMapData
                 };
 
                 try {
                     if (currentEntryId) {
-                        // UPDATE MODUS: Wenn currentEntryId gesetzt ist, aktualisiere den bestehenden Eintrag
-                        // Wichtig: Beim Update wollen wir das ursprüngliche 'date'-Feld NICHT überschreiben!
-                        // Es wird also kein 'date' Feld in dataToSave mitgegeben, wenn aktualisiert wird.
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
                         alert("Eintrag erfolgreich aktualisiert!");
-                        
-                        // Nach dem Update: Formular zurücksetzen und in den "Neu erstellen"-Modus wechseln
-                        //location.reload(); // Die gesamte Seite neu laden
-                        //resetForm(); 
                     } else {
-                        // CREATE MODUS: Wenn currentEntryId null ist, erstelle einen neuen Eintrag
-                        // Setze das Datum für den neuen Eintrag.
-                        // Wenn der Tag heute ist, nimm serverTimestamp. Wenn es ein geladenes Vergangenheitsdatum ist, nimm das.
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
-                        
                         await db.collection("dailyEntries").add(dataToSave);
                         alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
-                        
-                        // Nach dem Speichern: Formular zurücksetzen
                         resetForm(); 
                     }
-                    
                 } catch (e) {
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
                     alert("Fehler: " + e.message);
@@ -2380,16 +2006,30 @@
             });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
-            document.getElementById('popupOverlay').addEventListener('click', (event) => {
-                if (event.target.id === 'popupOverlay') closePopup();
-            });
-
+            document.getElementById('popupOverlay').addEventListener('click', (event) => { if (event.target.id === 'popupOverlay') closePopup(); });
             document.getElementById('searchBtn').addEventListener('click', loadEntryByDate);
             document.getElementById('statsBtn').addEventListener('click', loadStatistics);
             document.getElementById('closeStatsBtn').addEventListener('click', closeStatsPopup);
-            document.getElementById('statsOverlay').addEventListener('click', (event) => {
-                if(event.target.id === 'statsOverlay') closeStatsPopup();
-            });
+            document.getElementById('statsOverlay').addEventListener('click', (event) => { if(event.target.id === 'statsOverlay') closeStatsPopup(); });
+
+            // --- NEU: EVENT HANDLER FÜR SCHMERZKARTE ---
+            painMapCanvas = document.getElementById('painMapCanvas');
+            painMapCtx = painMapCanvas.getContext('2d');
+            
+            document.getElementById('painMapBtn').addEventListener('click', openPainMapPopup);
+            document.getElementById('closePainMapBtn').addEventListener('click', closePainMapPopup);
+            document.getElementById('painMapOverlay').addEventListener('click', (event) => { if (event.target.id === 'painMapOverlay') closePainMapPopup(); });
+
+            painMapCanvas.addEventListener('click', handlePainMapClick);
+
+            document.getElementById('painMapViewFront').addEventListener('click', () => { currentPainMapView = 'front'; updatePainMapControls(); redrawPainMapCanvas(); });
+            document.getElementById('painMapViewBack').addEventListener('click', () => { currentPainMapView = 'back'; updatePainMapControls(); redrawPainMapCanvas(); });
+            document.getElementById('painMapSizeSmall').addEventListener('click', () => { currentPainMapSize = 'small'; updatePainMapControls(); });
+            document.getElementById('painMapSizeMedium').addEventListener('click', () => { currentPainMapSize = 'medium'; updatePainMapControls(); });
+            document.getElementById('painMapSizeLarge').addEventListener('click', () => { currentPainMapSize = 'large'; updatePainMapControls(); });
+            document.getElementById('painMapUndo').addEventListener('click', undoLastPainPoint);
+            document.getElementById('painMapSaveAndClose').addEventListener('click', closePainMapPopup);
+            // --- ENDE EVENT HANDLER ---
 
             const signInButton = document.getElementById('signInButton');
             const userInfoDiv = document.getElementById('userInfo'); 
@@ -2397,15 +2037,13 @@
             if (signInButton) {
                 signInButton.addEventListener('click', () => {
                     const provider = new firebase.auth.GoogleAuthProvider();
-                    auth.signInWithPopup(provider)
-                        .then((result) => {
-                            const user = result.user;
-                            alert(`Erfolgreich angemeldet als ${user.displayName}!`);
-                            signInButton.style.display = 'none';
-                        }).catch((error) => {
-                            console.error('Fehler bei der Google-Anmeldung:', error);
-                            alert(`Anmeldefehler: ${error.message}`);
-                        });
+                    auth.signInWithPopup(provider).then((result) => {
+                        alert(`Erfolgreich angemeldet als ${result.user.displayName}!`);
+                        signInButton.style.display = 'none';
+                    }).catch((error) => {
+                        console.error('Fehler bei der Google-Anmeldung:', error);
+                        alert(`Anmeldefehler: ${error.message}`);
+                    });
                 });
             }
 
@@ -2414,45 +2052,31 @@
                     if (signInButton) signInButton.style.display = 'none';
                     userInfoDiv.textContent = `Angemeldet: ${user.email}`;
 
-                    // --- NEU: Sicherstellen, dass wir beim Start auf "Heute" sind ---
                     currentEditingDate = new Date();
-                    updateSleepTimeLabel(); // <--- HIER EINFÜGEN
+                    updateSleepTimeLabel();
 
                     const now = new Date();
                     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
                     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
                     try {
-                        const snapshot = await db.collection("dailyEntries")
-                            .where("userId", "==", user.uid)
-                            .where("date", ">=", startOfDay)
-                            .where("date", "<=", endOfDay)
-                            .limit(1)
-                            .get();
-
+                        const snapshot = await db.collection("dailyEntries").where("userId", "==", user.uid).where("date", ">=", startOfDay).where("date", "<=", endOfDay).limit(1).get();
                         if (!snapshot.empty) {
                             console.log("Eintrag für heute gefunden. Lade Daten...");
-                            const doc = snapshot.docs[0]; // Das Dokument selbst holen
-                            const data = doc.data();
-
-                            currentEntryId = doc.id; // WICHTIG: ID des heutigen Eintrags speichern
-                            fillFormWithData(data); // Formular mit den geladenen Daten befüllen
-                            
+                            const doc = snapshot.docs[0];
+                            currentEntryId = doc.id;
+                            fillFormWithData(doc.data());
                             userInfoDiv.textContent += " (Eintrag von heute geladen ✏️)";
                         } else {
-                            // Wenn kein Eintrag für heute gefunden wird, das Formular leeren
-                            // (falls zuvor Daten aus der Historie geladen oder manuell eingegeben waren)
                             resetForm(); 
                         }
                     } catch (e) {
                         console.error("Fehler beim Laden des heutigen Eintrags:", e);
-                        // Im Fehlerfall auch zurücksetzen
                         resetForm();
                     }
                 } else {
                     userInfoDiv.textContent = 'Nicht angemeldet.';
                     if (signInButton) signInButton.style.display = 'block';
-                    // Wenn Benutzer abgemeldet, Formular leeren und in Grundzustand versetzen
                     resetForm(); 
                 }
             });
