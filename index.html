@@ -1126,7 +1126,7 @@
         let painMapData = { frontPoints: [], backPoints: [] };
 
         // --- NEU: VARIABLEN FÜR SCHMERZKARTEN-HISTORIE ---
-        let allEntryDates = []; // Wird mit allen Daten von Einträgen gefüllt
+        let painMapDateHistory = []; // Speichert nur die Daten von Einträgen mit einer existierenden Schmerzkarte
         let currentPainMapDate = null; // Das Datum der aktuell im Popup gezeigten Karte
 
         let currentPainMapView = 'front';
@@ -1802,35 +1802,45 @@
         async function openPainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'flex';
             
-            // Lade die Datumshistorie nur einmal, falls noch nicht geschehen
-            if (allEntryDates.length === 0 && auth.currentUser) {
+            // Lade die gefilterte Datumshistorie nur einmal, falls noch nicht geschehen
+            if (painMapDateHistory.length === 0 && auth.currentUser) {
                 try {
                     const snapshot = await db.collection("dailyEntries")
                         .where("userId", "==", auth.currentUser.uid)
                         .orderBy("date", "asc") // Wichtig: nach Datum sortieren
                         .get();
                     
-                    allEntryDates = snapshot.docs.map(doc => doc.data().date.toDate());
+                    // Filtere die Einträge: Nur die behalten, die eine Schmerzkarte mit Punkten haben
+                    painMapDateHistory = snapshot.docs
+                        .filter(doc => {
+                            const data = doc.data();
+                            // Eine Schmerzkarte "existiert", wenn das Objekt da ist und mindestens einen Punkt hat.
+                            return data.painMap && (data.painMap.frontPoints?.length > 0 || data.painMap.backPoints?.length > 0);
+                        })
+                        .map(doc => doc.data().date.toDate());
+
                 } catch (error) {
-                    console.error("Fehler beim Laden der Datumshistorie:", error);
+                    console.error("Fehler beim Laden der Schmerzkarten-Historie:", error);
                 }
             }
 
-            // Starte mit dem Datum aus dem Hauptformular (wichtig: Kopie erstellen)
+            // Starte immer mit dem Datum aus dem Hauptformular
             currentPainMapDate = new Date(currentEditingDate);
             
-            // Die UI (Titel, Pfeile) für das aktuelle Datum aktualisieren.
-            updatePainMapDisplayForDate(currentPainMapDate);
+            // Lade die Schmerzkarte für diesen Tag (kann auch leer sein)
+            await loadPainMapForDate(currentPainMapDate);
             
-            // Die Ansicht auf "Vorderseite" zurücksetzen und Canvas neu zeichnen.
+            // Setze die Ansicht zurück und aktualisiere die Buttons
             currentPainMapView = 'front';
             updatePainMapControls();
-            redrawPainMapCanvas(); 
         }
 
 
 
+
+
         // --- NEU: Funktion zur Aktualisierung der Painmap-Anzeige (Titel & Pfeile) ---
+                // --- GEÄNDERT: Funktion zur Aktualisierung der Painmap-Anzeige (Titel & Pfeile) ---
         function updatePainMapDisplayForDate(dateToShow) {
             const titleEl = document.getElementById('painMapTitle');
             const prevArrow = document.getElementById('painMapPrevDate');
@@ -1841,28 +1851,20 @@
 
             titleEl.innerHTML = `Karte vom ${tempDate.toLocaleDateString('de-DE')}`;
             
-            const currentIndex = allEntryDates.findIndex(d => {
-                const dTemp = new Date(d);
-                dTemp.setHours(0, 0, 0, 0);
-                return dTemp.getTime() === tempDate.getTime();
-            });
+            // Finde den letzten existierenden Eintrag VOR dem aktuellen Datum
+            const prevDateInHistory = painMapDateHistory.filter(d => d < tempDate).pop();
 
-            prevArrow.style.visibility = 'visible';
-            nextArrow.style.visibility = 'visible';
+            // Finde den ersten existierenden Eintrag NACH dem aktuellen Datum
+            const nextDateInHistory = painMapDateHistory.find(d => d > tempDate);
+
+            // Deaktiviere den "Zurück"-Pfeil, wenn es keinen früheren Eintrag gibt
+            prevArrow.classList.toggle('disabled', !prevDateInHistory);
             
-            // Linker Pfeil: deaktivieren, wenn am Anfang
-            if (currentIndex <= 0) {
-                prevArrow.classList.add('disabled');
-            } else {
-                prevArrow.classList.remove('disabled');
-            }
-            // Rechter Pfeil: deaktivieren, wenn am Ende
-            if (currentIndex >= allEntryDates.length - 1) {
-                nextArrow.classList.add('disabled');
-            } else {
-                nextArrow.classList.remove('disabled');
-            }
+            // Deaktiviere den "Weiter"-Pfeil, wenn es keinen späteren Eintrag gibt
+            nextArrow.classList.toggle('disabled', !nextDateInHistory);
         }
+
+
 
         // --- NEU: Funktion zum Laden einer spezifischen Schmerzkarte aus der DB ---
         async function loadPainMapForDate(dateToLoad) {
@@ -2159,31 +2161,28 @@
             
             document.getElementById('painMapBtn').addEventListener('click', openPainMapPopup);
 
-                        // --- NEU: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
+            // --- NEU: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
+            // --- GEÄNDERT: EVENT HANDLER FÜR PAINMAP-NAVIGATION ---
             document.getElementById('painMapPrevDate').addEventListener('click', () => {
-                const prevArrow = document.getElementById('painMapPrevDate');
-                if (prevArrow.classList.contains('disabled')) return;
-
-                const tempDate = new Date(currentPainMapDate);
-                tempDate.setHours(0,0,0,0);
-                const currentIndex = allEntryDates.findIndex(d => new Date(d).setHours(0,0,0,0) === tempDate.getTime());
+                if (document.getElementById('painMapPrevDate').classList.contains('disabled')) return;
                 
-                if (currentIndex > 0) {
-                    currentPainMapDate = new Date(allEntryDates[currentIndex - 1]);
+                // Finde den letzten Eintrag in der Verlaufsliste, der vor dem aktuellen Datum liegt
+                const prevDate = painMapDateHistory.filter(d => d < currentPainMapDate).pop();
+
+                if (prevDate) {
+                    currentPainMapDate = new Date(prevDate);
                     loadPainMapForDate(currentPainMapDate);
                 }
             });
 
             document.getElementById('painMapNextDate').addEventListener('click', () => {
-                const nextArrow = document.getElementById('painMapNextDate');
-                if (nextArrow.classList.contains('disabled')) return;
+                if (document.getElementById('painMapNextDate').classList.contains('disabled')) return;
                 
-                const tempDate = new Date(currentPainMapDate);
-                tempDate.setHours(0,0,0,0);
-                const currentIndex = allEntryDates.findIndex(d => new Date(d).setHours(0,0,0,0) === tempDate.getTime());
+                // Finde den ersten Eintrag in der Verlaufsliste, der nach dem aktuellen Datum liegt
+                const nextDate = painMapDateHistory.find(d => d > currentPainMapDate);
 
-                if (currentIndex !== -1 && currentIndex < allEntryDates.length - 1) {
-                    currentPainMapDate = new Date(allEntryDates[currentIndex + 1]);
+                if (nextDate) {
+                    currentPainMapDate = new Date(nextDate);
                     loadPainMapForDate(currentPainMapDate);
                 }
             });
