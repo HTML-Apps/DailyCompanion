@@ -575,7 +575,7 @@
         .painmap-main-container {
             flex-grow: 1;
             display: flex;
-            gap: 15px;
+            gap: 40px;
             min-height: 0;
         }
 
@@ -746,7 +746,7 @@
                 display: flex !important; /* Überschreibt JS style.display */
                 position: relative;
                 width: 30%;
-                height: 100%;
+                height: 95%;
                 background: none;
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
@@ -774,7 +774,7 @@
             
             /* MITTLERE SPALTE (50% von Gesamt = ~71.4% vom 70% Wrapper) */
             .middle-col {
-                width: 71.4%;
+                width: 60%;
                 height: 100%;
                 overflow-y: auto;
                 border-radius: 25px; /* Setzt mobilen Flat-Border zurück */
@@ -785,7 +785,7 @@
 
             /* RECHTE SPALTE (20% von Gesamt = ~28.6% vom 70% Wrapper) */
             .right-col {
-                width: 28.6%;
+                width: 40%;
                 height: 100%;
                 overflow-y: auto;
                 border-radius: 25px; /* Setzt mobilen Flat-Border zurück */
@@ -1918,7 +1918,7 @@
             document.getElementById('painMapOverlay').style.display = 'flex';
             await refreshPainMapState();
         }
-        
+
         function updatePainMapDisplayForDate(dateToShow) {
             const titleEl = document.getElementById('painMapTitle');
             const prevArrow = document.getElementById('painMapPrevDate');
