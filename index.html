@@ -2154,7 +2154,7 @@
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
                 const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
-                const digestionRating = document.querySelector('#digestionm .rating-box.selected')?.dataset.value || null;
+                const digestionRating = document.querySelector('#digestion .rating-box.selected')?.dataset.value || null;
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
@@ -2172,7 +2172,7 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
-                //if (!digestionRating) missingFields.push('Verdauung');
+                if (!digestionRating) missingFields.push('Verdauung');
                 if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
                 if (missingFields.length > 0) { alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
