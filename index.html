@@ -1018,6 +1018,11 @@
                 </div>
 
                 <div class="category-item">
+                    <label for="digestion">Verdauung</label>
+                    <div class="rating-scale" id="digestion"></div>
+                </div>
+
+                <div class="category-item">
                     <label>Morgensteifigkeit</label>
                     <select id="morningStiffness" class="styled-input">
                         <option value="" selected disabled hidden>Bitte wählen...</option>
@@ -1166,6 +1171,7 @@
                         <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
                         <option value="movementFlowPainRating">Bewegungsöffnung / Flow</option>
                         <option value="immunesystemRating">Immunsystem</option>
+                        <option value="digestionRating">Verdauung</option>
                         <option value="morningStiffness">Morgensteifigkeit (Min)</option>
                         <option value="crpValue">CRP-Wert (mg/L)</option>
                         <option value="sport">Sport</option>
@@ -1304,6 +1310,7 @@
             setRating('lower-body-pain-rating', data.lowerBodyPainRating);
             setRating('movement-flow-pain-rating', data.movementFlowPainRating);
             setRating('immunesystem', data.immunesystemRating);
+            setRating('digestion', data.digestionRating);
 
             calculateOverallAverage();
 
@@ -1479,6 +1486,7 @@
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Bewegungsöffnung / Flow:</strong> ${data.movementFlowPainRating ? data.movementFlowPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Immunsystem:</strong> ${data.immunesystem ? data.immunesysten + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Immunsystem:</strong> ${data.digestion ? data.digestion + '/10' : 'Nicht bewertet'}</p>`;
             
             const stiffnessText = data.morningStiffness ? data.morningStiffness + ' Min.' : 'Nicht angegeben';
             popupContentHtml += `<p><strong>Morgensteifigkeit:</strong> ${stiffnessText}</p>`;
@@ -2043,6 +2051,7 @@
             generateRatingBoxes('lower-body-pain-rating');
             generateRatingBoxes('movement-flow-pain-rating');
             generateRatingBoxes('immunesystem');
+            generateRatingBoxes('digestion');
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -2145,6 +2154,7 @@
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
                 const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
+                const digestionRating = document.querySelector('#digestionm .rating-box.selected')?.dataset.value || null;
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
@@ -2162,6 +2172,7 @@
                 if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
                 if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
                 if (!immunesystemRating) missingFields.push('Immunsystem');
+                if (!digestionRating) missingFields.push('Verdauung');
                 if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
                 if (missingFields.length > 0) { alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
@@ -2179,6 +2190,7 @@
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
                     movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
                     immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
+                    digestionRating: digestionRating ? parseInt(digestionRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes, selectedNotesTags,
                     painMap: painMapData
