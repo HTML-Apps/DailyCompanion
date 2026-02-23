@@ -690,6 +690,29 @@
             z-index: 1;
         }
 
+        /* ----- HIER DEN NEUEN CODE EINFÜGEN ----- */
+
+        /* Neuer Stil für den speziellen Button */
+        .notes-tag-button.special-tag {
+            background-color: #9b59b6; /* Ein markantes Lila */
+            border-color: #8e44ad;
+            color: #ffffff;
+        }
+
+        /* Stil, wenn man mit der Maus darüber fährt (Hover) */
+        .notes-tag-button.special-tag:hover {
+            background-color: #8e44ad;
+        }
+
+        /* Stil, wenn der Button ausgewählt ist */
+        .notes-tag-button.special-tag.selected {
+            background-color: #af7ac5;
+            border-color: #9b59b6;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+        }
+
+
         @media (max-width: 480px) {
             body { padding: 0; }
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
