@@ -1587,6 +1587,10 @@
                     const data = doc.data();
                     currentEntryId = doc.id; 
                     fillFormWithData(data);
+                    
+                    // NEU: Schmerzkarte für das geladene Datum sofort aktualisieren
+                    await refreshPainMapState();
+                    
                     alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
@@ -1877,10 +1881,12 @@
             }
         }
         
-        async function openPainMapPopup() {
-            document.getElementById('painMapOverlay').style.display = 'flex';
+        // NEU: Zentrale Funktion, um die Historie zu laden und die Karte zu initialisieren
+        async function refreshPainMapState() {
+            if (!auth.currentUser) return;
             
-            if (painMapDateHistory.length === 0 && auth.currentUser) {
+            // 1. Historie laden, falls sie noch leer ist
+            if (painMapDateHistory.length === 0) {
                 try {
                     const snapshot = await db.collection("dailyEntries")
                         .where("userId", "==", auth.currentUser.uid)
@@ -1899,12 +1905,20 @@
                 }
             }
 
+            // 2. Datum setzen und UI aktualisieren
             currentPainMapDate = new Date(currentEditingDate);
-            await loadPainMapForDate(currentPainMapDate);
+            updatePainMapDisplayForDate(currentPainMapDate);
             currentPainMapView = 'front';
             updatePainMapControls();
+            redrawPainMapCanvas();
         }
 
+        // ANGEPASST: Wird nur noch vom Handy-Button aufgerufen, um das Overlay zu öffnen
+        async function openPainMapPopup() {
+            document.getElementById('painMapOverlay').style.display = 'flex';
+            await refreshPainMapState();
+        }
+        
         function updatePainMapDisplayForDate(dateToShow) {
             const titleEl = document.getElementById('painMapTitle');
             const prevArrow = document.getElementById('painMapPrevDate');
@@ -2179,6 +2193,11 @@
                         alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
                         resetForm(); 
                     }
+
+                    // NEU: Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
+                    painMapDateHistory = [];
+                    await refreshPainMapState();
+
                 } catch (e) {
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
                     alert("Fehler: " + e.message);
@@ -2247,7 +2266,7 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
-                    userInfoDiv.textContent = `Angemeldet: ${user.email}`;
+                    if (userInfoDiv) userInfoDiv.style.display = 'none'; // NEU: User-Info ausblenden
 
                     currentEditingDate = new Date();
                     updateSleepTimeLabel();
@@ -2263,16 +2282,22 @@
                             const doc = snapshot.docs[0];
                             currentEntryId = doc.id;
                             fillFormWithData(doc.data());
-                            userInfoDiv.textContent += " (Eintrag von heute geladen ✏️)";
                         } else {
                             resetForm(); 
                         }
+                        
+                        // NEU: Karte direkt beim Login (für Desktop) initialisieren
+                        await refreshPainMapState();
+                        
                     } catch (e) {
                         console.error("Fehler beim Laden des heutigen Eintrags:", e);
                         resetForm();
                     }
                 } else {
-                    userInfoDiv.textContent = 'Nicht angemeldet.';
+                    if (userInfoDiv) {
+                        userInfoDiv.style.display = 'block'; // Zeigen, wenn abgemeldet
+                        userInfoDiv.textContent = 'Nicht angemeldet.';
+                    }
                     if (signInButton) signInButton.style.display = 'block';
                     resetForm(); 
                 }
