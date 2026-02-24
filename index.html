@@ -15,13 +15,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    flatpickr("#searchDate", {
-        inline: true, // Dies zeigt den Kalender dauerhaft an
-        locale: "de"
-    });
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -832,60 +825,6 @@
             .middle-col::-webkit-scrollbar-track, .right-col::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb, .right-col::-webkit-scrollbar-thumb { background: #45456a; border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb:hover, .right-col::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
-        }
-
-        /* Flatpickr Layout-Fixes & Design-Anpassung */
-        .flatpickr-calendar.inline {
-            background: rgba(25, 25, 45, 0.95) !important;
-            border: 1px solid #45456a !important;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4) !important;
-            color: #fff !important;
-            margin: 10px auto !important;
-            width: 100% !important; /* Passt sich der Spaltenbreite an */
-            max-width: 300px;
-        }
-
-        /* Pfeile (Navigations-Buttons) verkleinern */
-        .flatpickr-prev-month, .flatpickr-next-month {
-            padding: 5px !important;
-            height: 30px !important;
-        }
-        .flatpickr-prev-month svg, .flatpickr-next-month svg {
-            width: 10px !important;
-            fill: #00f2fe !important; /* Dein Cyan-Farbton */
-        }
-
-        /* Monat und Jahr (Menü) Fix */
-        .flatpickr-current-month {
-            font-size: 1rem !important;
-            color: #fff !important;
-            padding: 0 !important;
-        }
-        .flatpickr-monthDropdown-months {
-            background: #1a1a2e !important;
-            color: #fff !important;
-            padding: 2px !important;
-            border-radius: 5px;
-        }
-
-        /* Wochentage und Zahlen */
-        .flatpickr-weekday {
-            color: #aaaaaa !important;
-        }
-        .flatpickr-day {
-            color: #fff !important;
-            border-radius: 8px !important;
-        }
-        .flatpickr-day.today {
-            border-color: #00f2fe !important;
-        }
-        .flatpickr-day.selected {
-            background: #00f2fe !important;
-            color: #0a0a1a !important;
-            border: none !important;
-        }
-        .flatpickr-day:hover {
-            background: #3a3a5a !important;
         }
     </style>
 </head>
@@ -2139,23 +2078,6 @@
             generateRatingBoxes('movement-flow-pain-rating');
             generateRatingBoxes('immunesystem');
             generateRatingBoxes('digestion');
-
-            flatpickr("#searchDate", {
-                inline: true,
-                locale: "de",
-                altInput: true,       // Zeigt ein schöneres Format an
-                altFormat: "d. F Y",  // z.B. 24. Februar 2024
-                dateFormat: "Y-m-d",
-                // Verhindert, dass das originale Input-Feld das Layout stört
-                static: true, 
-                monthSelectorType: "static"
-                });
-                onChange: function(selectedDates, dateStr, instance) {
-                    // Optional: Hier könnten Sie direkt die Suchfunktion triggern, 
-                    // sobald ein Datum im Kalender angeklickt wird
-                    console.log("Neues Datum gewählt:", dateStr);
-                }
-            });
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
