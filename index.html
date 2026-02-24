@@ -15,6 +15,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    flatpickr("#searchDate", {
+        inline: true, // Dies zeigt den Kalender dauerhaft an
+        locale: "de"
+    });
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -2078,6 +2085,17 @@
             generateRatingBoxes('movement-flow-pain-rating');
             generateRatingBoxes('immunesystem');
             generateRatingBoxes('digestion');
+
+            flatpickr("#searchDate", {
+                inline: true,      // Kalender wird dauerhaft angezeigt
+                locale: "de",      // Deutsche Sprache
+                dateFormat: "Y-m-d", // Format wie in Ihrer Firebase-Logik benötigt
+                onChange: function(selectedDates, dateStr, instance) {
+                    // Optional: Hier könnten Sie direkt die Suchfunktion triggern, 
+                    // sobald ein Datum im Kalender angeklickt wird
+                    console.log("Neues Datum gewählt:", dateStr);
+                }
+            });
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
