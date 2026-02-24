@@ -11,12 +11,11 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
-    <!-- Flowbite CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -714,12 +713,6 @@
             color: #ffffff;
         }
 
-        /* --- Datepicker Visibility --- */
-        #desktopDatepickerContainer {
-            display: none;
-            margin-bottom: 15px;
-        }
-
 
         @media (max-width: 480px) {
             body { padding: 0; }
@@ -832,14 +825,6 @@
             .middle-col::-webkit-scrollbar-track, .right-col::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb, .right-col::-webkit-scrollbar-thumb { background: #45456a; border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb:hover, .right-col::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
-            
-            /* Datepicker Sichtbarkeit für Desktop */
-            #mobileDateSearch {
-                display: none;
-            }
-            #desktopDatepickerContainer {
-                display: block;
-            }
         }
     </style>
 </head>
@@ -1158,17 +1143,10 @@
                 <div class="category-item">
                     <label>Historie & Statistik 📊</label>
                     <div class="history-controls">
-                        <!-- Mobile date search -->
-                        <div class="history-search-group" id="mobileDateSearch">
+                        <div class="history-search-group">
                             <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                             <button class="action-button btn-search" id="searchBtn">Laden</button>
                         </div>
-
-                        <!-- Desktop inline datepicker -->
-                        <div id="desktopDatepickerContainer">
-                            <div inline-datepicker id="desktopDatepicker"></div>
-                        </div>
-
                         <button class="action-button btn-stats" id="painMapBtn">Schmerzkarte bearbeiten</button>
                         <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
                         <button class="action-button btn-stats" onclick="exportDailyEntries()">Auswertung Google Colab (.py)</button>
@@ -1252,10 +1230,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <!-- Flowbite JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite-datepicker@1/dist/js/locales/de.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -2367,33 +2341,6 @@
                     resetForm(); 
                 }
             });
-
-            // Flowbite Datepicker Initialization
-            const datepickerEl = document.getElementById('desktopDatepicker');
-            if (datepickerEl) {
-                const datepicker = new Datepicker(datepickerEl, {
-                    language: 'de',
-                    todayBtn: true,
-                    todayBtnMode: 1, // 0 = move, 1 = select
-                    autohide: false, // Wichtig, damit er offen bleibt
-                });
-
-                datepickerEl.addEventListener('changeDate', async (event) => {
-                    const selectedDate = event.detail.date;
-                    
-                    // Datum in YYYY-MM-DD formatieren
-                    const year = selectedDate.getFullYear();
-                    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(selectedDate.getDate()).padStart(2, '0');
-                    const formattedDate = `${year}-${month}-${day}`;
-
-                    // Wert des (jetzt versteckten) Inputs setzen
-                    document.getElementById('searchDate').value = formattedDate;
-
-                    // Bestehende Ladefunktion aufrufen
-                    await loadEntryByDate();
-                });
-            }
         });
     </script>
 </body>
