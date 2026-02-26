@@ -712,71 +712,6 @@
             box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
             color: #ffffff;
         }
-        
-        /* --- NEUE STILE FÜR DEN DESKTOP-KALENDER --- */
-        #desktopDatePickerContainer {
-            display: none; /* Standardmäßig ausgeblendet */
-            margin-top: 15px;
-        }
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 0 5px;
-        }
-        .calendar-nav {
-            cursor: pointer;
-            font-size: 1.8em;
-            color: #ccc;
-            transition: color 0.2s;
-            user-select: none;
-            padding: 0 10px;
-        }
-        .calendar-nav:hover {
-            color: #00f2fe;
-        }
-        #calendarMonthYear {
-            font-weight: 600;
-            font-size: 1.1em;
-            color: #fff;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            text-align: center;
-        }
-        .calendar-grid div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 32px;
-            font-size: 0.85em;
-            border-radius: 50%;
-            transition: background-color 0.2s, color 0.2s, border 0.2s;
-        }
-        .calendar-weekday {
-            font-weight: bold;
-            color: #888;
-            cursor: default !important;
-        }
-        .calendar-day {
-             cursor: pointer;
-        }
-        .calendar-day:hover {
-            background-color: #3a3a5a;
-        }
-        .calendar-day.today {
-            border: 1px solid #00f2fe;
-        }
-        .calendar-day.selected {
-            background-color: #007bff;
-            color: white !important;
-            font-weight: bold;
-            border: 1px solid #007bff;
-        }
-        /* --- ENDE NEUE STILE --- */
 
 
         @media (max-width: 480px) {
@@ -890,11 +825,6 @@
             .middle-col::-webkit-scrollbar-track, .right-col::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb, .right-col::-webkit-scrollbar-thumb { background: #45456a; border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb:hover, .right-col::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
-
-            /* --- NEUE DESKTOP REGEL --- */
-            #desktopDatePickerContainer {
-                display: block; /* Kalender auf dem Desktop anzeigen */
-            }
         }
     </style>
 </head>
@@ -1217,7 +1147,6 @@
                             <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                             <button class="action-button btn-search" id="searchBtn">Laden</button>
                         </div>
-                        <div id="desktopDatePickerContainer"></div>
                         <button class="action-button btn-stats" id="painMapBtn">Schmerzkarte bearbeiten</button>
                         <button class="action-button btn-stats" id="statsBtn">Statistik anzeigen</button>
                         <button class="action-button btn-stats" onclick="exportDailyEntries()">Auswertung Google Colab (.py)</button>
@@ -1340,112 +1269,6 @@
         frontImage.src = 'body_front.png'; 
         const backImage = new Image();
         backImage.src = 'body_back.png';   
-
-        // --- NEUE KALENDER LOGIK ---
-        let calendarDate = new Date();
-
-        function renderDesktopCalendar() {
-            const calendarContainer = document.getElementById('desktopDatePickerContainer');
-            if (!calendarContainer) return;
-
-            calendarDate.setDate(1);
-            const month = calendarDate.getMonth();
-            const year = calendarDate.getFullYear();
-            
-            const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-            const header = `
-                <div class="calendar-header">
-                    <span id="calPrev" class="calendar-nav">&lt;</span>
-                    <span id="calendarMonthYear">${monthNames[month]} ${year}</span>
-                    <span id="calNext" class="calendar-nav">&gt;</span>
-                </div>
-            `;
-            
-            let days = '<div class="calendar-grid">';
-            const weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-            weekdays.forEach(day => days += `<div class="calendar-weekday">${day}</div>`);
-            
-            const firstDayIndex = calendarDate.getDay();
-            const lastDay = new Date(year, month + 1, 0).getDate();
-            
-            for (let i = 0; i < firstDayIndex; i++) {
-                days += `<div></div>`;
-            }
-            
-            for (let i = 1; i <= lastDay; i++) {
-                let todayClass = '';
-                const today = new Date();
-                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                    todayClass = ' today';
-                }
-                days += `<div class="calendar-day${todayClass}" data-day="${i}">${i}</div>`;
-            }
-            days += '</div>';
-            
-            calendarContainer.innerHTML = header + days;
-            
-            document.getElementById('calPrev').addEventListener('click', () => {
-                calendarDate.setMonth(calendarDate.getMonth() - 1);
-                renderDesktopCalendar();
-                updateCalendarSelection();
-            });
-            
-            document.getElementById('calNext').addEventListener('click', () => {
-                calendarDate.setMonth(calendarDate.getMonth() + 1);
-                renderDesktopCalendar();
-                updateCalendarSelection();
-            });
-
-            document.querySelectorAll('.calendar-day').forEach(dayElem => {
-                dayElem.addEventListener('click', (e) => {
-                    const day = e.target.dataset.day;
-                    if (!day) return;
-
-                    const selectedDate = new Date(year, month, day);
-                    const formattedDate = selectedDate.toISOString().split('T')[0];
-                    
-                    const searchDateInput = document.getElementById('searchDate');
-                    searchDateInput.value = formattedDate;
-                    searchDateInput.type = 'date'; 
-
-                    loadEntryByDate();
-                });
-            });
-        }
-
-        function updateCalendarSelection() {
-            const searchDateValue = document.getElementById('searchDate').value;
-            if (!searchDateValue) {
-                // Remove selection if input is empty
-                 const currentlySelected = document.querySelector('.calendar-day.selected');
-                if (currentlySelected) {
-                    currentlySelected.classList.remove('selected');
-                }
-                return;
-            };
-
-            const selected = new Date(searchDateValue);
-            // Adjust for timezone offset to get correct date parts
-            selected.setMinutes(selected.getMinutes() + selected.getTimezoneOffset());
-            
-            // Re-render calendar if the month/year is different
-            if (selected.getFullYear() !== calendarDate.getFullYear() || selected.getMonth() !== calendarDate.getMonth()) {
-                calendarDate = new Date(selected.getFullYear(), selected.getMonth(), 1);
-                renderDesktopCalendar();
-            }
-
-            const day = selected.getDate();
-            const currentlySelected = document.querySelector('.calendar-day.selected');
-            if (currentlySelected) {
-                currentlySelected.classList.remove('selected');
-            }
-            
-            const newSelected = document.querySelector(`.calendar-day[data-day="${day}"]`);
-            if (newSelected) {
-                newSelected.classList.add('selected');
-            }
-        }
-        // --- ENDE NEUE KALENDER LOGIK ---
 
 
         function fillFormWithData(data) {
@@ -1759,23 +1582,11 @@
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.textContent = 'Speichern';
             submitBtn.style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)";
-            
-            // NEU: Kalenderauswahl zurücksetzen
-            if (window.innerWidth >= 1024) {
-                 const searchDateInput = document.getElementById('searchDate');
-                 searchDateInput.value = '';
-                 searchDateInput.type = 'text';
-                 updateCalendarSelection();
-            }
         }
 
         async function loadEntryByDate() {
             const dateInput = document.getElementById('searchDate').value;
             const user = auth.currentUser;
-
-            if (window.innerWidth >= 1024) {
-                updateCalendarSelection();
-            }
 
             if (!user) { alert("Bitte anmelden."); return; }
             if (!dateInput) { alert("Bitte ein Datum wählen."); return; }
@@ -1812,6 +1623,7 @@
                     currentEntryId = doc.id; 
                     fillFormWithData(data);
                     
+                    // NEU: Schmerzkarte für das geladene Datum sofort aktualisieren
                     await refreshPainMapState();
                     
                     alert(`Eintrag vom ${day}.${month+1}.${year} geladen. Sie können ihn jetzt bearbeiten.`);
@@ -2104,9 +1916,11 @@
             }
         }
         
+        // NEU: Zentrale Funktion, um die Historie zu laden und die Karte zu initialisieren
         async function refreshPainMapState() {
             if (!auth.currentUser) return;
             
+            // 1. Historie laden, falls sie noch leer ist
             if (painMapDateHistory.length === 0) {
                 try {
                     const snapshot = await db.collection("dailyEntries")
@@ -2126,6 +1940,7 @@
                 }
             }
 
+            // 2. Datum setzen und UI aktualisieren
             currentPainMapDate = new Date(currentEditingDate);
             updatePainMapDisplayForDate(currentPainMapDate);
             currentPainMapView = 'front';
@@ -2133,6 +1948,7 @@
             redrawPainMapCanvas();
         }
 
+        // ANGEPASST: Wird nur noch vom Handy-Button aufgerufen, um das Overlay zu öffnen
         async function openPainMapPopup() {
             document.getElementById('painMapOverlay').style.display = 'flex';
             await refreshPainMapState();
@@ -2254,16 +2070,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // NEU: Desktop-spezifisches Setup
-            if (window.innerWidth >= 1024) {
-                const searchDateInput = document.getElementById('searchDate');
-                searchDateInput.placeholder = "Datum im Kalender wählen...";
-                searchDateInput.onfocus = null;
-                searchDateInput.onblur = null;
-                renderDesktopCanvas();
-            }
-
-
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
@@ -2427,6 +2233,7 @@
                         resetForm(); 
                     }
 
+                    // NEU: Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
                     painMapDateHistory = [];
                     await refreshPainMapState();
 
@@ -2498,7 +2305,7 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
-                    if (userInfoDiv) userInfoDiv.style.display = 'none';
+                    if (userInfoDiv) userInfoDiv.style.display = 'none'; // NEU: User-Info ausblenden
 
                     currentEditingDate = new Date();
                     updateSleepTimeLabel();
@@ -2518,6 +2325,7 @@
                             resetForm(); 
                         }
                         
+                        // NEU: Karte direkt beim Login (für Desktop) initialisieren
                         await refreshPainMapState();
                         
                     } catch (e) {
@@ -2526,7 +2334,7 @@
                     }
                 } else {
                     if (userInfoDiv) {
-                        userInfoDiv.style.display = 'block';
+                        userInfoDiv.style.display = 'block'; // Zeigen, wenn abgemeldet
                         userInfoDiv.textContent = 'Nicht angemeldet.';
                     }
                     if (signInButton) signInButton.style.display = 'block';
