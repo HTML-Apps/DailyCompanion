@@ -2389,12 +2389,15 @@
                 inline: true,      // Zeigt den Kalender dauerhaft an
                 "locale": "de",    // Stellt die Sprache auf Deutsch
                 defaultDate: "today", // Startet mit dem heutigen Datum
+
+                // NEU: Sagt flatpickr, wie es Datums-Strings (z.B. aus dem Textfeld) lesen soll.
+                dateFormat: "d.m.Y", 
                 
                 // Diese Funktion wird bei jeder Datumsänderung aufgerufen
                 onChange: function(selectedDates, dateStr, instance) {
                     if (selectedDates.length > 0) {
                         // Formatiert das Datum in 'YYYY-MM-DD' für das <input type="date">
-                        const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d");
+                        const formattedDate = instance.formatDate(selectedDates[0], "d.m.Y");
                         
                         // Setzt den Wert des Such-Datum-Feldes
                         searchDateInput.value = formattedDate;
