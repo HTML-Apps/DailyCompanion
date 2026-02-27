@@ -15,6 +15,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+    <!-- ====== START: Flatpickr Bibliotheken ====== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
+    <!-- ====== ENDE: Flatpickr Bibliotheken ====== -->
+
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -827,6 +834,59 @@
             .middle-col::-webkit-scrollbar-thumb, .right-col::-webkit-scrollbar-thumb { background: #45456a; border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb:hover, .right-col::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
         }
+
+        /* ====== START: Code für Desktop Date Picker ====== */
+
+        /* Container für den Kalender, standardmäßig unsichtbar */
+        #desktop-datepicker-wrapper {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        /* Flatpickr Kalender-Anpassungen (übernommen und verfeinert) */
+        .flatpickr-calendar {
+            background: transparent;
+            width: 100% !important;
+            box-shadow: none !important;
+            font-family: 'Poppins', sans-serif;
+        }
+        .flatpickr-months .flatpickr-month, .flatpickr-weekdays {
+            background: transparent;
+            color: #FFFFFF;
+        }
+        .flatpickr-months .flatpickr-prev-month svg, .flatpickr-months .flatpickr-next-month svg {
+            fill: #00f2fe;
+        }
+        .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
+            fill: #4facfe;
+        }
+        span.flatpickr-weekday {
+            color: #87879e;
+            font-weight: 500;
+        }
+        .flatpickr-day {
+            border: 1px solid transparent;
+            color: #D0D0D0;
+            font-weight: 400;
+        }
+        .flatpickr-day:hover {
+            background: rgba(0, 242, 254, 0.1);
+        }
+        .flatpickr-day.today {
+            border-color: #00f2fe;
+        }
+        .flatpickr-day.selected, .flatpickr-day.selected:hover {
+            background: #00f2fe;
+            border-color: #4facfe;
+            color: #0a0a1a;
+            font-weight: 600;
+        }
+        .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay {
+            opacity: 0.2;
+        }
+
+        /* ====== ENDE: Code für Desktop Date Picker ====== */
+
     </style>
 </head>
 <body>
@@ -1144,6 +1204,9 @@
                 <div class="category-item">
                     <label>Historie & Statistik 📊</label>
                     <div class="history-controls">
+                        <div id="desktop-datepicker-wrapper">
+                            <div id="desktop-datepicker-container"></div>
+                        </div>
                         <div class="history-search-group">
                             <input type="text" id="searchDate" placeholder="Datum wählen..." onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="styled-input">
                             <button class="action-button btn-search" id="searchBtn">Laden</button>
@@ -2302,6 +2365,53 @@
                     });
                 });
             }
+
+            // ====== START: Logik für Desktop Date Picker ======
+
+            // Das Datumseingabefeld, das wir aktualisieren wollen
+            const searchDateInput = document.getElementById('searchDate');
+
+            // Initialisiert den Inline-Kalender im Desktop-Container
+            const desktopPicker = flatpickr("#desktop-datepicker-container", {
+                inline: true,      // Zeigt den Kalender dauerhaft an
+                "locale": "de",    // Stellt die Sprache auf Deutsch
+                defaultDate: "today", // Startet mit dem heutigen Datum
+                
+                // Diese Funktion wird bei jeder Datumsänderung aufgerufen
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        // Formatiert das Datum in 'YYYY-MM-DD' für das <input type="date">
+                        const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d");
+                        
+                        // Setzt den Wert des Such-Datum-Feldes
+                        searchDateInput.value = formattedDate;
+                    }
+                }
+            });
+
+            // Funktionalität, um den Kalender auf dem in #searchDate ausgewählten Datum zu positionieren
+            searchDateInput.addEventListener('change', () => {
+                if (searchDateInput.value) {
+                    desktopPicker.setDate(searchDateInput.value, false); // 'false' verhindert, dass onChange erneut ausgelöst wird
+                }
+            });
+
+            // CSS-Klasse basierend auf der Fenstergröße umschalten
+            function toggleDesktopPickerVisibility() {
+                const pickerWrapper = document.getElementById('desktop-datepicker-wrapper');
+                if (window.innerWidth >= 1024) {
+                    pickerWrapper.style.display = 'block';
+                } else {
+                    pickerWrapper.style.display = 'none';
+                }
+            }
+
+            // Führt die Funktion beim Laden und bei Größenänderung des Fensters aus
+            window.addEventListener('resize', toggleDesktopPickerVisibility);
+            toggleDesktopPickerVisibility(); // Initialer Aufruf
+
+            // ====== ENDE: Logik für Desktop Date Picker ======
+
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
