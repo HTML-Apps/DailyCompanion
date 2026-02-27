@@ -2393,7 +2393,7 @@
                 onChange: function(selectedDates, dateStr, instance) {
                     if (selectedDates.length > 0) {
                         // Formatiert das Datum in 'YYYY-MM-DD' für das <input type="date">
-                        const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d");
+                        const formattedDate = instance.formatDate(selectedDates[0], "d.m.Y");
                         
                         // Setzt den Wert des Such-Datum-Feldes
                         searchDateInput.value = formattedDate;
