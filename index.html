@@ -2312,7 +2312,7 @@
 
                     // NEU: Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
                     painMapDateHistory = [];
-                    //await refreshPainMapState(); es soll verhindert werden, dass nach erstmaligem Speichern, da Formular blank neugeladen wird. 
+                    await refreshPainMapState(); es soll verhindert werden, dass nach erstmaligem Speichern, das Formular blank neugeladen wird. 
 
                 } catch (e) {
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
