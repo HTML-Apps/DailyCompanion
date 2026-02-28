@@ -2305,14 +2305,25 @@
                         alert("Eintrag erfolgreich aktualisiert!");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
-                        await db.collection("dailyEntries").add(dataToSave);
+                        
+                        // 1. Dokument in Firebase anlegen und die Referenz (docRef) abfangen
+                        const docRef = await db.collection("dailyEntries").add(dataToSave);
                         alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
-                        resetForm(); 
+                        
+                        // 2. Die neue ID speichern, damit bei erneuten Klicks aktualisiert (update) statt neu angelegt (add) wird
+                        currentEntryId = docRef.id; 
+                        
+                        // 3. Den Button optisch in den Update-Modus versetzen (genau wie in deiner fillFormWithData-Funktion)
+                        const submitBtn = document.getElementById('submitBtn');
+                        submitBtn.textContent = "Eintrag aktualisieren";
+                        submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
+                        
+                        // 4. WICHTIG: resetForm() weglassen, damit die Daten im Formular stehen bleiben!
                     }
 
                     // NEU: Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
                     painMapDateHistory = [];
-                    //await refreshPainMapState(); es soll verhindert werden, dass nach erstmaligem Speichern, da Formular blank neugeladen wird. 
+                    //await refreshPainMapState(); 
 
                 } catch (e) {
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
