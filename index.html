@@ -721,6 +721,21 @@
             color: #ffffff;
         }
 
+        /* --- NEUES STATISTIK SPLIT-LAYOUT --- */
+
+        /* Standard (Mobile First): Untereinander mit Abstand */
+        .stats-split-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .stats-split-container .chart-container,
+        .stats-split-container .stats-card {
+            width: 100%;
+        }
+
 
         @media (max-width: 480px) {
             body { padding: 0; }
@@ -899,6 +914,19 @@
             font-size: 0.8rem;
         }
         /* ====== ENDE: Code für Desktop Date Picker ====== */
+
+        /* Desktop: Nebeneinander, jeweils 50% Platz */
+        .stats-split-container {
+            flex-direction: row;
+            align-items: flex-start; /* Zieht beide Boxen auf die gleiche Ausrichtungshöhe */
+        }
+        
+        .stats-split-container .chart-container,
+        .stats-split-container .stats-card {
+            width: 50%;
+            flex: 1; /* Sorgt dafür, dass sich der Platz gleichmäßig aufteilt */
+            min-width: 0; /* Verhindert, dass die Canvas das Layout sprengt */
+        }
 
     </style>
 </head>
@@ -1253,14 +1281,16 @@
                     <span id="bestDayScore">--</span>
                 </div>
                 <p style="text-align:center; font-size:0.9em; margin-bottom:5px;">Top 5 vs. Flop 5 Tage</p>
-                <div class="chart-container">
-                    <canvas id="statsChart"></canvas>
-                </div>
+                <div class="stats-split-container">
+                    <div class="chart-container" style="margin-top: 0;">
+                        <canvas id="statsChart"></canvas>
+                    </div>
 
-                <div class="stats-card" style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
-                    <h4 style="color: #00f2fe; margin-top: 0;">Tag-Statistik</h4>
-                    <div id="tagStatsList" style="font-size: 0.9em; max-height: 400px; overflow-y: auto;">
+                    <div class="stats-card" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                        <h4 style="color: #00f2fe; margin-top: 0;">Tag-Statistik</h4>
+                        <div id="tagStatsList" style="font-size: 0.9em; max-height: 400px; overflow-y: auto;">
                         </div>
+                    </div>
                 </div>
                 
                 <div class="chart-container" style="margin-top: 30px;">
