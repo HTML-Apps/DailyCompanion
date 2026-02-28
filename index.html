@@ -848,6 +848,27 @@
             .middle-col::-webkit-scrollbar-track, .right-col::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb, .right-col::-webkit-scrollbar-thumb { background: #45456a; border-radius: 10px;}
             .middle-col::-webkit-scrollbar-thumb:hover, .right-col::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
+
+            /* NUR HIER wird das Nebeneinander-Layout aktiviert */
+            .stats-split-container {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
+            .stats-split-container .chart-container,
+            .stats-split-container .stats-card {
+                flex: 1; /* Teilt den Platz 50/50 auf */
+                width: 50%;
+                margin-bottom: 0;
+            }
+
+            /* Damit das Chart im Desktop-Modus nicht zu hoch wird */
+            .stats-split-container .chart-container {
+                height: 500px; 
+            }
+    
         }
 
         /* ====== START: Code für Desktop Date Picker ====== */
@@ -916,16 +937,16 @@
         /* ====== ENDE: Code für Desktop Date Picker ====== */
 
         /* Desktop: Nebeneinander, jeweils 50% Platz */
+        /* Basis-Stil für den Container */
         .stats-split-container {
-            flex-direction: row;
-            align-items: flex-start; /* Zieht beide Boxen auf die gleiche Ausrichtungshöhe */
+            width: 100%;
+            display: block; /* Standardmäßig untereinander */
         }
-        
+
         .stats-split-container .chart-container,
         .stats-split-container .stats-card {
-            width: 50%;
-            flex: 1; /* Sorgt dafür, dass sich der Platz gleichmäßig aufteilt */
-            min-width: 0; /* Verhindert, dass die Canvas das Layout sprengt */
+            width: 100%;
+            margin-bottom: 20px;
         }
 
     </style>
