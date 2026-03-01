@@ -1956,7 +1956,7 @@
                 crpValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'mg/L', dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null, showTrend: true },
                 sport: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null, showTrend: false },
                 painmeds: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Einnahme', dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null, showTrend: false },
-                stretching: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.stretchingStatus === 'Gemacht' || entry.stretchingStatus === 'Physio') ? 1 : null, showTrend: false },
+                stretching: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 2.5, yAxisLabel: 'Aktivität', dataExtractor: (entry) => { if (entry.stretchingStatus === 'Gemacht') return 1; if (entry.stretchingStatus === 'Physio') return 2; return null }, showTrend: false},
                 gluten: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Konsum', dataExtractor: (entry) => (entry.glutenStatus === 'Ja') ? 1 : null, showTrend: false },
                 milk: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Konsum', dataExtractor: (entry) => (entry.milkStatus === 'Ja') ? 1 : null, showTrend: false }
             };
@@ -2003,9 +2003,55 @@
                     responsive: true, maintainAspectRatio: false,
                     scales: {
                         x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy', displayFormats: { day: 'dd.MM.yyyy', week: 'dd.MM.yyyy', month: 'MM.yyyy', quarter: '[Q]Q.yyyy', year: 'yyyy' } }, ticks: { color: '#888', autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { min: config.yAxisMin, max: config.yAxisMax, beginAtZero: true, title: { display: true, text: config.yAxisLabel, color: '#ccc' }, ticks: { color: '#ccc', callback: (value) => (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') ? (value === 1 ? 'Ja' : null) : value }, grid: { color: 'rgba(255,255,255,0.1)' } }
-                    },
-                    plugins: { tooltip: { callbacks: { title: (context) => (context[0] && context[0].parsed && context[0].parsed.x) ? new Date(context[0].parsed.x).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '', label: (context) => (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') ? (context.parsed.y === 1 ? `${context.dataset.label}: Ja` : '') : `${context.dataset.label || ''}: ${context.parsed.y}` } } }
+                        y: { 
+                            min: config.yAxisMin, 
+                            max: config.yAxisMax, 
+                            beginAtZero: true, 
+                            title: { display: true, text: config.yAxisLabel, color: '#ccc' }, 
+                            ticks: { 
+                                color: '#ccc', 
+                                stepSize: 1, // Sorgt dafür, dass keine halben Schritte (1.5) angezeigt werden
+                                callback: (value) => {
+                                    // Neuer Logik-Block für Stretching
+                                    if (metricKey === 'stretching') {
+                                        if (value === 1) return 'Gemacht';
+                                        if (value === 2) return 'Physio';
+                                        return null; // Blendet alle anderen Zahlen (0, 3 etc.) aus
+                                    }
+                                    
+                                    // Deine bisherige Logik für den Rest
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') {
+                                        return value === 1 ? 'Ja' : null;
+                                    }
+                                    return value;
+                                } 
+                            }, 
+                            grid: { color: 'rgba(255,255,255,0.1)' } 
+                        },
+                    plugins: { 
+                        tooltip: { 
+                            callbacks: { 
+                                title: (context) => (context[0] && context[0].parsed && context[0].parsed.x) ? new Date(context[0].parsed.x).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '', 
+                                label: (context) => {
+                                    const yValue = context.parsed.y;
+                                    
+                                    // Neuer Logik-Block für Stretching
+                                    if (metricKey === 'stretching') {
+                                        if (yValue === 1) return `${context.dataset.label}: Gemacht`;
+                                        if (yValue === 2) return `${context.dataset.label}: Physio`;
+                                        return '';
+                                    }
+
+                                    // Deine bisherige Logik für den Rest
+                                    if (config.showTrend === false && metricKey !== 'crpValue' && metricKey !== 'morningStiffness') {
+                                        return yValue === 1 ? `${context.dataset.label}: Ja` : '';
+                                    }
+                                    
+                                    return `${context.dataset.label || ''}: ${yValue}`;
+                                } 
+                            } 
+                        } 
+                    }    
                 }
             });
         }
