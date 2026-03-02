@@ -1376,6 +1376,19 @@
                     <select id="tagAnalysisSelector" style="width:100%; padding:10px; margin-bottom:10px; background:#2a2a4a; color:white; border:1px solid #45456a; border-radius:10px;">
                         <option value="" disabled selected>Bitte Tag wählen...</option>
                     </select>
+
+
+                    <label for="yAxisSelector">Y-Achsen-Wert:</label>
+                        <select id="yAxisSelector">
+                            <option value="overallAverage" selected>Gesamtbilanz</option>
+                            <option value="moodRating">Stimmung</option>
+                            <option value="neckPainRating">Nackenschmerzen</option>
+                            <option value="shoulderPainRating">Schulterschmerzen</option>
+                            <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
+                            <option value="movementFlowPainRating">Bewegungsfluss</option>
+                            <option value="immunesystemRating">Immunsystem</option>
+                            <option value="digestionRating">Verdauung</option>
+                        </select>
                     
                     <canvas id="tagAnalysisChart"></canvas>
                     <p style="text-align:center; font-size: 0.8em; color: #aaa; margin-bottom: 10px;">Timeline</p>
@@ -2083,12 +2096,34 @@
             });
         }
 
-        function renderTagAnalysisChart(entries, selectedTag) {
+        // Hilfsobjekt für schöne Anzeigenamen (optional, aber empfohlen)
+        const yAxisLabels = {
+            overallAverage: 'Gesamtbilanz Score',
+            moodRating: 'Stimmung (1-10)',
+            neckPainRating: 'Nackenschmerzen (1-10)',
+            shoulderPainRating: 'Schulterschmerzen (1-10)',
+            lowerBodyPainRating: 'Unterkörperschmerzen (1-10)',
+            movementFlowPainRating: 'Bewegungsfluss (1-10)',
+            immunesystemRating: 'Immunsystem (1-10)',
+            digestionRating: 'Verdauung (1-10)'
+        };
+
+        function renderTagAnalysisChart(entries, selectedTag, yAxisKey) {
             const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
             
-            const validEntries = entries.filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag)).sort((a, b) => a.date - b.date);
+            const validEntries = entries
+                .filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag))
+                .sort((a, b) => a.date - b.date);
 
-            const scatterData = validEntries.map(e => ({ x: e.date, y: e.overallAverage || 0, details: e }));
+            // ========================================================================
+            // KERNÄNDERUNG: Die Y-Achse wird jetzt dynamisch über den 'yAxisKey' befüllt.
+            // Wir nutzen die [key]-Notation, um auf die Eigenschaft zuzugreifen.
+            // ========================================================================
+            const scatterData = validEntries.map(e => ({
+                x: e.date,
+                y: e[yAxisKey] || 0, // Hier passiert die Magie!
+                details: e
+            }));
 
             if (tagChartInstance) tagChartInstance.destroy();
 
@@ -2098,20 +2133,51 @@
                     datasets: [{
                         label: `Vorkommen: ${selectedTag} (${validEntries.length}x)`,
                         data: scatterData,
-                        backgroundColor: '#00f2fe', borderColor: '#00c7ff',
-                        pointRadius: 6, pointHoverRadius: 8
+                        backgroundColor: '#00f2fe',
+                        borderColor: '#00c7ff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        x: { type: 'time', time: { unit: 'day', displayFormats: { day: 'dd.MM.yyyy' }, tooltipFormat: 'dd.MM.yyyy' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
-                        y: { min: 0, max: 10, title: { display: true, text: 'Tagesbilanz Score', color: '#666' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#ccc' } }
+                        x: {
+                            type: 'time',
+                            time: { unit: 'day', displayFormats: { day: 'dd.MM.yyyy' }, tooltipFormat: 'dd.MM.yyyy' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#888' }
+                        },
+                        y: {
+                            min: 0,
+                            max: 10,
+                            // ANPASSUNG: Der Titel der Y-Achse ist jetzt auch dynamisch.
+                            title: {
+                                display: true,
+                                text: yAxisLabels[yAxisKey] || 'Wert', // Nutzt den schönen Namen aus dem Hilfsobjekt
+                                color: '#666'
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#ccc' }
+                        }
                     },
-                    plugins: { tooltip: { callbacks: { label: (context) => `Datum: ${context.raw.x.toLocaleDateString('de-DE')} | Score: ${context.raw.y}` } } }
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                // ANPASSUNG: Der Tooltip ist ebenfalls dynamisch.
+                                label: (context) => {
+                                    const yLabel = yAxisLabels[yAxisKey] || 'Wert';
+                                    const dateStr = context.raw.x.toLocaleDateString('de-DE');
+                                    return `Datum: ${dateStr} | ${yLabel.split(' ')[0]}: ${context.raw.y}`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
+
 
         async function exportDailyEntries() {
             const confirmDownload = confirm("Möchten Sie die Daten herunterladen und Google Colab für Ihr Python-Projekt öffnen?");
