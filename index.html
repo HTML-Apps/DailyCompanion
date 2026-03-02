@@ -1416,6 +1416,12 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+
+            // App Check initialisieren
+        const appCheck = firebase.appCheck();
+        appCheck.activate(
+        'hveu29873lkmdsfew098r32iuew', // Den Key aus der App Check Konsole einfügen
+        true);
         
         let statsChartInstance = null;
         let tagChartInstance = null;
