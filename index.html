@@ -1378,6 +1378,19 @@
                         <option value="" disabled selected>Bitte Tag wählen...</option>
                     </select>
 
+                    <label for="yAxisSelector" style="display: block; margin-top: 15px; margin-bottom: 5px; color: #ccc;">Referenzwert für Y-Achse:</label>
+                    <select id="yAxisSelector" class="styled-input" style="margin-bottom: 10px;">
+                        <option value="overallAverage" selected>Gesamtbilanz</option>
+                        <option value="moodRating">Stimmung</option>
+                        <option value="neckPainRating">Nackenschmerzen</option>
+                        <option value="shoulderPainRating">Schulterschmerzen</option>
+                        <option value="lowerBodyPainRating">Unterkörperschmerzen</option>
+                        <option value="movementFlowPainRating">Bewegungsfluss</option>
+                        <option value="immunesystemRating">Immunsystem</option>
+                        <option value="digestionRating">Verdauung</option>
+                    </select>
+
+
 
                     <label for="yAxisSelector">Y-Achsen-Wert:</label>
                         <select id="yAxisSelector">
@@ -1865,6 +1878,8 @@
                 renderTrendChart(fullEntries, 'overallAverage');
 
                 const tagSelector = document.getElementById('tagAnalysisSelector');
+                const yAxisSelector = document.getElementById('yAxisSelector');
+
                 const uniqueTags = new Set();
                 fullEntries.forEach(entry => {
                     if (entry.selectedNotesTags && Array.isArray(entry.selectedNotesTags)) {
@@ -1882,13 +1897,24 @@
                     tagSelector.appendChild(option);
                 });
 
-                tagSelector.onchange = (e) => {
-                    renderTagAnalysisChart(fullEntries, e.target.value);
-                };
+                // Gemeinsame Funktion zum Neuzeichnen des Charts
+                function updateTagChart() {
+                    const selectedTag = tagSelector.value;
+                    const selectedYAxis = yAxisSelector.value;
+                    if (selectedTag) {
+                        renderTagAnalysisChart(fullEntries, selectedTag, selectedYAxis);
+                    }
+                }
 
+                // Event-Listener für BEIDE Dropdowns, die die gleiche Funktion aufrufen
+                tagSelector.onchange = updateTagChart;
+                yAxisSelector.onchange = updateTagChart;
+
+                // Initiales Laden des Charts, falls Tags vorhanden sind
                 if (sortedTags.length > 0) {
                     tagSelector.value = sortedTags[0];
-                    renderTagAnalysisChart(fullEntries, sortedTags[0]);
+                    // Rufen Sie die Funktion zum ersten Mal mit den Standardwerten auf
+                    updateTagChart(); 
                 }
             } catch (error) {
                 console.error("Stats Error:", error);
@@ -2109,6 +2135,19 @@
             digestionRating: 'Verdauung (1-10)'
         };
 
+        // Hilfsobjekt für schönere Achsenbeschriftungen
+        const yAxisLabels = {
+            overallAverage: 'Gesamtbilanz Score',
+            moodRating: 'Stimmung (1-10)',
+            neckPainRating: 'Nackenschmerzen (1-10)',
+            shoulderPainRating: 'Schulterschmerzen (1-10)',
+            lowerBodyPainRating: 'Unterkörperschmerzen (1-10)',
+            movementFlowPainRating: 'Bewegungsfluss (1-10)',
+            immunesystemRating: 'Immunsystem (1-10)',
+            digestionRating: 'Verdauung (1-10)'
+        };
+
+        // Passen Sie Ihre Funktion "renderTagAnalysisChart" wie folgt an:
         function renderTagAnalysisChart(entries, selectedTag, yAxisKey) {
             const ctx = document.getElementById('tagAnalysisChart').getContext('2d');
             
@@ -2116,13 +2155,10 @@
                 .filter(e => e.selectedNotesTags && Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(selectedTag))
                 .sort((a, b) => a.date - b.date);
 
-            // ========================================================================
             // KERNÄNDERUNG: Die Y-Achse wird jetzt dynamisch über den 'yAxisKey' befüllt.
-            // Wir nutzen die [key]-Notation, um auf die Eigenschaft zuzugreifen.
-            // ========================================================================
             const scatterData = validEntries.map(e => ({
                 x: e.date,
-                y: e[yAxisKey] || 0, // Hier passiert die Magie!
+                y: e[yAxisKey] || 0, // Statt "e.overallAverage" wird nun der dynamische Key verwendet
                 details: e
             }));
 
@@ -2156,8 +2192,8 @@
                             // ANPASSUNG: Der Titel der Y-Achse ist jetzt auch dynamisch.
                             title: {
                                 display: true,
-                                text: yAxisLabels[yAxisKey] || 'Wert', // Nutzt den schönen Namen aus dem Hilfsobjekt
-                                color: '#666'
+                                text: yAxisLabels[yAxisKey] || 'Wert', // Verwendet den Namen aus dem Hilfsobjekt
+                                color: '#ccc'
                             },
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             ticks: { color: '#ccc' }
@@ -2166,11 +2202,12 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                // ANPASSUNG: Der Tooltip ist ebenfalls dynamisch.
+                                // ANPASSUNG: Der Tooltip zeigt nun den korrekten Wert an.
                                 label: (context) => {
                                     const yLabel = yAxisLabels[yAxisKey] || 'Wert';
                                     const dateStr = context.raw.x.toLocaleDateString('de-DE');
-                                    return `Datum: ${dateStr} | ${yLabel.split(' ')[0]}: ${context.raw.y}`;
+                                    // Zeigt den Namen der Y-Achse und den Wert an
+                                    return `${yLabel.split(' ')[0]}: ${context.raw.y}`;
                                 }
                             }
                         }
@@ -2178,6 +2215,7 @@
                 }
             });
         }
+
 
 
         async function exportDailyEntries() {
