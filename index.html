@@ -1274,7 +1274,7 @@
                         <button type="button" class="notes-tag-button" data-tag="Mouthtape">Mouthtape</button> 
                         <button type="button" class="notes-tag-button" data-tag="Schlaf schlecht">Schlaf schlecht</button>
 
-                        <div class="tag-category" style="text-align:center">Biologika / JAK</div>
+                        <div id="biologika-countdown" class="tag-category" style="text-align:center">Biologika | JAK</div>
                         <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button>
                         <button type="button" class="notes-tag-button" data-tag="Brainfog">Fog</button> 
                         <button type="button" class="notes-tag-button" data-tag="Kopfweh">Kopfweh</button>
@@ -2682,6 +2682,71 @@
 
             // ====== ENDE: Logik für Desktop Date Picker ======
 
+
+            // ====== START: Code für Biologika Countdown ======
+
+            function updateBiologikaCountdown() {
+                // 1. Definiert alle zukünftigen Spritzentermine
+                const injectionDates = [];
+                const initialDates = [
+                    '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
+                ];
+                initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
+
+                // Berechnet die nachfolgenden Termine (alle 28 Tage) für die nächsten 5 Jahre
+                let lastDate = new Date(injectionDates[injectionDates.length - 1]);
+                for (let i = 0; i < 65; i++) { // ca. 5 Jahre
+                    lastDate.setDate(lastDate.getDate() + 28);
+                    injectionDates.push(new Date(lastDate));
+                }
+                
+                // 2. Holt das heutige Datum (ohne Uhrzeit, um korrekt zu vergleichen)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // 3. Sucht den nächsten anstehenden Termin in der Liste
+                const nextInjectionDate = injectionDates.find(date => date >= today);
+
+                const countdownElement = document.getElementById('biologika-countdown');
+                if (!countdownElement) {
+                    console.error("Element für Biologika-Countdown nicht gefunden!");
+                    return;
+                }
+
+                // 4. Wenn ein zukünftiger Termin gefunden wurde...
+                if (nextInjectionDate) {
+                    const diffTime = nextInjectionDate.getTime() - today.getTime();
+                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                    let countdownText = '';
+                    
+                    // 5. Prüft, ob heute der Spritzentag ist und zeigt die Benachrichtigung an
+                    if (diffDays === 0) {
+                        countdownText = 'heute';
+                        
+                        // Einmalige Benachrichtigung pro Tag über den Local Storage
+                        const storageKey = 'cosentyxAlert_' + nextInjectionDate.toISOString().split('T')[0];
+                        if (!localStorage.getItem(storageKey)) {
+                            alert('Cosentyx®-Spritze bitte heute verabreichen');
+                            localStorage.setItem(storageKey, 'true');
+                        }
+                    } else if (diffDays === 1) {
+                        countdownText = 'morgen';
+                    } else {
+                        countdownText = `in ${diffDays} Tagen`;
+                    }
+                    
+                    // 6. Aktualisiert den Text in der App
+                    countdownElement.innerHTML = `Biologika / JAK: nächste Spritze ${countdownText}`;
+
+                } else {
+                    countdownElement.textContent = 'Biologika / JAK: Keine nächste Spritze geplant.';
+                }
+            }
+
+            // ====== ENDE: Code für Biologika Countdown ======
+
+            updateBiologikaCountdown();
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
