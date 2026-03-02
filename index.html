@@ -2688,16 +2688,20 @@
             function updateBiologikaCountdown() {
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
+                // Die wöchentliche Startphase bleibt gleich
                 const initialDates = [
                     '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
                 ];
                 initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
 
-                // Berechnet die nachfolgenden Termine (alle 28 Tage) für die nächsten 5 Jahre
-                let lastDate = new Date(injectionDates[injectionDates.length - 1]);
-                for (let i = 0; i < 65; i++) { // ca. 5 Jahre
-                    lastDate.setDate(lastDate.getDate() + 28);
-                    injectionDates.push(new Date(lastDate));
+                // NEUE LOGIK: Berechnet die nachfolgenden monatlichen Termine (immer am 27.)
+                let monthlyDate = new Date('2026-04-27T00:00:00'); // Start der monatlichen Phase
+                for (let i = 0; i < 60; i++) { // Fügt Termine für die nächsten 5 Jahre hinzu
+                    // Fügt eine Kopie des aktuellen Datums zur Liste hinzu
+                    injectionDates.push(new Date(monthlyDate)); 
+                    
+                    // Setzt das Datum auf den gleichen Tag im nächsten Monat
+                    monthlyDate.setMonth(monthlyDate.getMonth() + 1);
                 }
                 
                 // 2. Holt das heutige Datum (ohne Uhrzeit, um korrekt zu vergleichen)
@@ -2713,7 +2717,7 @@
                     return;
                 }
 
-                // 4. Wenn ein zukünftiger Termin gefunden wurde...
+                // 4. Wenn ein zukünftiger Termin gefunden wurde... (DIESER TEIL BLEIBT IDENTISCH)
                 if (nextInjectionDate) {
                     const diffTime = nextInjectionDate.getTime() - today.getTime();
                     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
@@ -2743,6 +2747,7 @@
                     countdownElement.textContent = 'Biologika / JAK: Keine nächste Spritze geplant.';
                 }
             }
+
 
             // ====== ENDE: Code für Biologika Countdown ======
 
