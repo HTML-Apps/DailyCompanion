@@ -2726,8 +2726,7 @@
                     
                     // 5. Prüft, ob heute der Spritzentag ist und zeigt die Benachrichtigung an
                     if (diffDays === 0) {
-                        countdownText = 'heute';
-                        
+                        countdownText = '<span style="color: #e74c3c; font-weight: bold;">heute</span>';                        
                         // Einmalige Benachrichtigung pro Tag über den Local Storage
                         const storageKey = 'cosentyxAlert_' + nextInjectionDate.toISOString().split('T')[0];
                         if (!localStorage.getItem(storageKey)) {
