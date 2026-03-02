@@ -1397,15 +1397,23 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs werden jetzt sicher von der Hosting-URL geladen -->
-    <script src="/__/firebase/9.6.10/firebase-app-compat.js"></script>
-    <script src="/__/firebase/9.6.10/firebase-auth-compat.js"></script>
-    <script src="/__/firebase/9.6.10/firebase-firestore-compat.js"></script>
 
-    <!-- Dieses Skript initialisiert Firebase automatisch und sicher -->
-    <script src="/__/firebase/init.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNx8HzHvGb7aBOsopIWz8-KWD3cnoNqWg", 
+            authDomain: "daily-companion-24975.firebaseapp.com", 
+            projectId: "daily-companion-24975", 
+            storageBucket: "daily-companion-24975.firebasestorage.app", 
+            messagingSenderId: "330854991329", 
+            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", 
+            measurementId: "G-52MKKC9GCS" 
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         
