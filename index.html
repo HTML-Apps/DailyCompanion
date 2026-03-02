@@ -2161,17 +2161,27 @@
                         },
                         y: {
                             min: 0,
-                            max: 10.3,
-                            // ANPASSUNG: Der Titel der Y-Achse ist jetzt auch dynamisch.
+                            // === START DER ÄNDERUNGEN ===
+                            max: 10.3, // Achse geht bis 10.3, damit der Punkt bei 10 Platz hat
+                            // === ENDE DER ÄNDERUNGEN ===
                             title: {
                                 display: true,
-                                text: yAxisLabels[yAxisKey] || 'Wert', // Verwendet den Namen aus dem Hilfsobjekt
+                                text: yAxisLabels[yAxisKey] || 'Wert',
                                 color: '#ccc'
                             },
                             grid: { color: 'rgba(255,255,255,0.1)' },
-                            stepSize: 1,
-                            ticks: { color: '#ccc' }
-                        }
+                            ticks: {
+                                color: '#ccc',
+                                // === START DER ÄNDERUNGEN ===
+                                stepSize: 1, // Erzwingt, dass die Skala in 1er-Schritten angezeigt wird (1, 2, 3...)
+                                // Stellt sicher, dass nur ganze Zahlen angezeigt werden
+                                callback: function(value) {
+                                if (Math.floor(value) === value) {
+                                    return value;
+                                }
+                                }
+                            }
+                        }    
                     },
                     plugins: {
                         tooltip: {
