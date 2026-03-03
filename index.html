@@ -2786,7 +2786,7 @@
 
                         const storageKey = 'cosentyxAlert_' + nextInjectionDate.toISOString().split('T')[0];
                         if (!localStorage.getItem(storageKey)) {
-                            alert('Cosentyx®-Spritze bitte heute verabreichen');
+                            alert('💉Cosentyx®-Spritze bitte heute verabreichen');
                             localStorage.setItem(storageKey, 'true');
                         }
                     } else if (diffDays === 1) {
