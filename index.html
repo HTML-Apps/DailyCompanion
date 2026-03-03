@@ -2436,6 +2436,17 @@
                         }
                     });
                 });
+
+                // Listener für Biologika- und JAK-Checkboxen, um den Notification-Dot zu steuern
+                const biologikaCheckbox = document.getElementById('painmedBiologika');
+                const jakCheckbox = document.getElementById('painmedJAK'); // Wird aktiv, sobald Sie das Element hinzufügen
+
+                if (biologikaCheckbox) {
+                    biologikaCheckbox.addEventListener('change', updateNotificationDot);
+                }
+                if (jakCheckbox) {
+                    jakCheckbox.addEventListener('change', updateNotificationDot);
+                }
             };
 
             setupExclusiveGroup('stretching-options-group');
@@ -2520,18 +2531,6 @@
                 const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
-
-                // Listener für Biologika- und JAK-Checkboxen, um den Notification-Dot zu steuern
-                const biologikaCheckbox = document.getElementById('painmedBiologika');
-                const jakCheckbox = document.getElementById('painmedJAK'); // Wird aktiv, sobald Sie das Element hinzufügen
-
-                if (biologikaCheckbox) {
-                    biologikaCheckbox.addEventListener('change', updateNotificationDot);
-                }
-                if (jakCheckbox) {
-                    jakCheckbox.addEventListener('change', updateNotificationDot);
-                }
-
                 
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
