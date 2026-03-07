@@ -1651,14 +1651,24 @@
 
             ratingCategories.forEach(categoryId => {
                 const selectedBox = document.querySelector(`#${categoryId} .rating-box.selected`);
+                
                 if (selectedBox) {
-                    totalRating += parseInt(selectedBox.dataset.value);
-                    ratingCount++;
+                    let value = parseInt(selectedBox.dataset.value);
+                    let weight = 1; // Standard-Gewichtung ist 1
+
+                    // Spezielle Gewichtung für das Immunsystem
+                    if (categoryId === 'immunesystem') {
+                        weight = 0.5;
+                    }
+
+                    totalRating += value * weight;
+                    ratingCount += weight; // Wichtig: Auch die Anzahl gewichtet erhöhen
                 }
             });
 
             const overallAverageDisplay = document.getElementById('overallAverageDisplay');
             if (ratingCount > 0) {
+                // Die Formel bleibt gleich, aber ratingCount ist nun keine Ganzzahl mehr
                 const average = (totalRating / ratingCount).toFixed(1);
                 overallAverageDisplay.textContent = average;
             } else {
