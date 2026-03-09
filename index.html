@@ -2813,7 +2813,7 @@
 
             // ====== ENDE: Code für Biologika Countdown ======
 
-            updateBiologikaCountdown();
+            //updateBiologikaCountdown();
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -2854,6 +2854,9 @@
                     resetForm(); 
                 }
             });
+
+            updateBiologikaCountdown();
+            
         });
     </script>
 </body>
