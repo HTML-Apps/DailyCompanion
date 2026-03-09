@@ -2789,14 +2789,12 @@
                     if (diffDays === 0) {
                         countdownText = '<span style="color: rgba(231, 76, 60, 0.85) ; font-weight: bold;">heute</span>';
                         
-                        // NEU: Setzt den Status für den Notification-Dot auf "true"
+                        // Setzt den Status für den Notification-Dot auf "true"
                         if(notificationDot) notificationDot.dataset.isInjectionDay = 'true';
 
-                        const storageKey = 'cosentyxAlert_' + nextInjectionDate.toISOString().split('T')[0];
-                        if (!localStorage.getItem(storageKey)) {
-                            alert('💉Cosentyx®-Spritze bitte heute verabreichen');
-                            localStorage.setItem(storageKey, 'true');
-                        }
+                        // GEÄNDERT: localStorage Logik entfernt, damit der Alert bei jedem Reload erscheint
+                        alert('Cosentyx®-Spritze bitte heute verabreichen');
+
                     } else if (diffDays === 1) {
                         countdownText = 'morgen';
                     } else {
