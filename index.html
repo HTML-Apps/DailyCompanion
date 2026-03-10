@@ -1459,102 +1459,156 @@
         const backImage = new Image();
         backImage.src = 'body_back.png';   
 
-        // ====== START: NEUER CODE FÜR DOPPELKLICK-FUNKTIONALITÄT ======
+        // ====== START: NEUER CODE FÜR DOPPELKLICK & LANGES DRÜCKEN ======
+
         /**
-         * Füllt das Formular mit vordefinierten Standardwerten.
-         * Die Werte können im Objekt 'defaultValues' einfach angepasst werden.
+         * Erfasst die aktuell im Formular eingestellten Werte und gibt sie als Objekt zurück.
+         * Dies vermeidet Code-Dopplung zwischen Speicher- und Submit-Funktion.
          */
-        function prefillFormWithDefaults() {
-            // --- HIER KÖNNEN SIE IHRE STANDARDWERTE EINFACH ÄNDERN ---
-            const defaultValues = {
-                bedTime: '22:10',
-                wakeUpTime: '06:00',
-                sportId: 'sportGym', // ID der Sport-Checkbox
-                stretchingId: 'stretchingNotDone', // ID der Dehnen-Checkbox
-                glutenId: 'glutenNo', // ID der Gluten-Checkbox
-                milkId: 'milkNo', // ID der Milch-Checkbox
-                painmedId: 'painmedEto60', // ID der Schmerzmittel-Checkbox
-                ratings: {
-                    'mood-rating': 8,
-                    'neck-pain-rating': 7,
-                    'shoulder-pain-rating': 8,
-                    'upper-body-pain-rating': 8,
-                    'lower-body-pain-rating': 8,
-                    'movement-flow-pain-rating': 5,
-                    'immunesystem': 9,
-                    'digestion': 8
-                },
-                morningStiffness: '45', // Wert aus dem Dropdown
-                noteTags: ['Zeh links', 'Zeh rechts', 'Haut offen', 'Omega3', 'Mouthtape'] // data-tag der Buttons
+        function getCurrentFormData() {
+            // Checkbox-Werte auslesen
+            const getCheckedName = (groupClass, dataAttribute) => document.querySelector(`.${groupClass} input:checked`)?.dataset[dataAttribute] || null;
+
+            // Alle Rating-Werte sammeln
+            const ratings = {};
+            document.querySelectorAll('.rating-scale[id]').forEach(scale => {
+                const ratingId = scale.id;
+                const selectedValue = scale.querySelector('.rating-box.selected')?.dataset.value || null;
+                // Konvertiere die ID in den passenden Datenbankschlüssel (z.B. 'mood-rating' -> 'moodRating')
+                const dbKey = ratingId.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+                if (selectedValue) {
+                    ratings[dbKey] = parseInt(selectedValue, 10);
+                }
+            });
+
+            const data = {
+                bedTime: document.getElementById('bedTime').value,
+                wakeUpTime: document.getElementById('wakeUpTime').value,
+                sportId: document.querySelector('.sport-options-group input:checked')?.id || null,
+                stretchingId: document.querySelector('.stretching-options-group input:checked')?.id || null,
+                glutenId: document.querySelector('.gluten-options-group input:checked')?.id || null,
+                milkId: document.querySelector('.milk-options-group input:checked')?.id || null,
+                painmedId: document.querySelector('.painmed-options-group input:checked')?.id || null,
+                ratings: ratings,
+                morningStiffness: document.getElementById('morningStiffness').value,
+                noteTags: Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(btn => btn.dataset.tag)
             };
-            // -------------------------------------------------------------
+            return data;
+        }
+
+
+        /**
+         * Speichert die aktuell im Formular eingestellten Werte als Standard in der Firebase-Datenbank.
+         */
+        async function saveCurrentAsDefaults() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Bitte melden Sie sich an, um Ihre Standardwerte zu speichern.");
+                return;
+            }
+
+            const defaultData = getCurrentFormData();
+
+            // Kurze Bestätigung für den Nutzer
+            if (!confirm("Sollen die aktuellen Eingaben als neuer Standard für den Doppelklick gespeichert werden?")) {
+                return;
+            }
+
+            try {
+                // Wir verwenden .doc(user.uid).set(), um für jeden User ein eigenes Dokument anzulegen/zu überschreiben.
+                await db.collection("userDefaults").doc(user.uid).set(defaultData);
+                alert("Ihre Standardwerte wurden erfolgreich gespeichert!");
+            } catch (error) {
+                console.error("Fehler beim Speichern der Standardwerte: ", error);
+                alert("Ein Fehler ist aufgetreten. Die Standardwerte konnten nicht gespeichert werden.");
+            }
+        }
+
+
+        /**
+         * Füllt das Formular mit den in Firebase gespeicherten Standardwerten.
+         * Falls keine vorhanden sind, werden harte Fallback-Werte genutzt.
+         */
+        async function applyDefaults() {
+            const user = auth.currentUser;
+            if (!user) return; // Funktion wird nur für angemeldete User ausgeführt
+
+            let defaultValues = {};
+
+            try {
+                const doc = await db.collection("userDefaults").doc(user.uid).get();
+                if (doc.exists) {
+                    console.log("Gespeicherte Standardwerte aus Firebase geladen.");
+                    defaultValues = doc.data();
+                } else {
+                    // --- FALLBACK-WERTE, falls noch nichts gespeichert wurde ---
+                    console.log("Keine Standardwerte in Firebase gefunden. Nutze Fallback.");
+                    defaultValues = {
+                        bedTime: '22:10', wakeUpTime: '06:00', sportId: 'sportGym',
+                        stretchingId: 'stretchingNotDone', glutenId: 'glutenNo', milkId: 'milkNo',
+                        painmedId: 'painmedEto60',
+                        ratings: { moodRating: 8, neckPainRating: 7, shoulderPainRating: 8, upperBodyPainRating: 8, lowerBodyPainRating: 8, movementFlowPainRating: 5, immunesystemRating: 9, digestionRating: 8 },
+                        morningStiffness: '45',
+                        noteTags: ['Zeh links', 'Zeh rechts', 'Haut offen', 'Omega3', 'Mouthtape']
+                    };
+                }
+            } catch (error) {
+                console.error("Fehler beim Laden der Standardwerte: ", error);
+                alert("Standardwerte konnten nicht geladen werden.");
+                return;
+            }
+            
+            // --- Formular mit den geladenen oder Fallback-Werten befüllen ---
 
             console.log('Fülle Formular mit Standardwerten...');
+            resetForm(); // Formular vor dem Befüllen leeren
 
-            // A. Alle relevanten Felder zuerst zurücksetzen, um Konflikte zu vermeiden.
-            document.querySelectorAll('.sport-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .painmed-options-group').forEach(group => {
-                group.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    if (cb.closest('.sport-checkbox')) {
-                        cb.closest('.sport-checkbox').classList.remove('selected');
-                    }
-                });
-            });
-            document.querySelectorAll('.rating-scale').forEach(scale => {
-                scale.querySelectorAll('.rating-box').forEach(box => box.classList.remove('selected'));
-            });
-            document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
-            
-            // B. Neue Werte setzen
             // 1. Zeiten
-            document.getElementById('bedTime').value = defaultValues.bedTime;
-            document.getElementById('wakeUpTime').value = defaultValues.wakeUpTime;
-            
-            // 2. Checkboxen (Sport, Dehnen, Ernährung, Schmerzmittel)
+            if (defaultValues.bedTime) document.getElementById('bedTime').value = defaultValues.bedTime;
+            if (defaultValues.wakeUpTime) document.getElementById('wakeUpTime').value = defaultValues.wakeUpTime;
+
+            // 2. Checkboxen
             const setCheckbox = (id) => {
+                if (!id) return;
                 const checkbox = document.getElementById(id);
                 if (checkbox) {
                     checkbox.checked = true;
-                    if (checkbox.closest('.sport-checkbox')) {
-                        checkbox.closest('.sport-checkbox').classList.add('selected');
-                    }
+                    checkbox.closest('.sport-checkbox')?.classList.add('selected');
                 }
             };
-            
             setCheckbox(defaultValues.sportId);
             setCheckbox(defaultValues.stretchingId);
             setCheckbox(defaultValues.glutenId);
             setCheckbox(defaultValues.milkId);
             setCheckbox(defaultValues.painmedId);
 
-            // 3. Ratings (Schmerzskalen)
-            for (const ratingId in defaultValues.ratings) {
-                const value = defaultValues.ratings[ratingId];
-                const container = document.getElementById(ratingId);
-                if (container) {
-                    const targetBox = container.querySelector(`.rating-box[data-value="${value}"]`);
-                    if (targetBox) {
-                        targetBox.classList.add('selected');
-                    }
+            // 3. Ratings
+            if (defaultValues.ratings) {
+                for (const dbKey in defaultValues.ratings) {
+                    const value = defaultValues.ratings[dbKey];
+                    const ratingId = dbKey.replace(/([A-Z])/g, '-$1').toLowerCase(); // 'moodRating' -> 'mood-rating'
+                    const container = document.getElementById(ratingId);
+                    container?.querySelector(`.rating-box[data-value="${value}"]`)?.classList.add('selected');
                 }
             }
 
             // 4. Morgensteifigkeit
-            document.getElementById('morningStiffness').value = defaultValues.morningStiffness;
+            if (defaultValues.morningStiffness) document.getElementById('morningStiffness').value = defaultValues.morningStiffness;
 
             // 5. Notiz-Tags
-            defaultValues.noteTags.forEach(tagName => {
-                const button = document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`);
-                if (button) {
-                    button.classList.add('selected');
-                }
-            });
+            if (defaultValues.noteTags) {
+                defaultValues.noteTags.forEach(tagName => {
+                    document.querySelector(`.notes-tag-button[data-tag="${tagName}"]`)?.classList.add('selected');
+                });
+            }
 
-            // C. Berechnungen am Ende aktualisieren
+            // Berechnungen am Ende aktualisieren
             calculateSleepDuration();
             calculateOverallAverage();
         }
-        // ====== ENDE: NEUER CODE FÜR DOPPELKLICK-FUNKTIONALITÄT ======
+
+        // ====== ENDE: NEUER CODE FÜR DOPPELKLICK & LANGES DRÜCKEN ======
+
 
 
         function fillFormWithData(data) {
@@ -2516,22 +2570,59 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            // NEU: Doppelklick-Funktionalität für die Überschrift "Daily Companion"
+            // NEU: Erweiterte Klick-Logik für die Überschrift
             const headerTitle = document.querySelector('.header-fixed h1');
             if (headerTitle) {
+                let clickTimer = null;
                 let lastClickTime = 0;
-                headerTitle.addEventListener('click', () => {
-                    const currentTime = new Date().getTime();
-                    // Prüfen, ob der Klick innerhalb von 800ms nach dem letzten erfolgte
-                    if (currentTime - lastClickTime < 800) {
-                        // Doppelklick erkannt
-                        prefillFormWithDefaults();
-                        lastClickTime = 0; // Timer zurücksetzen
-                    } else {
-                        // Erster Klick (oder Klick nach langer Pause)
-                        lastClickTime = currentTime;
-                    }
+
+                // Startet, wenn man klickt/tippt und den Finger draufhält
+                headerTitle.addEventListener('mousedown', (e) => {
+                    // Verhindert Textauswahl bei langem Drücken auf dem Desktop
+                    e.preventDefault(); 
+                    
+                    // Startet einen Timer für das "lange Drücken"
+                    clickTimer = setTimeout(() => {
+                        // Wenn der Timer abläuft, wird die Speicherfunktion ausgeführt
+                        saveCurrentAsDefaults();
+                        clickTimer = null; // Timer zurücksetzen
+                    }, 700); // 700ms ist eine gute Dauer für "langes Drücken"
                 });
+
+                // Wird ausgeführt, wenn man den Klick/Tipp loslässt
+                const handleMouseUpOrLeave = () => {
+                    // Wenn der "langes Drücken"-Timer noch läuft, wird er abgebrochen.
+                    // Das bedeutet, es war nur ein kurzer Klick.
+                    if (clickTimer) {
+                        clearTimeout(clickTimer);
+                        clickTimer = null;
+
+                        // Hier kommt die bekannte Doppelklick-Logik ins Spiel
+                        const currentTime = new Date().getTime();
+                        if (currentTime - lastClickTime < 800) {
+                            // Dies war der zweite Klick -> Doppelklick erkannt
+                            applyDefaults();
+                            lastClickTime = 0; // Timer für Doppelklick zurücksetzen
+                        } else {
+                            // Dies war der erste Klick
+                            lastClickTime = currentTime;
+                        }
+                    }
+                };
+                
+                headerTitle.addEventListener('mouseup', handleMouseUpOrLeave);
+                headerTitle.addEventListener('mouseleave', handleMouseUpOrLeave); // Falls man mit gedrückter Maustaste wegzieht
+                
+                // Touch-Events für Mobilgeräte hinzufügen
+                headerTitle.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    clickTimer = setTimeout(() => {
+                        saveCurrentAsDefaults();
+                        clickTimer = null;
+                    }, 700);
+                }, { passive: false });
+
+                headerTitle.addEventListener('touchend', handleMouseUpOrLeave);
             }
 
             generateRatingBoxes('mood-rating');
