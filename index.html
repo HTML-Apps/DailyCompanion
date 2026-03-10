@@ -1556,22 +1556,37 @@
         ];
 
         // Lädt den Plan aus Firebase
+        // Ändere die loadFitnessData Funktion wie folgt:
         async function loadFitnessData() {
             const user = auth.currentUser;
-            if (!user) return;
+            if (!user) {
+                console.log("Kein User angemeldet, lade keine Fitnessdaten.");
+                return;
+                    }
 
             try {
+                console.log("Lade Fitnessplan für User:", user.uid);
                 const doc = await db.collection("fitnessPlans").doc(user.uid).get();
-                if (doc.exists) {
+                
+                if (doc.exists && doc.data().exercises && doc.data().exercises.length > 0) {
+                    // Daten aus Firebase vorhanden
                     fitnessExercises = doc.data().exercises;
+                    console.log("Daten aus Firebase geladen.");
                 } else {
-                    // Wenn kein Plan existiert, Initialdaten laden und in Firebase speichern
-                    fitnessExercises = initialFitnessData;
-                    await saveFitnessDataToFirebase();
+                    // Falls Dokument nicht existiert oder leer ist -> Initialdaten nutzen
+                    console.log("Keine Daten in Firebase gefunden. Nutze Initialdaten.");
+                    fitnessExercises = [...initialFitnessData]; // Kopie der Initialdaten
+                    await saveFitnessDataToFirebase(); // Direkt in Firebase für die Zukunft speichern
                 }
+                
+                // WICHTIG: Render-Aufruf sicherstellen
                 renderFitnessPlan();
+                
             } catch (error) {
                 console.error("Fehler beim Laden des Fitnessplans: ", error);
+                // Fallback: Trotz Fehler Initialdaten zeigen, damit die App bedienbar bleibt
+                fitnessExercises = [...initialFitnessData];
+                renderFitnessPlan();
             }
         }
 
