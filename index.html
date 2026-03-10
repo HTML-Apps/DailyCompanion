@@ -2571,33 +2571,31 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // NEU: Erweiterte Klick-Logik für die Überschrift
+            // Erweiterte Klick-Logik für die Überschrift (mit Einzelklick-Hinweis)
             const headerTitle = document.querySelector('.header-fixed h1');
             if (headerTitle) {
                 let clickTimer = null;
                 let lastClickTime = 0;
 
                 // Startet, wenn man klickt/tippt und den Finger draufhält
-                headerTitle.addEventListener('mousedown', (e) => {
-                    // Verhindert Textauswahl bei langem Drücken auf dem Desktop
+                const handleMouseDownOrTouchStart = (e) => {
                     e.preventDefault(); 
                     
                     // Startet einen Timer für das "lange Drücken"
                     clickTimer = setTimeout(() => {
-                        // Wenn der Timer abläuft, wird die Speicherfunktion ausgeführt
                         saveCurrentAsDefaults();
-                        clickTimer = null; // Timer zurücksetzen
-                    }, 700); // 700ms ist eine gute Dauer für "langes Drücken"
-                });
+                        clickTimer = null; // Timer zurücksetzen, damit kein Klick mehr ausgelöst wird
+                    }, 700); 
+                };
 
                 // Wird ausgeführt, wenn man den Klick/Tipp loslässt
                 const handleMouseUpOrLeave = () => {
-                    // Wenn der "langes Drücken"-Timer noch läuft, wird er abgebrochen.
-                    // Das bedeutet, es war nur ein kurzer Klick.
+                    // Wenn der "langes Drücken"-Timer noch läuft, war es nur ein kurzer Klick.
                     if (clickTimer) {
                         clearTimeout(clickTimer);
                         clickTimer = null;
 
-                        // Hier kommt die bekannte Doppelklick-Logik ins Spiel
+                        // Hier kommt die Klick-Logik ins Spiel
                         const currentTime = new Date().getTime();
                         if (currentTime - lastClickTime < 800) {
                             // Dies war der zweite Klick -> Doppelklick erkannt
@@ -2606,22 +2604,27 @@
                         } else {
                             // Dies war der erste Klick
                             lastClickTime = currentTime;
+                            
+                            // Wir warten einen winzigen Moment, um sicherzustellen, dass es kein Doppelklick wird.
+                            setTimeout(() => {
+                                // Wenn nach der Wartezeit immer noch kein zweiter Klick kam (lastClickTime wurde nicht zurückgesetzt),
+                                // dann zeigen wir den Hinweis an.
+                                if (lastClickTime !== 0) {
+                                    alert("Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
+                                }
+                            }, 800); // Diese Zeit muss mit der Doppelklick-Zeit übereinstimmen.
                         }
                     }
                 };
                 
+                // Desktop-Events
+                headerTitle.addEventListener('mousedown', handleMouseDownOrTouchStart);
                 headerTitle.addEventListener('mouseup', handleMouseUpOrLeave);
-                headerTitle.addEventListener('mouseleave', handleMouseUpOrLeave); // Falls man mit gedrückter Maustaste wegzieht
-                
-                // Touch-Events für Mobilgeräte hinzufügen
-                headerTitle.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    clickTimer = setTimeout(() => {
-                        saveCurrentAsDefaults();
-                        clickTimer = null;
-                    }, 700);
-                }, { passive: false });
+                // KORRIGIERTE ZEILE: 'headerListener' wurde zu 'headerTitle' geändert
+                headerTitle.addEventListener('mouseleave', handleMouseUpOrLeave); 
 
+                // Touch-Events für Mobilgeräte
+                headerTitle.addEventListener('touchstart', handleMouseDownOrTouchStart, { passive: false });
                 headerTitle.addEventListener('touchend', handleMouseUpOrLeave);
             }
 
