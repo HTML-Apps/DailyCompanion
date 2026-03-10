@@ -2585,7 +2585,7 @@
                     clickTimer = setTimeout(() => {
                         saveCurrentAsDefaults();
                         clickTimer = null; // Timer zurücksetzen, damit kein Klick mehr ausgelöst wird
-                    }, 700); 
+                    }, 1000); 
                 };
 
                 // Wird ausgeführt, wenn man den Klick/Tipp loslässt
@@ -2597,7 +2597,7 @@
 
                         // Hier kommt die Klick-Logik ins Spiel
                         const currentTime = new Date().getTime();
-                        if (currentTime - lastClickTime < 800) {
+                        if (currentTime - lastClickTime < 500) {
                             // Dies war der zweite Klick -> Doppelklick erkannt
                             applyDefaults();
                             lastClickTime = 0; // Timer für Doppelklick zurücksetzen
@@ -2612,7 +2612,7 @@
                                 if (lastClickTime !== 0) {
                                     alert("Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
                                 }
-                            }, 800); // Diese Zeit muss mit der Doppelklick-Zeit übereinstimmen.
+                            }, 500); // Diese Zeit muss mit der Doppelklick-Zeit übereinstimmen.
                         }
                     }
                 };
