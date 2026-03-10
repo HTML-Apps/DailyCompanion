@@ -739,6 +739,65 @@
         }
 
 
+
+
+
+
+
+
+
+
+
+        /* ====== START: Fitness Tracker Styles ====== */
+        .fitness-card {
+            background-color: #2a2a4a;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #45456a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .fitness-btn-icon {
+            background: #3a3a5a;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .fitness-btn-icon:hover { background: #45456a; }
+        .fitness-btn-icon:active { background: #1a1a2e; }
+        .fitness-btn-icon.delete-btn { color: #ff6b6b; }
+        .fitness-btn-icon.delete-btn:hover { background: rgba(255, 107, 107, 0.2); }
+
+        .fitness-header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding-bottom: 10px;
+        }
+        .fitness-category-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #00f2fe;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        /* ====== ENDE: Fitness Tracker Styles ====== */
+
+
+
+
+
+
         @media (max-width: 480px) {
             body { padding: 0; }
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
@@ -1077,7 +1136,7 @@
                 </div>
 
                 <div class="category-item">
-                    <label>Sport-Aktivitäten</label>
+                    <label id="openFitnessTrackerBtn" style="cursor: pointer; color: #00f2fe; text-decoration: underline; display: inline-block; padding-bottom: 5px; transition: text-shadow 0.2s;" onmouseover="this.style.textShadow='0 0 10px rgba(0,242,254,0.5)'" onmouseout="this.style.textShadow='none'">Sport-Aktivitäten 🏋️‍♂️ (Plan öffnen)</label>
                     <div class="sport-options-group">
                         <label class="sport-checkbox">
                             <input type="checkbox" id="sportGym" data-sport-type="active" data-sport-name="Fitnessstudio">
@@ -1415,6 +1474,28 @@
         </div>
     </div>
 
+    <div class="overlay" id="fitnessOverlay">
+        <div class="popup" id="fitnessPopup">
+            <span class="close-btn" id="closeFitnessBtn">&times;</span>
+            
+            <div class="fitness-header-nav">
+                <h2 style="margin: 0; background: none; -webkit-text-fill-color: #fff; color: #fff;">Workout Plan</h2>
+                <button onclick="addFitnessExercise()" class="action-button btn-search" style="border-radius: 50px; font-size: 0.9em; padding: 8px 15px;">+ Übung</button>
+            </div>
+
+            <div class="popup-content" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <div>
+                    <h3 class="fitness-category-title">Oberkörper</h3>
+                    <div id="oberkoerper-list"></div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <h3 class="fitness-category-title">Unterkörper</h3>
+                    <div id="unterkoerper-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -1443,6 +1524,162 @@
 
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ====== START: Fitness Tracker JS Logik ======
+        let fitnessExercises = [];
+
+        const initialFitnessData = [
+            { id: "1", cat: 'oberkoerper', name: 'Bankdrücken', sets: '3x8', startWeight: 60, weight: 60 },
+            { id: "2", cat: 'oberkoerper', name: 'Latzug', sets: '5x8', startWeight: 75, weight: 75 },
+            { id: "3", cat: 'oberkoerper', name: 'Butterfly', sets: '3x8', startWeight: 60, weight: 60 },
+            { id: "4", cat: 'oberkoerper', name: 'Rudern', sets: '3x8', startWeight: 60, weight: 60 },
+            { id: "5", cat: 'oberkoerper', name: 'Bizeps', sets: '3x20', startWeight: 14, weight: 14 },
+            { id: "6", cat: 'oberkoerper', name: 'Trizeps', sets: '3x15', startWeight: 50, weight: 50 },
+            { id: "7", cat: 'unterkoerper', name: 'Beinbeuger', sets: '3x8', startWeight: 65, weight: 65 },
+            { id: "8", cat: 'unterkoerper', name: 'Beinstrecker', sets: '3x25', startWeight: 50, weight: 50 },
+            { id: "9", cat: 'unterkoerper', name: 'Abduktion', sets: '3x20', startWeight: 90, weight: 90 },
+            { id: "10", cat: 'unterkoerper', name: 'Adduktion', sets: '3x10', startWeight: 85, weight: 85 },
+            { id: "11", cat: 'unterkoerper', name: 'Bulgarian Squats', sets: '3x10', startWeight: 20, weight: 20 },
+            { id: "12", cat: 'unterkoerper', name: 'Crisscross', sets: '3x20', startWeight: 5, weight: 5 }
+        ];
+
+        // Lädt den Plan aus Firebase
+        async function loadFitnessData() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const doc = await db.collection("fitnessPlans").doc(user.uid).get();
+                if (doc.exists) {
+                    fitnessExercises = doc.data().exercises;
+                } else {
+                    // Wenn kein Plan existiert, Initialdaten laden und in Firebase speichern
+                    fitnessExercises = initialFitnessData;
+                    await saveFitnessDataToFirebase();
+                }
+                renderFitnessPlan();
+            } catch (error) {
+                console.error("Fehler beim Laden des Fitnessplans: ", error);
+            }
+        }
+
+        // Speichert den aktuellen Plan in Firebase
+        async function saveFitnessDataToFirebase() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            try {
+                await db.collection("fitnessPlans").doc(user.uid).set({ exercises: fitnessExercises });
+            } catch (error) {
+                console.error("Fehler beim Speichern des Fitnessplans: ", error);
+            }
+        }
+
+        function renderFitnessPlan() {
+            renderFitnessSection('oberkoerper-list', 'oberkoerper');
+            renderFitnessSection('unterkoerper-list', 'unterkoerper');
+        }
+
+        function renderFitnessSection(containerId, category) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            container.innerHTML = '';
+            const filtered = fitnessExercises.filter(ex => ex.cat === category);
+
+            filtered.forEach((ex) => {
+                const globalIndex = fitnessExercises.findIndex(e => e.id === ex.id);
+                const div = document.createElement('div');
+                div.className = 'fitness-card';
+                div.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 0.9em; color: #fff;">${ex.name}</div>
+                        <div style="font-size: 0.75em; color: #aaa; margin-top: 2px;">
+                            ${ex.sets} <span style="margin-left: 5px; color: rgba(0, 242, 254, 0.7);">${ex.startWeight}kg (Start)</span>
+                        </div>
+                        <div style="display: flex; gap: 4px; margin-top: 8px;">
+                            <button onclick="moveFitnessEx(${globalIndex}, -1)" class="fitness-btn-icon">↑</button>
+                            <button onclick="moveFitnessEx(${globalIndex}, 1)" class="fitness-btn-icon">↓</button>
+                            <button onclick="deleteFitnessEx(${globalIndex})" class="fitness-btn-icon delete-btn">✕</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                        <span style="font-size: 0.65em; color: #888; text-transform: uppercase; font-weight: bold; margin-right: 5px;">Ist-Zustand</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" value="${ex.weight}" step="0.5" class="styled-input" style="width: 70px; padding: 6px; text-align: center; color: #00f2fe; font-weight: bold;" onchange="updateFitnessWeight(${globalIndex}, this.value)">
+                            <span style="font-size: 0.8em; color: #aaa; font-weight: bold;">KG</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function moveFitnessEx(index, direction) {
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= fitnessExercises.length) return;
+            
+            const temp = fitnessExercises[index];
+            fitnessExercises[index] = fitnessExercises[targetIndex];
+            fitnessExercises[targetIndex] = temp;
+            
+            renderFitnessPlan();
+            saveFitnessDataToFirebase(); // Direkt in Firebase speichern
+        }
+
+        function updateFitnessWeight(index, val) {
+            fitnessExercises[index].weight = parseFloat(val) || 0;
+            saveFitnessDataToFirebase();
+        }
+
+        function deleteFitnessEx(index) {
+            if(confirm("Übung wirklich löschen?")) {
+                fitnessExercises.splice(index, 1);
+                renderFitnessPlan();
+                saveFitnessDataToFirebase();
+            }
+        }
+
+        function addFitnessExercise() {
+            const name = prompt("Name der Übung:");
+            if (!name) return;
+            const sets = prompt("Sätze/Wdh (z.B. 3x10):", "3x10");
+            const startWeight = prompt("Startgewicht in kg:", "0");
+            const cat = confirm("OK für Oberkörper, Abbrechen für Unterkörper") ? 'oberkoerper' : 'unterkoerper';
+            
+            fitnessExercises.push({
+                id: Date.now().toString(),
+                cat: cat,
+                name: name,
+                sets: sets,
+                startWeight: parseFloat(startWeight) || 0,
+                weight: parseFloat(startWeight) || 0
+            });
+            
+            renderFitnessPlan();
+            saveFitnessDataToFirebase();
+        }
+        // ====== ENDE: Fitness Tracker JS Logik ======
+
+
+
+
+
+
+
+
+
 
         let painMapDateHistory = [];
         let currentPainMapDate = null; 
@@ -2882,6 +3119,39 @@
                 });
             }
 
+
+
+
+
+
+
+
+
+
+
+
+            // Listener für Fitness Tracker
+            document.getElementById('openFitnessTrackerBtn').addEventListener('click', () => {
+                document.getElementById('fitnessOverlay').style.display = 'flex';
+            });
+            document.getElementById('closeFitnessBtn').addEventListener('click', () => {
+                document.getElementById('fitnessOverlay').style.display = 'none';
+            });
+            document.getElementById('fitnessOverlay').addEventListener('click', (event) => {
+                if (event.target.id === 'fitnessOverlay') document.getElementById('fitnessOverlay').style.display = 'none';
+            });
+
+
+
+
+
+
+
+
+
+
+
+
             // ====== START: Logik für Desktop Date Picker ======
 
             // Das Datumseingabefeld, das wir aktualisieren wollen
@@ -3051,6 +3321,9 @@
                         
                         // NEU: Karte direkt beim Login (für Desktop) initialisieren
                         await refreshPainMapState();
+
+                        // Lädt die Fitness-Daten, sobald der User eingeloggt ist
+                        await loadFitnessData();
 
                         setTimeout(() => {
                             updateBiologikaCountdown();
