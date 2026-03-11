@@ -1512,20 +1512,27 @@
     </div>
 
     <div class="overlay" id="fitnessOverlay">
-        <div class="popup-content" style="max-height: 100vh;">
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">Oberkörper</button>
-                <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">Unterkörper</button>
+        <div class="popup" id="fitnessPopup">
+            <span class="close-btn" id="closeFitnessBtn">&times;</span>
+            
+            <div class="fitness-header-nav">
+                <h2 style="margin: 0; background: none; -webkit-text-fill-color: #fff; color: #fff;">Workout Plan</h2>
+                <button onclick="addFitnessExercise()" class="action-button btn-search" style="border-radius: 50px; font-size: 0.9em; padding: 8px 15px;">+ Übung</button>
             </div>
 
-            <div class="fitness-swipe-wrapper" id="fitnessSwipeWrapper">
-                <div class="fitness-slide" id="slide-oberkoerper">
-                    <h3 class="fitness-category-title" style="text-align: center;">Oberkörper</h3>
-                    <div id="oberkoerper-list"></div>
+            <div class="popup-content" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">Oberkörper</button>
+                    <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">Unterkörper</button>
                 </div>
-                <div class="fitness-slide" id="slide-unterkoerper">
-                    <h3 class="fitness-category-title" style="text-align: center;">Unterkörper</h3>
-                    <div id="unterkoerper-list"></div>
+
+                <div class="fitness-swipe-wrapper" id="fitnessSwipeWrapper">
+                    <div class="fitness-slide" id="slide-oberkoerper">
+                        <div id="oberkoerper-list"></div>
+                    </div>
+                    <div class="fitness-slide" id="slide-unterkoerper">
+                        <div id="unterkoerper-list"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3202,16 +3209,33 @@
 
 
 
-            // Listener für Fitness Tracker
-            document.getElementById('openFitnessTrackerBtn').addEventListener('click', () => {
-                document.getElementById('fitnessOverlay').style.display = 'flex';
-            });
-            document.getElementById('closeFitnessBtn').addEventListener('click', () => {
-                document.getElementById('fitnessOverlay').style.display = 'none';
-            });
-            document.getElementById('fitnessOverlay').addEventListener('click', (event) => {
-                if (event.target.id === 'fitnessOverlay') document.getElementById('fitnessOverlay').style.display = 'none';
-            });
+            // Listener für Fitness Tracker (Ausfallsicher)
+            const openFitBtn = document.getElementById('openFitnessTrackerBtn');
+            const closeFitBtn = document.getElementById('closeFitnessBtn');
+            const fitOverlay = document.getElementById('fitnessOverlay');
+
+            if (openFitBtn && fitOverlay) {
+                openFitBtn.addEventListener('click', () => {
+                    fitOverlay.style.display = 'flex';
+                    // Optional: Scrollt beim Öffnen immer zum Oberkörper zurück
+                    const swipeWrapper = document.getElementById('fitnessSwipeWrapper');
+                    if (swipeWrapper) swipeWrapper.scrollLeft = 0;
+                });
+            }
+
+            if (closeFitBtn && fitOverlay) {
+                closeFitBtn.addEventListener('click', () => {
+                    fitOverlay.style.display = 'none';
+                });
+            }
+
+            if (fitOverlay) {
+                fitOverlay.addEventListener('click', (event) => {
+                    if (event.target.id === 'fitnessOverlay') {
+                        fitOverlay.style.display = 'none';
+                    }
+                });
+            }
 
 
 
