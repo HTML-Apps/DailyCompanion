@@ -1518,15 +1518,13 @@
             
             <div class="fitness-header-nav">
                 <h2 style="margin: 0; background: none; -webkit-text-fill-color: #fff; color: #fff;">Workout Plan</h2>
+                <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">OK</button>
+                <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">UK</button>
+
                 <button onclick="addFitnessExercise()" class="action-button btn-search" style="border-radius: 50px; font-size: 0.9em; padding: 8px 15px;">+ Übung</button>
             </div>
 
             <div class="popup-content" style="max-height: 87vh; overflow-y: auto; padding-right: 5px;">
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">Oberkörper</button>
-                    <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">Unterkörper</button>
-                </div>
-
                 <div class="fitness-swipe-wrapper" id="fitnessSwipeWrapper">
                     <div class="fitness-slide" id="slide-oberkoerper">
                         <div id="oberkoerper-list"></div>
