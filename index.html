@@ -839,6 +839,49 @@
 
 
 
+
+
+
+
+
+
+        /* ====== START: Notiz-Suche Styles ====== */
+        .search-result-entry {
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            color: #FFFFFF;
+        }
+        .search-result-entry .date {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #00f2fe;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding-bottom: 5px;
+        }
+        .search-result-content {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #d0d0d0;
+            white-space: pre-wrap; /* Wichtig, damit Zeilenumbrüche aus dem Textarea angezeigt werden */
+        }
+        .search-highlight {
+            background-color: rgba(0, 242, 254, 0.3);
+            color: #ffffff;
+            font-weight: bold;
+            padding: 0 4px;
+            border-radius: 4px;
+            border: 1px solid #00f2fe;
+        }
+        /* ====== ENDE: Notiz-Suche Styles ====== */
+
+
+
+
         @media (max-width: 480px) {
             body { padding: 0; }
             .header-fixed { padding: 8px 0; margin-bottom: 0px; }
@@ -1405,7 +1448,7 @@
                         <button type="button" class="notes-tag-button" data-tag="Spritze Femur links">Spritze Femur links</button>
                         <button type="button" class="notes-tag-button" data-tag="Spritze Femur rechts">Spritze Femur rechts</button>
                         
-                        <div class="tag-category" style="text-align:center">Anmerkungen</div> 
+                        <div id="openSearchBtn" class="tag-category" style="text-align:center; cursor: pointer; transition: color 0.2s; border-radius: 5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#00f2fe'">Anmerkungen 🔍</div>
                     </div>
                     <textarea id="notes" placeholder="Zusätzliche Kommentare..."></textarea>
                 </div>
@@ -1536,6 +1579,20 @@
                         <div id="unterkoerper-list"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="searchOverlay">
+        <div class="popup" id="searchPopup">
+            <span class="close-btn" id="closeSearchBtn">&times;</span>
+            <h2 style="margin-top: 0px;">Notiz-Suche</h2>
+            
+            <div class="popup-content" style="display: flex; flex-direction: column; height: calc(100vh - 120px);">
+                <input type="text" id="searchInput" class="styled-input" placeholder="Suche in Notizen..." style="margin-bottom: 20px;">
+                <div id="searchStatusMessage" style="color: #aaa; font-size: 0.9em; margin-bottom: 15px; text-align: center;">Bitte warten, Daten werden geladen...</div>
+                
+                <div id="searchResultsContainer" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;"></div>
             </div>
         </div>
     </div>
@@ -3221,6 +3278,144 @@
 
 
 
+
+
+
+            // ====== START: Such-Logik ======
+            let searchEntriesCache = [];
+
+            const openSearchBtn = document.getElementById('openSearchBtn');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const closeSearchBtn = document.getElementById('closeSearchBtn');
+            const searchInput = document.getElementById('searchInput');
+            const searchResultsContainer = document.getElementById('searchResultsContainer');
+            const searchStatusMessage = document.getElementById('searchStatusMessage');
+
+            // 1. Popup öffnen und Daten aus Firebase laden
+            if (openSearchBtn) {
+                openSearchBtn.addEventListener('click', async () => {
+                    const user = auth.currentUser;
+                    if (!user) {
+                        alert("Bitte melden Sie sich an, um die Suche zu nutzen.");
+                        return;
+                    }
+
+                    searchOverlay.style.display = 'flex';
+                    searchInput.value = '';
+                    searchResultsContainer.innerHTML = '';
+                    searchStatusMessage.textContent = 'Lade Daten aus der Datenbank...';
+
+                    try {
+                        // Alle Einträge des Users abrufen
+                        const snapshot = await db.collection("dailyEntries")
+                            .where("userId", "==", user.uid)
+                            .get();
+
+                        searchEntriesCache = [];
+                        snapshot.forEach(doc => {
+                            const d = doc.data();
+                            // Datumsobjekt sicherstellen
+                            d.dateObj = d.date && d.date.toDate ? d.date.toDate() : new Date();
+                            searchEntriesCache.push(d);
+                        });
+
+                        // Absteigend sortieren (Neueste zuerst)
+                        searchEntriesCache.sort((a, b) => b.dateObj - a.dateObj);
+
+                        searchStatusMessage.textContent = `${searchEntriesCache.length} Einträge geladen. Du kannst jetzt suchen.`;
+                        searchInput.focus();
+                    } catch (error) {
+                        console.error("Fehler beim Laden für die Suche:", error);
+                        searchStatusMessage.textContent = 'Fehler beim Laden der Daten.';
+                    }
+                });
+            }
+
+            // 2. Popup schließen
+            if (closeSearchBtn) {
+                closeSearchBtn.addEventListener('click', () => {
+                    searchOverlay.style.display = 'none';
+                });
+            }
+            if (searchOverlay) {
+                searchOverlay.addEventListener('click', (event) => {
+                    if (event.target.id === 'searchOverlay') {
+                        searchOverlay.style.display = 'none';
+                    }
+                });
+            }
+
+            // 3. Suchfunktion bei Eingabe
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    renderFirebaseSearchResults(e.target.value.trim().toLowerCase());
+                });
+            }
+
+            function renderFirebaseSearchResults(searchTerm) {
+                searchResultsContainer.innerHTML = '';
+
+                if (!searchTerm) {
+                    searchStatusMessage.textContent = 'Gib einen Suchbegriff ein, um die Notizen zu filtern.';
+                    return;
+                }
+
+                // Filtern der gecachten Einträge
+                const filteredEntries = searchEntriesCache.filter(entry => {
+                    if (!entry.notes) return false;
+
+                    // Fall 1: "notes" ist ein einfacher String (Standard in deiner App)
+                    if (typeof entry.notes === 'string') {
+                        return entry.notes.toLowerCase().includes(searchTerm);
+                    }
+
+                    // Fall 2: Fallback falls es als Array gespeichert wurde
+                    if (typeof entry.notes === 'object' && Array.isArray(entry.notes.value)) {
+                        return entry.notes.value.some(note => typeof note === 'string' && note.toLowerCase().includes(searchTerm));
+                    }
+                    
+                    return false;
+                });
+
+                if (filteredEntries.length === 0) {
+                    searchStatusMessage.textContent = 'Keine passenden Notizen gefunden.';
+                    return;
+                }
+
+                searchStatusMessage.textContent = `${filteredEntries.length} passende(r) Eintrag/Einträge gefunden.`;
+
+                // Ergebnisse rendern
+                filteredEntries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'search-result-entry';
+                    
+                    let notesText = '';
+                    if (typeof entry.notes === 'string') {
+                        notesText = entry.notes;
+                    } else if (typeof entry.notes === 'object' && Array.isArray(entry.notes.value)) {
+                        notesText = entry.notes.value.join('\n'); // Arrays zu einem Text zusammenfügen
+                    }
+
+                    // Datum formatieren
+                    const dateStr = entry.dateObj.toLocaleDateString('de-DE');
+                    const dateHTML = `<div class="date">${dateStr}</div>`;
+                    
+                    // Suchbegriff highlighten
+                    const highlightedNotes = highlightFirebaseSearchTerm(notesText, searchTerm);
+                    
+                    entryDiv.innerHTML = `${dateHTML}<div class="search-result-content">${highlightedNotes}</div>`;
+                    searchResultsContainer.appendChild(entryDiv);
+                });
+            }
+
+            function highlightFirebaseSearchTerm(text, term) {
+                if (!term) return text;
+                // RegExp sicher machen (Sonderzeichen escapen)
+                const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${escapedTerm})`, 'gi');
+                return text.replace(regex, `<span class="search-highlight">$1</span>`);
+            }
+            // ====== ENDE: Such-Logik ======
 
 
 
