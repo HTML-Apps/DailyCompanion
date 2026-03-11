@@ -2263,6 +2263,7 @@
                     alert(`Kein Eintrag für den ${day}.${month+1}.${year} gefunden.\n\nDu kannst jetzt einen neuen Eintrag für diesen Tag erstellen.`);
                     document.getElementById('submitBtn').textContent = `Neuen Eintrag für ${day}.${month+1}. speichern`;
                     document.getElementById('submitBtn').style.background = "linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%)";
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     const doc = snapshot.docs[0];
                     const data = doc.data();
