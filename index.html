@@ -3326,7 +3326,7 @@
                         // Absteigend sortieren (Neueste zuerst)
                         searchEntriesCache.sort((a, b) => b.dateObj - a.dateObj);
 
-                        searchStatusMessage.textContent = `${searchEntriesCache.length} Einträge geladen. Du kannst jetzt suchen.`;
+                        searchStatusMessage.textContent = `${searchEntriesCache.length} Einträge geladen. Du kannst jetzt suchen. Begriffkategorien: Flow, Physio, Essen, Verdauung, Haut, Biologika`;
                         searchInput.focus();
                     } catch (error) {
                         console.error("Fehler beim Laden für die Suche:", error);
