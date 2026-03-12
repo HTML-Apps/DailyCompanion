@@ -904,7 +904,7 @@
             .rating-scale { gap: 3px; }
             .rating-box { min-width: 28px; height: 32px; font-size: 0.9em; }
             .overall-average-display { font-size: 1.8em; }
-            textarea { width: calc(100% - 30px); font-size: 0.9em; min-height: 60px; margin-left: 4px;}
+            textarea { width: calc(100% - 30px); font-size: 0.9em; min-height: 100px; margin-left: 4px;}
             .submit-button { padding: 15px; font-size: 1.3em; }
             
             .popup { padding: 15px; width: 95%; }
@@ -3360,7 +3360,7 @@
                 searchResultsContainer.innerHTML = '';
 
                 if (!searchTerm) {
-                    searchStatusMessage.textContent = 'Gib einen Suchbegriff ein, um die Notizen zu filtern.';
+                    searchStatusMessage.textContent = 'Gib einen Suchbegriff ein, um die Notizen zu filtern. Begriffkategorien: Flow, Physio, Essen, Verdauung, Haut, Biologika';
                     return;
                 }
 
