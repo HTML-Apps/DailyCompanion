@@ -928,6 +928,7 @@
         @media (min-width: 1024px) {
             body { 
                 overflow: hidden; /* Hauptseite fixieren, Blöcke einzeln scrollen lassen */
+                height: 100vh;
             }
             .app-layout {
                 flex-direction: row;
@@ -935,11 +936,10 @@
                 align-items: flex-start;
                 width: 98%;
                 max-width: 1800px;
-                height: calc(100vh - 150px); /* Höhe abzüglich Header & Login Info */
-                min-height: 500px;
+                flex-grow: 1;
+                min-height: 0;
                 gap: 15px;
                 margin: 0 auto;
-                margin-top: 5px;
             }
             
             /* LINKE SPALTE: PainMap Overlay wird dauerhaft und positioniert eingebunden */
@@ -961,10 +961,6 @@
                 border: 3px solid rgb(135, 135, 158);
             }
 
-            #painMapOverlay {
-                top: 82px;
-            }
-            
             /* Unsichtbar machen von Buttons, die am Desktop nicht gebraucht werden */
             #closePainMapBtn { display: none; }
             #painMapBtn { display: none; }
