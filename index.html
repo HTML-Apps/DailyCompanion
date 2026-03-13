@@ -1911,19 +1911,8 @@
             // --- Formular mit den geladenen oder Fallback-Werten befüllen ---
 
             console.log('Fülle Formular mit Standardwerten...');
-            
-            // NEU: 1. Aktuell gewähltes Datum sichern 
-            // WICHTIG: Ersetze 'dateInput' mit der echten ID deines Datumsfeldes (z.B. 'entryDate' oder 'trackDate')
-            const dateField = document.getElementById('dateInput'); 
-            const savedDate = dateField ? dateField.value : null;
+            resetForm(); // Formular vor dem Befüllen leeren
 
-            resetForm(); // Formular leeren (setzt vermutlich das Datum auf heute)
-
-            // NEU: 2. Gesichertes Datum wiederherstellen
-            if (dateField && savedDate) {
-                dateField.value = savedDate;
-            }
-            
             // 1. Zeiten
             if (defaultValues.bedTime) document.getElementById('bedTime').value = defaultValues.bedTime;
             if (defaultValues.wakeUpTime) document.getElementById('wakeUpTime').value = defaultValues.wakeUpTime;
