@@ -2571,30 +2571,17 @@
                 const mathData = chartData.map(d => ({ x: d.x.getTime(), y: d.y }));
                 const trend = calculateTrend(mathData);
                 const slopePerDay = trend.m * 86400000;
+                const isImprovementPositive = ['moodRating', 'neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 'lowerBodyPainRating', 'overallAverage', 'movementFlowPainRating', 'immunesystemRating', 'digestionRating', 'morningStiffness'].includes(metricKey);
                 const actualTrendIsUp = slopePerDay > 0;
-
-                // 1. Definiere Metriken, bei denen STEIGENDE Werte gut sind (z.B. Stimmung)
-                const higherIsBetter = ['moodRating', 'immunesystemRating', 'digestionRating'].includes(metricKey);
-                
-                // 2. Definiere Metriken, bei denen FALLENDE Werte gut sind (z.B. Schmerz, CRP, Steifigkeit)
-                const lowerIsBetter = [
-                    'neckPainRating', 'shoulderPainRating', 'upperBodyPainRating', 
-                    'lowerBodyPainRating', 'overallAverage', 'movementFlowPainRating', 
-                    'morningStiffness', 'crpValue'
-                ].includes(metricKey);
-
-                // 3. Logik für "isGoodTrend"
-                let isGoodTrend = false;
-                if (higherIsBetter) {
-                    isGoodTrend = actualTrendIsUp; // Steigt = Gut
-                } else if (lowerIsBetter) {
-                    isGoodTrend = !actualTrendIsUp; // Sinkt = Gut
-                }
-
+                let isGoodTrend = isImprovementPositive ? actualTrendIsUp : !actualTrendIsUp;
                 const directionText = isGoodTrend ? "Verbesserung" : "Verschlechterung";
                 const trendColor = isGoodTrend ? "#2ecc71" : "#e74c3c";
-
-                // ... Rest des Codes (innerHTML, datasets.push) bleibt gleich
+                trendText.innerHTML = `Trend: <strong style="color:${trendColor}">${directionText}</strong><br>(Änderung/Tag: ${slopePerDay.toFixed(3)})`;
+                datasets.push({
+                    type: 'line', label: 'Trend',
+                    data: [ { x: new Date(trend.startPoint.x), y: trend.startPoint.y }, { x: new Date(trend.endPoint.x), y: trend.endPoint.y } ],
+                    borderColor: trendColor, borderDash: [5, 5], pointRadius: 0, fill: false
+                });
             }
 
             trendChartInstance = new Chart(ctx, {
