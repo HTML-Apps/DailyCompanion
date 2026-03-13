@@ -2251,7 +2251,8 @@
             document.getElementById('statsOverlay').style.display = 'none';
         }
 
-        function resetForm() {
+        // Füge den Parameter 'keepDate' hinzu (Standardmäßig false)
+        function resetForm(keepDate = false) {
             document.getElementById('bedTime').value = '';
             document.getElementById('wakeUpTime').value = '';
             document.getElementById('sleepDurationDisplay').textContent = '';
@@ -2273,7 +2274,12 @@
             painMapData = { frontPoints: [], backPoints: [] };
 
             currentEntryId = null;
-            currentEditingDate = new Date();
+
+            // NUR zurücksetzen, wenn keepDate NICHT wahr ist
+            if (!keepDate) {
+                currentEditingDate = new Date();
+            }
+            
             updateSleepTimeLabel();
             
             const submitBtn = document.getElementById('submitBtn');
