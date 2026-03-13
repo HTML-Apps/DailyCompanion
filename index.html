@@ -2251,8 +2251,7 @@
             document.getElementById('statsOverlay').style.display = 'none';
         }
 
-        // Füge den Parameter 'keepDate' hinzu (Standardmäßig false)
-        function resetForm(keepDate = false) {
+        function resetForm() {
             document.getElementById('bedTime').value = '';
             document.getElementById('wakeUpTime').value = '';
             document.getElementById('sleepDurationDisplay').textContent = '';
@@ -2274,12 +2273,7 @@
             painMapData = { frontPoints: [], backPoints: [] };
 
             currentEntryId = null;
-
-            // NUR zurücksetzen, wenn keepDate NICHT wahr ist
-            if (!keepDate) {
-                currentEditingDate = new Date();
-            }
-            
+            currentEditingDate = new Date();
             updateSleepTimeLabel();
             
             const submitBtn = document.getElementById('submitBtn');
@@ -2732,8 +2726,6 @@
                 }
             });
         }
-
-
 
         async function exportDailyEntries() {
             const confirmDownload = confirm("Möchten Sie die Daten herunterladen und Google Colab für Ihr Python-Projekt öffnen?");
@@ -3236,17 +3228,6 @@
                 });
             }
 
-
-
-
-
-
-
-
-
-
-
-
             // Listener für Fitness Tracker (Ausfallsicher)
             const openFitBtn = document.getElementById('openFitnessTrackerBtn');
             const closeFitBtn = document.getElementById('closeFitnessBtn');
@@ -3274,12 +3255,6 @@
                     }
                 });
             }
-
-
-
-
-
-
 
             // ====== START: Such-Logik ======
             let searchEntriesCache = [];
@@ -3417,13 +3392,6 @@
             }
             // ====== ENDE: Such-Logik ======
 
-
-
-
-
-
-
-
             // ====== START: Logik für Desktop Date Picker ======
 
             // Das Datumseingabefeld, das wir aktualisieren wollen
@@ -3498,7 +3466,6 @@
             }
 
             // ====== START: Code für Biologika Countdown ======
-
             function updateBiologikaCountdown() {
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
@@ -3563,10 +3530,7 @@
                 // NEU: Ruft am Ende die Funktion auf, um den Dot-Status zu aktualisieren
                 updateNotificationDot();
             }
-
             // ====== ENDE: Code für Biologika Countdown ======
-
-            //updateBiologikaCountdown();
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -3617,5 +3581,6 @@
         });
 
     </script>
+    
 </body>
 </html>
