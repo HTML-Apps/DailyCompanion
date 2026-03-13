@@ -1634,45 +1634,40 @@
             { id: "9", cat: 'unterkoerper', name: 'Abduktion', sets: '3x20', startWeight: 90, weight: 90 },
             { id: "10", cat: 'unterkoerper', name: 'Adduktion', sets: '3x10', startWeight: 85, weight: 85 },
             { id: "11", cat: 'unterkoerper', name: 'Bulgarian Squats', sets: '3x10', startWeight: 20, weight: 20 },
-            { id: "12", cat: 'unterkoerper', name: 'Crisscross', sets: '3x20', startWeight: 5, weight: 5 }
+            { id: "12", cat: 'unterkoerper', name: 'Crisscross', sets: '3x20', startWeight: 5, weight: 5 },
+            // Beispiel für eine Physio-Übung in den Initialdaten:
+            { id: "13", cat: 'physio', name: 'Blackroll / Dehnen', sets: '10 min', startWeight: 0, weight: 0 }
         ];
 
-        // Lädt den Plan aus Firebase
-        // Ändere die loadFitnessData Funktion wie folgt:
         async function loadFitnessData() {
             const user = auth.currentUser;
             if (!user) {
                 console.log("Kein User angemeldet, lade keine Fitnessdaten.");
                 return;
-                    }
+            }
 
             try {
                 console.log("Lade Fitnessplan für User:", user.uid);
                 const doc = await db.collection("fitnessPlans").doc(user.uid).get();
                 
                 if (doc.exists && doc.data().exercises && doc.data().exercises.length > 0) {
-                    // Daten aus Firebase vorhanden
                     fitnessExercises = doc.data().exercises;
                     console.log("Daten aus Firebase geladen.");
                 } else {
-                    // Falls Dokument nicht existiert oder leer ist -> Initialdaten nutzen
                     console.log("Keine Daten in Firebase gefunden. Nutze Initialdaten.");
-                    fitnessExercises = [...initialFitnessData]; // Kopie der Initialdaten
-                    await saveFitnessDataToFirebase(); // Direkt in Firebase für die Zukunft speichern
+                    fitnessExercises = [...initialFitnessData];
+                    await saveFitnessDataToFirebase();
                 }
                 
-                // WICHTIG: Render-Aufruf sicherstellen
                 renderFitnessPlan();
                 
             } catch (error) {
                 console.error("Fehler beim Laden des Fitnessplans: ", error);
-                // Fallback: Trotz Fehler Initialdaten zeigen, damit die App bedienbar bleibt
                 fitnessExercises = [...initialFitnessData];
                 renderFitnessPlan();
             }
         }
 
-        // Speichert den aktuellen Plan in Firebase
         async function saveFitnessDataToFirebase() {
             const user = auth.currentUser;
             if (!user) return;
@@ -1687,19 +1682,19 @@
         function renderFitnessPlan() {
             renderFitnessSection('oberkoerper-list', 'oberkoerper');
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
-            renderFitnessSection('physio-list', 'physio');
+            renderFitnessSection('physio-list', 'physio'); // Diese Zeile rendert die Physio-Sektion
         }
 
         function renderFitnessSection(containerId, category) {
             const container = document.getElementById(containerId);
             if(!container) return;
             container.innerHTML = '';
+            
+            // Filtern nach der entsprechenden Kategorie (oberkoerper, unterkoerper ODER physio)
             const filtered = fitnessExercises.filter(ex => ex.cat === category);
 
             filtered.forEach((ex) => {
                 const globalIndex = fitnessExercises.findIndex(e => e.id === ex.id);
-                
-                // Fallback: Falls maxWeight in der DB noch fehlt, berechne es aus Start/Ist-Zustand
                 const currentMax = ex.maxWeight !== undefined ? ex.maxWeight : Math.max(ex.startWeight || 0, ex.weight || 0);
 
                 const div = document.createElement('div');
@@ -1717,7 +1712,6 @@
                         </div>
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                        <span style="font-size: 0.65em; color: #888; text-transform: uppercase; font-weight: bold; margin-right: 5px;"></span>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="number" value="${ex.weight}" step="0.5" class="styled-input" style="width: 70px; padding: 6px; text-align: center; color: #ffffff; font-weight: bold;" onchange="updateFitnessWeight(${globalIndex}, this.value)">
                             <span style="font-size: 0.8em; color: #aaa; font-weight: bold;">KG</span>
@@ -1737,22 +1731,19 @@
             fitnessExercises[targetIndex] = temp;
             
             renderFitnessPlan();
-            saveFitnessDataToFirebase(); // Direkt in Firebase speichern ↑  
+            saveFitnessDataToFirebase();
         }
 
         function updateFitnessWeight(index, val) {
             const newVal = parseFloat(val) || 0;
             fitnessExercises[index].weight = newVal;
             
-            // Initialisiere maxWeight in der Datenbank, falls noch nicht vorhanden
             if (fitnessExercises[index].maxWeight === undefined) {
                 fitnessExercises[index].maxWeight = Math.max(fitnessExercises[index].startWeight || 0, newVal);
             }
             
-            // Prüfe auf einen neuen Rekord (Max-Wert)
             if (newVal > fitnessExercises[index].maxWeight) {
                 fitnessExercises[index].maxWeight = newVal;
-                // Rendert die UI neu, damit der neue Max-Wert sofort sichtbar ist
                 renderFitnessPlan(); 
             }
             
@@ -1767,12 +1758,18 @@
             }
         }
 
+        // Angepasst, um die neue Kategorie "physio" auswählen zu können
         function addFitnessExercise() {
             const name = prompt("Name der Übung:");
             if (!name) return;
             const sets = prompt("Sätze/Wdh (z.B. 3x10):", "3x10");
             const startWeight = prompt("Startgewicht in kg:", "0");
-            const cat = confirm("OK für Oberkörper, Abbrechen für Unterkörper") ? 'oberkoerper' : 'unterkoerper';
+            
+            // Auswahl der Kategorie erweitert
+            const catChoice = prompt("Kategorie: 1 für Oberkörper, 2 für Unterkörper, 3 für Physio", "1");
+            let cat = 'oberkoerper';
+            if (catChoice === "2") cat = 'unterkoerper';
+            if (catChoice === "3") cat = 'physio';
             
             const weightNum = parseFloat(startWeight) || 0;
 
@@ -1783,12 +1780,13 @@
                 sets: sets,
                 startWeight: weightNum,
                 weight: weightNum,
-                maxWeight: weightNum // Neues Feld initialisieren
+                maxWeight: weightNum
             });
             
             renderFitnessPlan();
             saveFitnessDataToFirebase();
         }
+        // ====== ENDE: Fitness Tracker JS Logik ======
         // ====== ENDE: Fitness Tracker JS Logik ======
 
         let painMapDateHistory = [];
