@@ -802,6 +802,7 @@
             flex: 0 0 100%;
             scroll-snap-align: start;
             box-sizing: border-box;
+            scroll-snap-stop: always;
         }
         .fitness-tab-btn {
             /*flex: 1;*/
@@ -3522,7 +3523,7 @@
                         countdownText = `in ${diffDays} Tagen`;
                     }
                     
-                    countdownElement.innerHTML = `Rheumatologe: Biologika | JAK <br>nächste Spritze: ${countdownText}`;
+                    countdownElement.innerHTML = `Rheumatologie: Biologika | JAK <br>nächste Spritze: ${countdownText}`;
 
                 } else {
                     countdownElement.textContent = 'Biologika | JAK<br>Keine nächste Spritze geplant.';
