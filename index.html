@@ -1696,15 +1696,26 @@
 
             // Kurzer Timeout bleibt wichtig, damit das Rendering fertig ist
             setTimeout(() => {
-                const target = document.getElementById('slide-unterkoerper');
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'auto',
-                        block: 'nearest',
-                        inline: 'start'
-                    });
+                const wrapper = document.querySelector('.fitness-swipe-wrapper');
+                if (wrapper) {
+                    // Wir holen uns alle Slides (direkte Kinder des Wrappers)
+                    const slides = wrapper.getElementsByClassName('fitness-slide');
+                    
+                    if (slides.length >= 2) {
+                        // slides[1] ist der zweite Slide (Unterkörper)
+                        const targetSlide = slides[1]; 
+                        
+                        // Wir berechnen den Abstand des zweiten Slides vom linken Rand des Wrappers
+                        const offsetLeft = targetSlide.offsetLeft;
+                        
+                        wrapper.scrollTo({
+                            left: offsetLeft,
+                            behavior: 'auto'
+                        });
+                        console.log("Scroll durchgeführt zu Position:", offsetLeft);
+                    }
                 }
-            }, 150);
+            }, 200);
         }
 
         function renderFitnessSection(containerId, category) {
