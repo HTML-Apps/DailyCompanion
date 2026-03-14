@@ -1689,33 +1689,35 @@
             }
         }
 
+        
         function renderFitnessPlan() {
             renderFitnessSection('oberkoerper-list', 'oberkoerper');
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
             renderFitnessSection('physio-list', 'physio');
 
-            // Kurzer Timeout bleibt wichtig, damit das Rendering fertig ist
+            // Wir nutzen einen etwas großzügigeren Timeout, 
+            // falls das Popup eine Animation beim Öffnen hat.
             setTimeout(() => {
-                const wrapper = document.querySelector('.fitness-swipe-wrapper');
-                if (wrapper) {
-                    // Wir holen uns alle Slides (direkte Kinder des Wrappers)
-                    const slides = wrapper.getElementsByClassName('fitness-slide');
-                    
-                    if (slides.length >= 2) {
-                        // slides[1] ist der zweite Slide (Unterkörper)
-                        const targetSlide = slides[1]; 
-                        
-                        // Wir berechnen den Abstand des zweiten Slides vom linken Rand des Wrappers
-                        const offsetLeft = targetSlide.offsetLeft;
-                        
-                        wrapper.scrollTo({
-                            left: offsetLeft,
-                            behavior: 'auto'
-                        });
-                        console.log("Scroll durchgeführt zu Position:", offsetLeft);
-                    }
+                const target = document.getElementById('slide-unterkoerper');
+                const wrapper = document.getElementById('fitnessSwipeWrapper');
+
+                if (target && wrapper) {
+                    // Methode A: Der moderne Weg
+                    target.scrollIntoView({
+                        behavior: 'auto', // 'auto' springt sofort, 'smooth' gleitet
+                        block: 'nearest', 
+                        inline: 'start'
+                    });
+
+                    // Sicherheits-Check (Methode B): Falls scrollIntoView durch CSS-Snap blockiert wurde
+                    setTimeout(() => {
+                        const offset = target.offsetLeft;
+                        if (wrapper.scrollLeft !== offset) {
+                            wrapper.scrollTo({ left: offset, behavior: 'auto' });
+                        }
+                    }, 50);
                 }
-            }, 200);
+            }, 250); 
         }
 
         function renderFitnessSection(containerId, category) {
