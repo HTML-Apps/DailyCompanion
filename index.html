@@ -1692,7 +1692,20 @@
         function renderFitnessPlan() {
             renderFitnessSection('oberkoerper-list', 'oberkoerper');
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
-            renderFitnessSection('physio-list', 'physio'); // Diese Zeile rendert die Physio-Sektion
+            renderFitnessSection('physio-list', 'physio');
+
+            // --- NEU: Zum mittleren Slide springen ---
+            const wrapper = document.querySelector('.fitness-swipe-wrapper');
+            if (wrapper) {
+                // Wir warten 50ms, bis der Browser die Elemente gezeichnet hat
+                setTimeout(() => {
+                    const slideWidth = wrapper.offsetWidth; // Breite eines 100% Slides
+                    wrapper.scrollTo({
+                        left: slideWidth, // Scrollt genau um eine Bildschirmbreite nach rechts (Slide 2)
+                        behavior: 'auto'  // 'auto' statt 'smooth', damit es beim Laden nicht "hüpft"
+                    });
+                }, 50);
+            }
         }
 
         function renderFitnessSection(containerId, category) {
