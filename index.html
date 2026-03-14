@@ -1694,22 +1694,17 @@
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
             renderFitnessSection('physio-list', 'physio');
 
-            // --- NEU: Zum mittleren Slide springen ---
-            const wrapper = document.querySelector('.fitness-swipe-wrapper');
-            if (wrapper) {
-                // Wir warten 50ms, bis der Browser die Elemente gezeichnet hat
-                setTimeout(() => {
-                    const wrapper = document.querySelector('.fitness-swipe-wrapper');
-                    if (wrapper && wrapper.children.length > 0) {
-                        const slideWidth = wrapper.offsetWidth;
-                        // Wir scrollen zum zweiten Kind-Element (Index 1)
-                        wrapper.scrollTo({
-                            left: slideWidth,
-                            behavior: 'auto'
-                        });
-                    }
-                }, 200); // Erhöht auf 200ms
-            }
+            // Kurzer Timeout bleibt wichtig, damit das Rendering fertig ist
+            setTimeout(() => {
+                const target = document.getElementById('unterkoerper-list');
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'nearest',
+                        inline: 'start'
+                    });
+                }
+            }, 150);
         }
 
         function renderFitnessSection(containerId, category) {
