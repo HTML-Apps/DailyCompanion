@@ -1699,12 +1699,16 @@
             if (wrapper) {
                 // Wir warten 50ms, bis der Browser die Elemente gezeichnet hat
                 setTimeout(() => {
-                    const slideWidth = wrapper.offsetWidth; // Breite eines 100% Slides
-                    wrapper.scrollTo({
-                        left: slideWidth, // Scrollt genau um eine Bildschirmbreite nach rechts (Slide 2)
-                        behavior: 'auto'  // 'auto' statt 'smooth', damit es beim Laden nicht "hüpft"
-                    });
-                }, 50);
+                    const wrapper = document.querySelector('.fitness-swipe-wrapper');
+                    if (wrapper && wrapper.children.length > 0) {
+                        const slideWidth = wrapper.offsetWidth;
+                        // Wir scrollen zum zweiten Kind-Element (Index 1)
+                        wrapper.scrollTo({
+                            left: slideWidth,
+                            behavior: 'auto'
+                        });
+                    }
+                }, 200); // Erhöht auf 200ms
             }
         }
 
