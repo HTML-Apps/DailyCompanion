@@ -1695,29 +1695,31 @@
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
             renderFitnessSection('physio-list', 'physio');
 
-            // Wir nutzen einen etwas großzügigeren Timeout, 
-            // falls das Popup eine Animation beim Öffnen hat.
-            setTimeout(() => {
-                const target = document.getElementById('slide-unterkoerper');
-                const wrapper = document.getElementById('fitnessSwipeWrapper');
+            const wrapper = document.getElementById('fitnessSwipeWrapper');
+            const target = document.getElementById('slide-unterkoerper');
 
-                if (target && wrapper) {
-                    // Methode A: Der moderne Weg
-                    target.scrollIntoView({
-                        behavior: 'auto', // 'auto' springt sofort, 'smooth' gleitet
-                        block: 'nearest', 
-                        inline: 'start'
+            if (wrapper && target) {
+                // 1. Wir schalten Snap kurz aus, damit der Browser nicht "gegenhält"
+                wrapper.style.scrollSnapType = 'none';
+
+                // 2. Wir nutzen ein etwas längeres Timeout, um das Popup abzuwarten
+                setTimeout(() => {
+                    const offset = target.offsetLeft;
+                    
+                    // 3. Sofort springen ohne Animation (verhindert Glitches)
+                    wrapper.scrollTo({
+                        left: offset,
+                        behavior: 'auto'
                     });
 
-                    // Sicherheits-Check (Methode B): Falls scrollIntoView durch CSS-Snap blockiert wurde
+                    // 4. Snap wieder aktivieren, nachdem wir gelandet sind
                     setTimeout(() => {
-                        const offset = target.offsetLeft;
-                        if (wrapper.scrollLeft !== offset) {
-                            wrapper.scrollTo({ left: offset, behavior: 'auto' });
-                        }
+                        wrapper.style.scrollSnapType = 'x mandatory';
                     }, 50);
-                }
-            }, 250); 
+                    
+                    console.log("Forced Scroll to:", offset);
+                }, 400); // 400ms ist der "Sweet Spot" für die meisten Popup-Animationen
+            }
         }
 
         function renderFitnessSection(containerId, category) {
