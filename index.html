@@ -1685,7 +1685,7 @@
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
 
-        // ====== START: Fitness Tracker JS Logik ======
+        // ====== START: Fitness-Tracker JS Logik ======
         let fitnessExercises = [];
 
         const initialFitnessData = [
@@ -1756,12 +1756,16 @@
             if(!container) return;
             container.innerHTML = '';
             
-            // Filtern nach der entsprechenden Kategorie (oberkoerper, unterkoerper ODER physio)
             const filtered = fitnessExercises.filter(ex => ex.cat === category);
 
             filtered.forEach((ex) => {
                 const globalIndex = fitnessExercises.findIndex(e => e.id === ex.id);
-                const currentMax = ex.maxWeight !== undefined ? ex.maxWeight : Math.max(ex.startWeight || 0, ex.weight || 0);
+                
+                // Fallback für alte Einträge ohne Einheit
+                const unit = ex.unit || 'kg'; 
+                
+                // Initialen Bestwert setzen, falls keiner existiert
+                let currentBest = ex.maxWeight !== undefined ? ex.maxWeight : (ex.startWeight || 0);
 
                 const div = document.createElement('div');
                 div.className = 'fitness-card';
@@ -1769,7 +1773,7 @@
                     <div style="flex: 1;">
                         <div style="font-weight: bold; font-size: 0.9em; color: #fff;">${ex.name}</div>
                         <div style="font-size: 0.75em; color: #aaa; margin-top: 2px;">
-                            ${ex.sets} <span style="margin-left: 5px; color: rgba(0, 242, 254, 0.7);">${ex.startWeight}kg | max: ${currentMax}kg</span>
+                            ${ex.sets} <span style="margin-left: 5px; color: rgba(0, 242, 254, 0.7);">Start: ${ex.startWeight}${unit} | Best: ${currentBest}${unit}</span>
                         </div>
                         <div style="display: flex; gap: 4px; margin-top: 8px;">
                             <button onclick="moveFitnessEx(${globalIndex}, -1)" class="fitness-btn-icon">↑</button>
@@ -1780,7 +1784,7 @@
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="number" value="${ex.weight}" step="0.5" class="styled-input" style="width: 70px; padding: 6px; text-align: center; color: #ffffff; font-weight: bold;" onchange="updateFitnessWeight(${globalIndex}, this.value)">
-                            <span style="font-size: 0.8em; color: #aaa; font-weight: bold;">KG</span>
+                            <span style="font-size: 0.8em; color: #aaa; font-weight: bold;">${unit.toUpperCase()}</span>
                         </div>
                     </div>
                 `;
@@ -1802,15 +1806,29 @@
 
         function updateFitnessWeight(index, val) {
             const newVal = parseFloat(val) || 0;
-            fitnessExercises[index].weight = newVal;
+            const ex = fitnessExercises[index];
+            ex.weight = newVal;
             
-            if (fitnessExercises[index].maxWeight === undefined) {
-                fitnessExercises[index].maxWeight = Math.max(fitnessExercises[index].startWeight || 0, newVal);
+            const unit = ex.unit || 'kg';
+            
+            // Setze initialen Bestwert, falls keiner existiert
+            if (ex.maxWeight === undefined) {
+                ex.maxWeight = ex.startWeight !== undefined ? ex.startWeight : newVal;
             }
             
-            if (newVal > fitnessExercises[index].maxWeight) {
-                fitnessExercises[index].maxWeight = newVal;
-                renderFitnessPlan(); 
+            // Logik: Was ist ein "neuer Bestwert"?
+            if (unit === 'cm') {
+                // Bei Abstand (cm) ist weniger = besser!
+                if (newVal < ex.maxWeight) {
+                    ex.maxWeight = newVal;
+                    renderFitnessPlan(); 
+                }
+            } else {
+                // Bei Gewicht (kg) oder Winkel (°) ist mehr = besser!
+                if (newVal > ex.maxWeight) {
+                    ex.maxWeight = newVal;
+                    renderFitnessPlan(); 
+                }
             }
             
             saveFitnessDataToFirebase();
@@ -1828,32 +1846,43 @@
         function addFitnessExercise() {
             const name = prompt("Name der Übung:");
             if (!name) return;
-            const sets = prompt("Sätze/Wdh (z.B. 3x10):", "3x10");
-            const startWeight = prompt("Startgewicht in kg:", "0");
+            const sets = prompt("Sätze/Wdh (z.B. 3x10 oder 3x30sek):", "3x10");
             
-            // Auswahl der Kategorie erweitert
-            const catChoice = prompt("Kategorie: 1 für Oberkörper, 2 für Unterkörper, 3 für Physio", "1");
+            // Kategorie abfragen
+            const catChoice = prompt("Kategorie: 1 = Oberkörper, 2 = Unterkörper, 3 = Physio", "1");
             let cat = 'oberkoerper';
-            if (catChoice === "2") cat = 'unterkoerper';
-            if (catChoice === "3") cat = 'physio';
+            let unit = 'kg'; // Standardeinheit
             
-            const weightNum = parseFloat(startWeight) || 0;
+            if (catChoice === "2") cat = 'unterkoerper';
+            if (catChoice === "3") {
+                cat = 'physio';
+                // Wenn Physio, fragen wir nach der Einheit
+                const unitChoice = prompt("Welche Einheit messen wir?\n1 = cm (Abstand)\n2 = ° (Grad/Winkel)\n3 = kg (Gewicht)", "1");
+                if (unitChoice === "1") unit = 'cm';
+                else if (unitChoice === "2") unit = '°';
+                else if (unitChoice === "3") unit = 'kg';
+            }
+            
+            // Text dynamisch anpassen
+            const startValueStr = prompt(`Startwert in ${unit}:`, "0");
+            const valNum = parseFloat(startValueStr) || 0;
 
             fitnessExercises.push({
                 id: Date.now().toString(),
                 cat: cat,
                 name: name,
                 sets: sets,
-                startWeight: weightNum,
-                weight: weightNum,
-                maxWeight: weightNum
+                unit: unit, // Speichert die gewählte Einheit
+                startWeight: valNum, // Wir behalten das Wording für die DB
+                weight: valNum,
+                maxWeight: valNum
             });
             
             renderFitnessPlan();
             saveFitnessDataToFirebase();
         }
 
-        // ====== ENDE: Fitness Tracker JS Logik ======
+        // ====== ENDE: Fitness-Tracker JS Logik ======
 
         let painMapDateHistory = [];
         let currentPainMapDate = null; 
