@@ -3246,26 +3246,26 @@
                     const targetSlide = document.getElementById('slide-unterkoerper');
 
                     if (swipeWrapper && targetSlide) {
-                            // 2. CSS-Tricks: Snap UND Smooth-Scroll vorübergehend deaktivieren
+                            // 2. BEIDE Bremsen anziehen: Snap aus UND Smooth-Scroll unterbinden
                             swipeWrapper.style.scrollSnapType = 'none';
-                            swipeWrapper.style.scrollBehavior = 'auto'; // Verhindert die sichtbare Bewegung
+                            swipeWrapper.style.scrollBehavior = 'auto'; // Erzwingt sofortigen Sprung
 
-                            // 3. Kurzer Delay (wichtig!), damit der Browser das 'flex' Layout fixiert
+                            // 3. Ein minimaler Moment für das Layout
                             setTimeout(() => {
                                 const offset = targetSlide.offsetLeft;
                                 
-                                // 4. Präzise setzen
+                                // 4. Den Scroll ausführen
                                 swipeWrapper.scrollTo({
                                     left: offset,
-                                    behavior: 'auto'
+                                    behavior: 'auto' // Doppelt hält besser
                                 });
 
-                                // 5. Alles wieder aktivieren
+                                // 5. Erst NACH dem Sprung die Bequemlichkeit wieder aktivieren
                                 setTimeout(() => {
                                     swipeWrapper.style.scrollSnapType = 'x mandatory';
-                                    swipeWrapper.style.scrollBehavior = 'smooth'; // Wieder zurück auf smooth für manuelles Swipen
-                                }, 60);
-                            }, 30); 
+                                    swipeWrapper.style.scrollBehavior = 'smooth';
+                                }, 50);
+                            }, 20); // 20ms reichen meistens völlig aus
                         }
                 });
             }
