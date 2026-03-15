@@ -2696,8 +2696,14 @@
                 
                 crpValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'mg/L', dataExtractor: (entry) => entry.crpValue ? parseFloat(entry.crpValue) : null, showTrend: true },
                 bsgValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'mm/h', dataExtractor: (entry) => entry.bsgValue ? parseFloat(entry.bsgValue) : null, showTrend: true },
-                hbValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'g/dl', dataExtractor: (entry) => entry.hbValue ? parseFloat(entry.hbValue) : null, showTrend: true },
                 tzValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: '/nl', dataExtractor: (entry) => entry.tzValue ? parseFloat(entry.tzValue) : null, showTrend: true },
+
+                lzValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: '/nl', dataExtractor: (entry) => entry.lzValue ? parseFloat(entry.lzValue) : null, showTrend: true },
+                npValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: '%', dataExtractor: (entry) => entry.npValue ? parseFloat(entry.npValue) : null, showTrend: true },
+                alatValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'U/l', dataExtractor: (entry) => entry.alatValue ? parseFloat(entry.alatValue) : null, showTrend: true },
+
+                hbValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'g/dl', dataExtractor: (entry) => entry.hbValue ? parseFloat(entry.hbValue) : null, showTrend: true },
+                d3Value: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'µg/l', dataExtractor: (entry) => entry.d3Value ? parseFloat(entry.d3Value) : null, showTrend: true },
 
                 sport: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null, showTrend: false },
                 painmeds: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Einnahme', dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null, showTrend: false },
@@ -3330,8 +3336,14 @@
 
                     crpValue,
                     bsgValue,
-                    hbValue,
                     tzValue,
+
+                    lzValue,
+                    npValue,
+                    alatValue,
+
+                    hbValue,
+                    d3Value,
 
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
