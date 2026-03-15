@@ -1811,9 +1811,9 @@
 
             const ex = fitnessExercises[index];
             ex.weight = newVal;
-    
+            
             const unit = ex.unit || 'kg';
-    
+            
             // 1. Initialisierung sicherstellen (Zahlenwert erzwingen)
             if (ex.maxWeight === undefined) {
                 ex.maxWeight = parseFloat(ex.startWeight) || newVal;
@@ -1821,17 +1821,17 @@
 
             // 2. Bestwert-Logik
             if (unit === 'cm') {
-            // Bei cm (z.B. Abstand zum Boden): Kleiner ist besser
-            if (newVal < ex.maxWeight) {
-                ex.maxWeight = newVal;
-            }
+                // Bei cm (z.B. Abstand zum Boden): Kleiner ist besser
+                if (newVal < ex.maxWeight) {
+                    ex.maxWeight = newVal;
+                }
             } else {
-            // Bei kg oder Grad: Größer ist besser
-            if (newVal > ex.maxWeight) {
-                ex.maxWeight = newVal;
+                // Bei kg oder Grad: Größer ist besser
+                if (newVal > ex.maxWeight) {
+                    ex.maxWeight = newVal;
+                }
             }
-            }
-    
+            
             // 3. WICHTIG: Immer rendern und speichern, damit Input und Anzeige synchron sind
             renderFitnessPlan(); 
             saveFitnessDataToFirebase();
