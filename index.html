@@ -16,6 +16,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1"></script>
+
     <!-- ====== START: Flatpickr Bibliotheken ====== -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -3684,8 +3686,8 @@
                     // Nach Datum aufsteigend sortieren
                     entries.sort((a, b) => a.dateObj - b.dateObj);
 
-                    // Hilfsfunktion zum Erstellen der Charts
-                    function createBloodChart(chartInstance, canvasId, label, dataKey, color) {
+                    // Hilfsfunktion zum Erstellen der Charts mit Normalbereichen
+                    function createBloodChart(chartInstance, canvasId, label, dataKey, color, minNormal, maxNormal) {
                         const ctx = document.getElementById(canvasId).getContext('2d');
                         
                         const chartData = entries
@@ -3701,11 +3703,11 @@
                                     label: label,
                                     data: chartData,
                                     borderColor: color,
-                                    backgroundColor: color + '33', // Hex-Farbe mit 20% Transparenz
+                                    backgroundColor: color,
                                     pointRadius: 4,
-                                    pointHoverRadius: 6,
-                                    fill: true,
-                                    tension: 0.3
+                                    fill: false,
+                                    tension: 0.3,
+                                    zIndex: 10 // Linie über den Normalbereich legen
                                 }]
                             },
                             options: {
@@ -3714,28 +3716,46 @@
                                 scales: {
                                     x: {
                                         type: 'time',
-                                        time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy', displayFormats: { day: 'dd.MM.yyyy', month: 'MM.yyyy' } },
+                                        time: { unit: 'day', displayFormats: { day: 'dd.MM', month: 'MM.yy' } },
                                         ticks: { color: '#ccc' },
                                         grid: { color: 'rgba(255,255,255,0.05)' }
                                     },
                                     y: {
-                                        beginAtZero: true,
                                         ticks: { color: '#ccc' },
                                         grid: { color: 'rgba(255,255,255,0.1)' }
                                     }
                                 },
                                 plugins: {
-                                    legend: { display: true, labels: { color: '#fff' } }
+                                    legend: { display: true, labels: { color: '#fff' } },
+                                    annotation: {
+                                        annotations: {
+                                            box1: {
+                                                type: 'box',
+                                                yMin: minNormal,
+                                                yMax: maxNormal,
+                                                backgroundColor: 'rgba(46, 213, 115, 0.1)', // Ganz zartes Grün
+                                                borderColor: 'rgba(46, 213, 115, 0.2)',
+                                                borderWidth: 1,
+                                                label: {
+                                                    display: true,
+                                                    content: 'Normalbereich',
+                                                    position: 'start',
+                                                    color: 'rgba(46, 213, 115, 0.5)',
+                                                    font: { size: 10 }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         });
                     }
 
-                    // Charts mit unterschiedlichen Farben generieren
-                    crpChartInstance = createBloodChart(crpChartInstance, 'crpChart', 'CRP-Wert (mg/L)', 'crpValue', '#ff4757');   // Rot
-                    bsgChartInstance = createBloodChart(bsgChartInstance, 'bsgChart', 'Blutsenkung (mm/h)', 'bsgValue', '#ffa502'); // Orange
-                    hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#2ed573');      // Grün
-                    tzChartInstance = createBloodChart(tzChartInstance, 'tzChart', 'Thrombozyten (/nl)', 'tzValue', '#1e90ff');     // Blau
+                    // Hier die Aufrufe mit den von dir genannten Normalwerten:
+                    crpChartInstance = createBloodChart(crpChartInstance, 'crpChart', 'CRP (mg/L)', 'crpValue', '#ff4757', 0, 5);
+                    bsgChartInstance = createBloodChart(bsgChartInstance, 'bsgChart', 'Blutsenkung (mm/h)', 'bsgValue', '#ffa502', 0, 15);
+                    hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#2ed573', 12.6, 17.4);
+                    tzChartInstance = createBloodChart(tzChartInstance, 'tzChart', 'Thrombozyten (/nl)', 'tzValue', '#1e90ff', 138, 347);
 
                 } catch (error) {
                     console.error("Fehler beim Laden der Blutwerte-Historie:", error);
