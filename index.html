@@ -3246,25 +3246,27 @@
                     const targetSlide = document.getElementById('slide-unterkoerper');
 
                     if (swipeWrapper && targetSlide) {
-                        // Wir schalten Snap kurz aus, damit der Sprung sauber klappt
-                        swipeWrapper.style.scrollSnapType = 'none';
+                            // 2. CSS-Tricks: Snap UND Smooth-Scroll vorübergehend deaktivieren
+                            swipeWrapper.style.scrollSnapType = 'none';
+                            swipeWrapper.style.scrollBehavior = 'auto'; // Verhindert die sichtbare Bewegung
 
-                        // Ein minimaler Timeout (10ms) gibt dem Browser Zeit, das 'flex' Layout zu berechnen
-                        setTimeout(() => {
-                            const offset = targetSlide.offsetLeft;
-                            swipeWrapper.scrollTo({
-                                left: offset,
-                                behavior: 'auto' // 'auto' für sofortigen Sprung ohne Animation
-                            });
-
-                            // Snap wieder aktivieren
+                            // 3. Kurzer Delay (wichtig!), damit der Browser das 'flex' Layout fixiert
                             setTimeout(() => {
-                                swipeWrapper.style.scrollSnapType = 'x mandatory';
-                            }, 50);
-                            
-                            console.log("Erfolgreich zum Unterkörper gescrollt, Offset:", offset);
-                        }, 10);
-                    }
+                                const offset = targetSlide.offsetLeft;
+                                
+                                // 4. Präzise setzen
+                                swipeWrapper.scrollTo({
+                                    left: offset,
+                                    behavior: 'auto'
+                                });
+
+                                // 5. Alles wieder aktivieren
+                                setTimeout(() => {
+                                    swipeWrapper.style.scrollSnapType = 'x mandatory';
+                                    swipeWrapper.style.scrollBehavior = 'smooth'; // Wieder zurück auf smooth für manuelles Swipen
+                                }, 60);
+                            }, 30); 
+                        }
                 });
             }
 
