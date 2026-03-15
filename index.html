@@ -1689,42 +1689,10 @@
             }
         }
 
-        
         function renderFitnessPlan() {
             renderFitnessSection('oberkoerper-list', 'oberkoerper');
             renderFitnessSection('unterkoerper-list', 'unterkoerper');
             renderFitnessSection('physio-list', 'physio');
-
-            const wrapper = document.getElementById('fitnessSwipeWrapper');
-            const target = document.getElementById('slide-unterkoerper');
-
-            if (wrapper && target) {
-                wrapper.style.scrollSnapType = 'none';
-
-                setTimeout(() => {
-                    let offset = target.offsetLeft;
-
-                    // FALLBACK: Wenn offset 0 ist, obwohl es der 2. Slide ist
-                    if (offset === 0) {
-                        const wrapperWidth = wrapper.clientWidth || wrapper.offsetWidth;
-                        offset = wrapperWidth; // Da jeder Slide 100% hat, ist Slide 2 bei 1x Breite
-                        console.log("Offset war 0, nutze Fallback (Breite):", offset);
-                    }
-
-                    if (offset > 0) {
-                        wrapper.scrollTo({
-                            left: offset,
-                            behavior: 'auto'
-                        });
-                        console.log("Finaler Scroll zu:", offset);
-                    }
-
-                    // Snap wieder an
-                    setTimeout(() => {
-                        wrapper.style.scrollSnapType = 'x mandatory';
-                    }, 100);
-                }, 500); // 500ms geben dem Popup wirklich Zeit, fertig zu laden
-            }
         }
 
         function renderFitnessSection(containerId, category) {
@@ -1828,6 +1796,7 @@
             renderFitnessPlan();
             saveFitnessDataToFirebase();
         }
+
         // ====== ENDE: Fitness Tracker JS Logik ======
 
         let painMapDateHistory = [];
@@ -3262,17 +3231,40 @@
                 });
             }
 
-            // Listener für Fitness Tracker (Ausfallsicher)
+            // Listener für Fitness Tracker (Optimiert für Start bei Slide 2)
             const openFitBtn = document.getElementById('openFitnessTrackerBtn');
             const closeFitBtn = document.getElementById('closeFitnessBtn');
             const fitOverlay = document.getElementById('fitnessOverlay');
 
             if (openFitBtn && fitOverlay) {
                 openFitBtn.addEventListener('click', () => {
+                    // 1. Overlay sichtbar machen
                     fitOverlay.style.display = 'flex';
-                    // Optional: Scrollt beim Öffnen immer zum Oberkörper zurück
+
+                    // 2. Zum mittleren Slide springen
                     const swipeWrapper = document.getElementById('fitnessSwipeWrapper');
-                    if (swipeWrapper) swipeWrapper.scrollLeft = 0;
+                    const targetSlide = document.getElementById('slide-unterkoerper');
+
+                    if (swipeWrapper && targetSlide) {
+                        // Wir schalten Snap kurz aus, damit der Sprung sauber klappt
+                        swipeWrapper.style.scrollSnapType = 'none';
+
+                        // Ein minimaler Timeout (10ms) gibt dem Browser Zeit, das 'flex' Layout zu berechnen
+                        setTimeout(() => {
+                            const offset = targetSlide.offsetLeft;
+                            swipeWrapper.scrollTo({
+                                left: offset,
+                                behavior: 'auto' // 'auto' für sofortigen Sprung ohne Animation
+                            });
+
+                            // Snap wieder aktivieren
+                            setTimeout(() => {
+                                swipeWrapper.style.scrollSnapType = 'x mandatory';
+                            }, 50);
+                            
+                            console.log("Erfolgreich zum Unterkörper gescrollt, Offset:", offset);
+                        }, 10);
+                    }
                 });
             }
 
