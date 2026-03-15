@@ -2277,6 +2277,17 @@
 
             const crpText = data.crpValue ? data.crpValue + ' mg/L' : 'Nicht angegeben';
             popupContentHtml += `<p><strong>CRP-Wert:</strong> ${crpText}</p>`;
+
+            /*
+            const crpText = data.bsgValue ? data.bsgValue + ' mm/h' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>BSG-Wert:</strong> ${bsgValue}</p>`;
+
+            const crpText = data.hbValue ? data.hbValue + ' g/dl' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>Hb-Wert:</strong> ${hbValue}</p>`;
+
+            const crpText = data.tzValue ? data.tzValue + ' /nl' : 'Nicht angegeben';
+            popupContentHtml += `<p><strong>Tz-Wert:</strong> ${tzValue}</p>`;
+            */
             
             const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
             popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
