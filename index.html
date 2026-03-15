@@ -1360,13 +1360,6 @@
                 </div>
 
                 <div class="category-item">
-                    <label>CRP-Wert (mg/L)</label>
-                    <div class="crp-input-container">
-                        <input type="number" id="crpInput" step="0.1" placeholder="z.B. 5.0" class="styled-input">
-                    </div>
-                </div>
-
-                <div class="category-item">
                     <label>Gesamttagesbilanz</label>
                     <div class="overall-average-display" id="overallAverageDisplay">--</div>
                 </div>
@@ -1431,8 +1424,7 @@
                         <button type="button" class="notes-tag-button" data-tag="Wirbelkörperlockerung in L-Liegeposition mit Nugget">Liegeposition 🥜</button>
                         <button type="button" class="notes-tag-button" data-tag="Beikippung in L-Liegeposition">Beinkippung liegend</button>
 
-                        <div id="biologika-countdown" class="tag-category" style="text-align:center">Biologika | JAK</div>
-                        <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button>
+                        <div id="biologika-countdown" class="tag-category" style="text-align:center; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#00f2fe'">Rheumatologie: Biologika | JAK</div>                        <button type="button" class="notes-tag-button" data-tag="Fatigue">Fatigue</button>
                         <button type="button" class="notes-tag-button" data-tag="Brainfog">Fog</button> 
                         <button type="button" class="notes-tag-button" data-tag="Kopfweh">Kopfweh</button>
                         <button type="button" class="notes-tag-button" data-tag="Rötung Spritze / Schmerzen">Rötung</button> 
@@ -1554,6 +1546,7 @@
         </div>
     </div>
 
+    <!-- Fitness-Tracker -->
     <div class="overlay" id="fitnessOverlay">
         <div class="popup" id="fitnessPopup">
             <span class="close-btn" id="closeFitnessBtn">&times;</span>
@@ -1586,6 +1579,7 @@
         </div>
     </div>
 
+    <!-- Kommentarsuche -->
     <div class="overlay" id="searchOverlay">
         <div class="popup" id="searchPopup">
             <span class="close-btn" id="closeSearchBtn">&times;</span>
@@ -1600,6 +1594,54 @@
         </div>
     </div>
 
+    <!-- Blutwerte-Popup -->
+    <div class="overlay" id="bloodValuesOverlay">
+        <div class="popup" id="bloodValuesPopup">
+            <span class="close-btn" id="closeBloodValuesBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">BLUTWERTE</h2>
+            
+            <div class="popup-content" style="max-height: 85vh; overflow-y: auto; padding-right: 5px;">
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">CRP-Wert (mg/L)</label>
+                        <input type="number" id="crpInput" step="0.1" class="styled-input" placeholder="z.B. 5.0">
+                    </div>
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Blutsenkung (bsg | mm/h)</label>
+                        <input type="number" id="bsgInput" step="1" class="styled-input" placeholder="z.B. 10">
+                    </div>
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Hämoglobin (hb | g/dl)</label>
+                        <input type="number" id="hbInput" step="0.1" class="styled-input" placeholder="z.B. 14.5">
+                    </div>
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Thrombozyten (tz | /nl)</label>
+                        <input type="number" id="tzInput" step="1" class="styled-input" placeholder="z.B. 250">
+                    </div>
+                    
+                    <button class="action-button btn-search" id="saveBloodValuesBtn" style="margin-top: 10px; padding: 15px; font-size: 1.1em; background: linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);">
+                        Werte für diesen Tag speichern
+                    </button>
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 30px 0;">
+                <h3 style="text-align: center; color: white;">Historischer Verlauf</h3>
+
+                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                    <canvas id="crpChart"></canvas>
+                </div>
+                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                    <canvas id="bsgChart"></canvas>
+                </div>
+                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                    <canvas id="hbChart"></canvas>
+                </div>
+                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                    <canvas id="tzChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -1967,7 +2009,12 @@
             calculateSleepDuration(); 
 
             document.getElementById('morningStiffness').value = (data.morningStiffness !== undefined && data.morningStiffness !== null) ? data.morningStiffness : '';
+
+            // Blutwerte-Cluster
             document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
+            document.getElementById('bsgInput').value = (data.bsgValue !== undefined && data.bsgValue !== null) ? data.bsgValue : '';
+            document.getElementById('hbInput').value = (data.hbValue !== undefined && data.hbValue !== null) ? data.hbValue : '';
+            document.getElementById('tzInput').value = (data.tzValue !== undefined && data.tzValue !== null) ? data.tzValue : '';
 
             document.getElementById('notes').value = data.notes || '';
 
@@ -2260,6 +2307,9 @@
             document.getElementById('sleepDurationDisplay').textContent = '';
             document.getElementById('morningStiffness').value = '';
             document.getElementById('crpInput').value = '';
+            document.getElementById('bsgInput').value = '';
+            document.getElementById('hbInput').value = '';
+            document.getElementById('tzInput').value = '';
             document.getElementById('notes').value = '';
 
             document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
@@ -3082,7 +3132,13 @@
                 let missingFields = [];
                 const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
                 const morningStiffnessValue = document.getElementById('morningStiffness').value;
+
+                // Blutwerte-Cluster
                 const crpValue = document.getElementById('crpInput').value ? parseFloat(document.getElementById('crpInput').value) : null;
+                const bsgValue = document.getElementById('bsgInput').value ? parseFloat(document.getElementById('bsgInput').value) : null;
+                const hbValue = document.getElementById('hbInput').value ? parseFloat(document.getElementById('hbInput').value) : null;
+                const tzValue = document.getElementById('tzInput').value ? parseFloat(document.getElementById('tzInput').value) : null;
+
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
                 const noSport = document.getElementById('sportNone');
@@ -3126,7 +3182,12 @@
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports, stretchingStatus, glutenStatus, milkStatus, selectedPainmeds,
                     morningStiffness: morningStiffnessValue !== "" ? parseInt(morningStiffnessValue) : null,
+
                     crpValue,
+                    bsgValue,
+                    hbValue,
+                    tzValue,
+
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
@@ -3427,7 +3488,6 @@
             // ====== ENDE: Such-Logik ======
 
             // ====== START: Logik für Desktop Date Picker ======
-
             // Das Datumseingabefeld, das wir aktualisieren wollen
             const searchDateInput = document.getElementById('searchDate');
 
@@ -3565,6 +3625,123 @@
                 updateNotificationDot();
             }
             // ====== ENDE: Code für Biologika Countdown ======
+
+            // ====== START: Blutwerte & Charts Logik ======
+            const biologikaTrigger = document.getElementById('biologika-countdown');
+            const bloodValuesOverlay = document.getElementById('bloodValuesOverlay');
+            const closeBloodValuesBtn = document.getElementById('closeBloodValuesBtn');
+
+            // Variablen für die Charts (damit sie beim Neuladen zerstört werden können)
+            let crpChartInstance = null;
+            let bsgChartInstance = null;
+            let hbChartInstance = null;
+            let tzChartInstance = null;
+
+            if (biologikaTrigger) {
+                biologikaTrigger.addEventListener('click', async () => {
+                    bloodValuesOverlay.style.display = 'flex';
+                    await renderBloodValueCharts();
+                });
+            }
+
+            if (closeBloodValuesBtn) {
+                closeBloodValuesBtn.addEventListener('click', () => {
+                    bloodValuesOverlay.style.display = 'none';
+                });
+            }
+
+            // Schließen beim Klick außerhalb
+            bloodValuesOverlay.addEventListener('click', (event) => {
+                if (event.target.id === 'bloodValuesOverlay') {
+                    bloodValuesOverlay.style.display = 'none';
+                }
+            });
+
+            // Der Speichern-Button im Popup löst den Haupt-Speichern-Button aus
+            document.getElementById('saveBloodValuesBtn').addEventListener('click', () => {
+                document.getElementById('submitBtn').click();
+                bloodValuesOverlay.style.display = 'none';
+                alert("Blutwerte in Tagesbilanz übernommen und gespeichert.");
+            });
+
+            async function renderBloodValueCharts() {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                try {
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .get();
+
+                    let entries = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        if (d.date) {
+                            entries.push({ ...d, dateObj: d.date.toDate() });
+                        }
+                    });
+
+                    // Nach Datum aufsteigend sortieren
+                    entries.sort((a, b) => a.dateObj - b.dateObj);
+
+                    // Hilfsfunktion zum Erstellen der Charts
+                    function createBloodChart(chartInstance, canvasId, label, dataKey, color) {
+                        const ctx = document.getElementById(canvasId).getContext('2d');
+                        
+                        const chartData = entries
+                            .filter(e => e[dataKey] !== undefined && e[dataKey] !== null)
+                            .map(e => ({ x: e.dateObj, y: parseFloat(e[dataKey]) }));
+
+                        if (chartInstance) chartInstance.destroy();
+
+                        return new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                datasets: [{
+                                    label: label,
+                                    data: chartData,
+                                    borderColor: color,
+                                    backgroundColor: color + '33', // Hex-Farbe mit 20% Transparenz
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                    fill: true,
+                                    tension: 0.3
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time: { unit: 'day', tooltipFormat: 'dd.MM.yyyy', displayFormats: { day: 'dd.MM.yyyy', month: 'MM.yyyy' } },
+                                        ticks: { color: '#ccc' },
+                                        grid: { color: 'rgba(255,255,255,0.05)' }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: { color: '#ccc' },
+                                        grid: { color: 'rgba(255,255,255,0.1)' }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: true, labels: { color: '#fff' } }
+                                }
+                            }
+                        });
+                    }
+
+                    // Charts mit unterschiedlichen Farben generieren
+                    crpChartInstance = createBloodChart(crpChartInstance, 'crpChart', 'CRP-Wert (mg/L)', 'crpValue', '#ff4757');   // Rot
+                    bsgChartInstance = createBloodChart(bsgChartInstance, 'bsgChart', 'Blutsenkung (mm/h)', 'bsgValue', '#ffa502'); // Orange
+                    hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#2ed573');      // Grün
+                    tzChartInstance = createBloodChart(tzChartInstance, 'tzChart', 'Thrombozyten (/nl)', 'tzValue', '#1e90ff');     // Blau
+
+                } catch (error) {
+                    console.error("Fehler beim Laden der Blutwerte-Historie:", error);
+                }
+            }
+            // ====== ENDE: Blutwerte & Charts Logik ======
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
