@@ -1699,26 +1699,31 @@
             const target = document.getElementById('slide-unterkoerper');
 
             if (wrapper && target) {
-                // 1. Wir schalten Snap kurz aus, damit der Browser nicht "gegenhält"
                 wrapper.style.scrollSnapType = 'none';
 
-                // 2. Wir nutzen ein etwas längeres Timeout, um das Popup abzuwarten
                 setTimeout(() => {
-                    const offset = target.offsetLeft;
-                    
-                    // 3. Sofort springen ohne Animation (verhindert Glitches)
-                    wrapper.scrollTo({
-                        left: offset,
-                        behavior: 'auto'
-                    });
+                    let offset = target.offsetLeft;
 
-                    // 4. Snap wieder aktivieren, nachdem wir gelandet sind
+                    // FALLBACK: Wenn offset 0 ist, obwohl es der 2. Slide ist
+                    if (offset === 0) {
+                        const wrapperWidth = wrapper.clientWidth || wrapper.offsetWidth;
+                        offset = wrapperWidth; // Da jeder Slide 100% hat, ist Slide 2 bei 1x Breite
+                        console.log("Offset war 0, nutze Fallback (Breite):", offset);
+                    }
+
+                    if (offset > 0) {
+                        wrapper.scrollTo({
+                            left: offset,
+                            behavior: 'auto'
+                        });
+                        console.log("Finaler Scroll zu:", offset);
+                    }
+
+                    // Snap wieder an
                     setTimeout(() => {
                         wrapper.style.scrollSnapType = 'x mandatory';
-                    }, 50);
-                    
-                    console.log("Forced Scroll to:", offset);
-                }, 400); // 400ms ist der "Sweet Spot" für die meisten Popup-Animationen
+                    }, 100);
+                }, 500); // 500ms geben dem Popup wirklich Zeit, fertig zu laden
             }
         }
 
