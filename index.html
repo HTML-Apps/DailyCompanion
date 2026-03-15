@@ -1516,8 +1516,14 @@
 
                         <option value="crpValue">CRP-Wert (mg/L)</option>
                         <option value="bsgValue">BSG-Wert (mm/h)</option>
-                        <option value="hbValue">Hämoglobin-Wert (g/dl)</option>
                         <option value="tzValue">Thrombozyten-Wert (/nl)</option>
+
+                        <option value="lzValue">Leukozyten-Wert (/nl)</option>
+                        <option value="npValue">Neutrophilie-Wert (%)</option>
+                        <option value="alatValue">ALAT-Wert (U/l)</option>
+
+                        <option value="hbValue">Hämoglobin-Wert (g/dl)</option>
+                        <option value="d3Value">Vitamin-D3-Wert (µg/l)</option>
 
                         <option value="sport">Sport</option>
                         <option value="painmeds">Schmerzmitteleinnahme</option>
@@ -3773,8 +3779,14 @@
             // Variablen für die Charts (damit sie beim Neuladen zerstört werden können)
             let crpChartInstance = null;
             let bsgChartInstance = null;
-            let hbChartInstance = null;
             let tzChartInstance = null;
+
+            let lzChartInstance = null;
+            let npChartInstance = null;
+            let alatChartInstance = null;
+
+            let hbChartInstance = null;
+            let d3ChartInstance = null;
 
             if (biologikaTrigger) {
                 biologikaTrigger.addEventListener('click', async () => {
@@ -3891,8 +3903,14 @@
                     // Hier die Aufrufe mit den von dir genannten Normalwerten:
                     crpChartInstance = createBloodChart(crpChartInstance, 'crpChart', 'CRP (mg/L)', 'crpValue', '#ff4757', 0, 5);
                     bsgChartInstance = createBloodChart(bsgChartInstance, 'bsgChart', 'Blutsenkung (mm/h)', 'bsgValue', '#ff4757', 0, 15);
-                    hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#ff4757', 12.6, 17.4);
                     tzChartInstance = createBloodChart(tzChartInstance, 'tzChart', 'Thrombozyten (/nl)', 'tzValue', '#ff4757', 138, 347);
+
+                    lzChartInstance = createBloodChart(lzChartInstance, 'lzChart', 'Leukozyten (/nl)', 'lzValue', '#ff4757', 4.06, 11.89);
+                    npChartInstance = createBloodChart(npChartInstance, 'npChart', 'Neutrophilie (%)', 'npValue', '#ff4757', 40.3, 74.8);
+                    alatChartInstance = createBloodChart(alatChartInstance, 'alatChart', 'ALAT (U/l)', 'alatValue', '#ff4757', 0, 50);
+
+                    hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#ff4757', 12.6, 17.4);
+                    d3ChartInstance = createBloodChart(d3ChartInstance, 'd3Chart', 'Vitamin-D3 (µg/l)', 'd3Value', '#ff4757', 20, 70);
 
                 } catch (error) {
                     console.error("Fehler beim Laden der Blutwerte-Historie:", error);
