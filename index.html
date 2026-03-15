@@ -1510,7 +1510,12 @@
                         <option value="immunesystemRating">Immunsystem</option>
                         <option value="digestionRating">Verdauung</option>
                         <option value="morningStiffness">Morgensteifigkeit (Min)</option>
+
                         <option value="crpValue">CRP-Wert (mg/L)</option>
+                        <option value="bsgValue">BSG-Wert (mm/h)</option>
+                        <option value="hbValue">Hämoglobin-Wert (g/dl)</option>
+                        <option value="tzValue">Thrombozyten-Wert (/nl)</option>
+
                         <option value="sport">Sport</option>
                         <option value="painmeds">Schmerzmitteleinnahme</option>
                         <option value="stretching">Dehnung/Physio</option>
@@ -2566,7 +2571,6 @@
                 bsgValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'mm/h', dataExtractor: (entry) => entry.bsgValue ? parseFloat(entry.bsgValue) : null, showTrend: true },
                 hbValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: 'g/dl', dataExtractor: (entry) => entry.hbValue ? parseFloat(entry.hbValue) : null, showTrend: true },
                 tzValue: { chartType: 'scatter', yAxisMin: 0, yAxisMax: undefined, yAxisLabel: '/nl', dataExtractor: (entry) => entry.tzValue ? parseFloat(entry.tzValue) : null, showTrend: true },
-
 
                 sport: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Aktivität', dataExtractor: (entry) => (entry.selectedSports && !entry.selectedSports.includes('Kein Sport') && entry.selectedSports.length > 0) ? 1 : null, showTrend: false },
                 painmeds: { chartType: 'scatter', yAxisMin: -0.1, yAxisMax: 1.1, yAxisLabel: 'Einnahme', dataExtractor: (entry) => (entry.selectedPainmeds && !entry.selectedPainmeds.includes('Keine') && entry.selectedPainmeds.length > 0) ? 1 : null, showTrend: false },
