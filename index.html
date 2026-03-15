@@ -2377,7 +2377,7 @@
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
                     .where("date", ">=", startOfDay)
-                    .where("date", "<", nextDay)
+                    .where("date", "<=", endOfDay)
                     .limit(1)
                     .get();
 
@@ -2902,7 +2902,7 @@
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", auth.currentUser.uid)
                     .where("date", ">=", startOfDay)
-                    .where("date", "<", nextDay)
+                    .where("date", "<=", endOfDay)
                     .limit(1)
                     .get();
 
@@ -3797,7 +3797,7 @@
                     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
                     try {
-                        const snapshot = await db.collection("dailyEntries").where("userId", "==", user.uid).where("date", ">=", startOfDay).where("date", "<", nextDay).limit(1).get();
+                        const snapshot = await db.collection("dailyEntries").where("userId", "==", user.uid).where("date", ">=", startOfDay).where("date", "<=", endOfDay).limit(1).get();
                         if (!snapshot.empty) {
                             console.log("Eintrag für heute gefunden. Lade Daten...");
                             const doc = snapshot.docs[0];
