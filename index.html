@@ -2116,8 +2116,14 @@
             // Blutwerte-Cluster
             document.getElementById('crpInput').value = (data.crpValue !== undefined && data.crpValue !== null) ? data.crpValue : '';
             document.getElementById('bsgInput').value = (data.bsgValue !== undefined && data.bsgValue !== null) ? data.bsgValue : '';
-            document.getElementById('hbInput').value = (data.hbValue !== undefined && data.hbValue !== null) ? data.hbValue : '';
             document.getElementById('tzInput').value = (data.tzValue !== undefined && data.tzValue !== null) ? data.tzValue : '';
+
+            document.getElementById('lzInput').value = (data.lzValue !== undefined && data.lzValue !== null) ? data.lzValue : '';
+            document.getElementById('npInput').value = (data.npValue !== undefined && data.npValue !== null) ? data.npValue : '';
+            document.getElementById('alatInput').value = (data.alatValue !== undefined && data.alatValue !== null) ? data.alatValue : '';
+
+            document.getElementById('hbInput').value = (data.hbValue !== undefined && data.hbValue !== null) ? data.hbValue : '';
+            document.getElementById('d3Input').value = (data.d3Value !== undefined && data.d3Value !== null) ? data.d3Value : '';
 
             document.getElementById('notes').value = data.notes || '';
 
@@ -2420,10 +2426,18 @@
             document.getElementById('wakeUpTime').value = '';
             document.getElementById('sleepDurationDisplay').textContent = '';
             document.getElementById('morningStiffness').value = '';
+
             document.getElementById('crpInput').value = '';
             document.getElementById('bsgInput').value = '';
-            document.getElementById('hbInput').value = '';
             document.getElementById('tzInput').value = '';
+
+            document.getElementById('lzInput').value = '';
+            document.getElementById('npInput').value = '';
+            document.getElementById('alatInput').value = '';
+
+            document.getElementById('hbInput').value = '';
+            document.getElementById('d3Input').value = '';
+
             document.getElementById('notes').value = '';
 
             document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
@@ -3255,8 +3269,14 @@
                 // Blutwerte-Cluster
                 const crpValue = document.getElementById('crpInput').value ? parseFloat(document.getElementById('crpInput').value) : null;
                 const bsgValue = document.getElementById('bsgInput').value ? parseFloat(document.getElementById('bsgInput').value) : null;
-                const hbValue = document.getElementById('hbInput').value ? parseFloat(document.getElementById('hbInput').value) : null;
                 const tzValue = document.getElementById('tzInput').value ? parseFloat(document.getElementById('tzInput').value) : null;
+
+                const lzValue = document.getElementById('lzInput').value ? parseFloat(document.getElementById('lzInput').value) : null;
+                const npValue = document.getElementById('npInput').value ? parseFloat(document.getElementById('npInput').value) : null;
+                const alatValue = document.getElementById('alatInput').value ? parseFloat(document.getElementById('alatInput').value) : null;
+
+                const hbValue = document.getElementById('hbInput').value ? parseFloat(document.getElementById('hbInput').value) : null;
+                const d3Value = document.getElementById('d3Input').value ? parseFloat(document.getElementById('d3Input').value) : null;
 
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
