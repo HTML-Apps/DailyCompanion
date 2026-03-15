@@ -1805,34 +1805,38 @@
         }
 
         function updateFitnessWeight(index, val) {
-            const newVal = parseFloat(val) || 0;
+            const newVal = parseFloat(val);
+            // Abbruch, wenn die Eingabe keine Zahl ist (verhindert NaN im Bestwert)
+            if (isNaN(newVal)) return;
+
             const ex = fitnessExercises[index];
             ex.weight = newVal;
-            
+    
             const unit = ex.unit || 'kg';
-            
-            // Setze initialen Bestwert, falls keiner existiert
+    
+            // 1. Initialisierung sicherstellen (Zahlenwert erzwingen)
             if (ex.maxWeight === undefined) {
-                ex.maxWeight = ex.startWeight !== undefined ? ex.startWeight : newVal;
+                ex.maxWeight = parseFloat(ex.startWeight) || newVal;
             }
-            
-            // Logik: Was ist ein "neuer Bestwert"?
+
+            // 2. Bestwert-Logik
             if (unit === 'cm') {
-                // Bei Abstand (cm) ist weniger = besser!
-                if (newVal < ex.maxWeight) {
-                    ex.maxWeight = newVal;
-                    renderFitnessPlan(); 
-                }
-            } else {
-                // Bei Gewicht (kg) oder Winkel (°) ist mehr = besser!
-                if (newVal > ex.maxWeight) {
-                    ex.maxWeight = newVal;
-                    renderFitnessPlan(); 
-                }
+            // Bei cm (z.B. Abstand zum Boden): Kleiner ist besser
+            if (newVal < ex.maxWeight) {
+                ex.maxWeight = newVal;
             }
-            
+            } else {
+            // Bei kg oder Grad: Größer ist besser
+            if (newVal > ex.maxWeight) {
+                ex.maxWeight = newVal;
+            }
+            }
+    
+            // 3. WICHTIG: Immer rendern und speichern, damit Input und Anzeige synchron sind
+            renderFitnessPlan(); 
             saveFitnessDataToFirebase();
         }
+        
 
         function deleteFitnessEx(index) {
             if(confirm("Übung wirklich löschen?")) {
