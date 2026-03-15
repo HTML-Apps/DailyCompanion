@@ -3246,27 +3246,33 @@
                     const targetSlide = document.getElementById('slide-unterkoerper');
 
                     if (swipeWrapper && targetSlide) {
-                            // 2. BEIDE Bremsen anziehen: Snap aus UND Smooth-Scroll unterbinden
-                            swipeWrapper.style.scrollSnapType = 'none';
-                            swipeWrapper.style.scrollBehavior = 'auto'; // Erzwingt sofortigen Sprung
+                        // TRICK: Wrapper kurz unsichtbar machen, damit man den Sprung nicht sieht
+                        swipeWrapper.style.opacity = '0'; 
+                        swipeWrapper.style.scrollBehavior = 'auto';
+                        swipeWrapper.style.scrollSnapType = 'none';
 
-                            // 3. Ein minimaler Moment für das Layout
-                            setTimeout(() => {
-                                const offset = targetSlide.offsetLeft;
+                        // Wir nutzen requestAnimationFrame – das wartet exakt auf den nächsten 
+                        // "Herzschlag" des Grafikprozessors (GPU)
+                        requestAnimationFrame(() => {
+                            const offset = targetSlide.offsetLeft;
+                            
+                            swipeWrapper.scrollTo({
+                                left: offset,
+                                behavior: 'auto'
+                            });
+
+                            // Jetzt machen wir ihn wieder sichtbar
+                            requestAnimationFrame(() => {
+                                swipeWrapper.style.opacity = '1';
                                 
-                                // 4. Den Scroll ausführen
-                                swipeWrapper.scrollTo({
-                                    left: offset,
-                                    behavior: 'auto' // Doppelt hält besser
-                                });
-
-                                // 5. Erst NACH dem Sprung die Bequemlichkeit wieder aktivieren
+                                // Snap erst nach dem Sichtbarwerden wieder an
                                 setTimeout(() => {
                                     swipeWrapper.style.scrollSnapType = 'x mandatory';
                                     swipeWrapper.style.scrollBehavior = 'smooth';
-                                }, 50);
-                            }, 20); // 20ms reichen meistens völlig aus
-                        }
+                                }, 100);
+                            });
+                        });
+                    }
                 });
             }
 
