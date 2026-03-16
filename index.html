@@ -2055,7 +2055,7 @@
         async function saveCurrentAsDefaults() {
             const user = auth.currentUser;
             if (!user) {
-                alert("Bitte melden Sie sich an, um Ihre Standardwerte zu speichern.");
+                alert("🔓 Bitte melden Sie sich an, um Ihre Standardwerte zu speichern.");
                 return;
             }
 
@@ -2069,10 +2069,10 @@
             try {
                 // Wir verwenden .doc(user.uid).set(), um für jeden User ein eigenes Dokument anzulegen/zu überschreiben.
                 await db.collection("userDefaults").doc(user.uid).set(defaultData);
-                alert("Ihre Standardwerte wurden erfolgreich gespeichert!");
+                alert("💾 Ihre Standardwerte wurden erfolgreich gespeichert!");
             } catch (error) {
                 console.error("Fehler beim Speichern der Standardwerte: ", error);
-                alert("Ein Fehler ist aufgetreten. Die Standardwerte konnten nicht gespeichert werden.");
+                alert("❌ Ein Fehler ist aufgetreten. Die Standardwerte konnten nicht gespeichert werden.");
             }
         }
 
@@ -3433,7 +3433,7 @@
 
                 } catch (e) {
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
-                    alert("Fehler: " + e.message);
+                    alert("❌ Fehler: " + e.message);
                 }
             });
 
@@ -3487,11 +3487,11 @@
                 signInButton.addEventListener('click', () => {
                     const provider = new firebase.auth.GoogleAuthProvider();
                     auth.signInWithPopup(provider).then((result) => {
-                        alert(`Erfolgreich angemeldet als ${result.user.displayName}!`);
+                        alert(`🔓 Erfolgreich angemeldet als ${result.user.displayName}!`);
                         signInButton.style.display = 'none';
                     }).catch((error) => {
                         console.error('Fehler bei der Google-Anmeldung:', error);
-                        alert(`Anmeldefehler: ${error.message}`);
+                        alert(`❌ Anmeldefehler: ${error.message}`);
                     });
                 });
             }
@@ -3570,7 +3570,7 @@
                 openSearchBtn.addEventListener('click', async () => {
                     const user = auth.currentUser;
                     if (!user) {
-                        alert("Bitte melden Sie sich an, um die Suche zu nutzen.");
+                        alert("🔓 Bitte melden Sie sich an, um die Suche zu nutzen.");
                         return;
                     }
 
@@ -3871,7 +3871,7 @@
             document.getElementById('saveBloodValuesBtn').addEventListener('click', () => {
                 document.getElementById('submitBtn').click();
                 bloodValuesOverlay.style.display = 'none';
-                alert("Blutwerte in Tagesbilanz übernommen und gespeichert.");
+                alert("💾 Blutwerte in Tagesbilanz übernommen und gespeichert.");
             });
 
             async function renderBloodValueCharts() {
