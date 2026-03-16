@@ -1238,7 +1238,7 @@
             
             <div class="container middle-col" style="padding-top: 0px;">
                 <div class="category-item">
-                    <label id="sleepTimeLabel">Schlafzeiten 😴</label>
+                    <label id="sleepTimeLabel" style="cursor: pointer; color: #ffffff; display: block; padding-bottom: 5px; transition: text-shadow 0.2s;" onmouseover="this.style.textShadow='0 0 10px rgba(0,242,254,0.5)'" onmouseout="this.style.textShadow='none'">Schlafzeiten 😴</label>
                     <div class="time-input-group">
                         <div class="time-entry">
                             <span class="icon">🌙</span>
@@ -1765,6 +1765,28 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Schlafanalyse -->
+    <div class="overlay" id="sleepAnalysisOverlay">
+        <div class="popup" id="sleepAnalysisPopup">
+            <span class="close-btn" id="closeSleepAnalysisBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">SCHLAFANALYSE</h2>
+            
+            <div class="popup-content" style="max-height: 85vh; overflow-y: auto; padding-right: 5px;">
+                <div class="chart-container" style="height: 350px; margin-bottom: 30px;">
+                    <h4 style="text-align:center; color:#00f2fe; margin-top:0;">Schlafphasen & Rhythmus</h4>
+                    <canvas id="sleepPhaseChart"></canvas>
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+
+                <div class="chart-container" style="height: 350px; margin-bottom: 30px;">
+                    <h4 style="text-align:center; color:#00f2fe; margin-top:0;">Schlafdauer (Stunden & Schnitt)</h4>
+                    <canvas id="sleepDurationChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -3977,6 +3999,232 @@
                 }
             }
             // ====== ENDE: Blutwerte & Charts Logik ======
+
+            // ====== START: Schlafanalyse & Charts Logik ======
+            let sleepPhaseChartInstance = null;
+            let sleepDurationChartInstance = null;
+
+            const sleepTimeLabelBtn = document.getElementById('sleepTimeLabel');
+            const sleepAnalysisOverlay = document.getElementById('sleepAnalysisOverlay');
+            const closeSleepAnalysisBtn = document.getElementById('closeSleepAnalysisBtn');
+
+            // 1. Event-Listener für das Pop-Up
+            if (sleepTimeLabelBtn) {
+                sleepTimeLabelBtn.addEventListener('click', async () => {
+                    sleepAnalysisOverlay.style.display = 'flex';
+                    await renderSleepAnalysisCharts();
+                });
+            }
+
+            if (closeSleepAnalysisBtn) {
+                closeSleepAnalysisBtn.addEventListener('click', () => {
+                    sleepAnalysisOverlay.style.display = 'none';
+                });
+            }
+
+            sleepAnalysisOverlay.addEventListener('click', (event) => {
+                if (event.target.id === 'sleepAnalysisOverlay') {
+                    sleepAnalysisOverlay.style.display = 'none';
+                }
+            });
+
+            // 2. Funktion zum Laden und Rendern der Charts
+            async function renderSleepAnalysisCharts() {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                try {
+                    // Daten aus Firestore laden
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .get();
+
+                    let rawData = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        if (d.date) {
+                            rawData.push({ ...d, date: d.date.toDate() }); // toDate() wandelt Firestore Timestamp in JS Date um
+                        }
+                    });
+
+                    // --- Hilfsfunktionen für die Datenberechnung (aus Schlafanalyse.html) ---
+                    const getAdjustedTime = (t) => {
+                        if(!t || typeof t !== 'string') return null;
+                        let [h, m] = t.split(':').map(Number);
+                        if (isNaN(h)) return null;
+                        if (h < 12) h += 24; 
+                        return h + (m / 60);
+                    };
+
+                    const extractDuration = (str) => {
+                        if(!str || typeof str !== 'string') return 0;
+                        const hMatch = str.match(/(\d+)\s*Std/);
+                        const mMatch = str.match(/(\d+)\s*Min/);
+                        const h = hMatch ? parseInt(hMatch[1]) : 0;
+                        const m = mMatch ? parseInt(mMatch[1]) : 0;
+                        return h + (m / 60);
+                    };
+
+                    const calculateMovingAverage = (data, windowSize) => {
+                        return data.map((_, i, arr) => {
+                            const start = Math.max(0, i - windowSize + 1);
+                            const subset = arr.slice(start, i + 1);
+                            const validPoints = subset.filter(v => v !== null && !isNaN(v));
+                            if (validPoints.length === 0) return null;
+                            return validPoints.reduce((a, b) => a + b, 0) / validPoints.length;
+                        });
+                    };
+
+                    const fillMissingDays = (entries) => {
+                        if (entries.length === 0) return [];
+                        entries.sort((a, b) => a.date - b.date); // Aufsteigend sortieren
+                        
+                        const filledData = [];
+                        const firstDate = new Date(entries[0].date);
+                        const lastDate = new Date(entries[entries.length - 1].date);
+                        
+                        const dataMap = new Map();
+                        entries.forEach(item => {
+                            const d = new Date(item.date);
+                            const dateStr = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+                            dataMap.set(dateStr, item);
+                        });
+
+                        let current = new Date(firstDate);
+                        current.setHours(0,0,0,0);
+                        const end = new Date(lastDate);
+                        end.setHours(0,0,0,0);
+
+                        // Fallback-Werte
+                        const DEFAULT_BED = "22:15";
+                        const DEFAULT_WAKE = "06:20";
+                        const DEFAULT_DUR_HOURS = 8.08;
+
+                        while (current <= end) {
+                            const dateStr = current.getFullYear() + "-" + (current.getMonth()+1) + "-" + current.getDate();
+                            
+                            if (dataMap.has(dateStr)) {
+                                filledData.push(dataMap.get(dateStr));
+                            } else {
+                                filledData.push({
+                                    date: new Date(current),
+                                    bedTime: DEFAULT_BED,
+                                    wakeUpTime: DEFAULT_WAKE,
+                                    sleepDurationNum: DEFAULT_DUR_HOURS, // Wird als Ersatz für das geparste genutzt
+                                    isPlaceholder: true
+                                });
+                            }
+                            current.setDate(current.getDate() + 1);
+                        }
+                        return filledData;
+                    };
+
+                    // Daten Lücken auffüllen
+                    const data = fillMissingDays(rawData);
+
+                    // Arrays für Chart.js vorbereiten
+                    const labels = data.map(d => d.date.toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'2-digit'}));
+                    const bedTimes = data.map(d => getAdjustedTime(d.bedTime));
+                    const wakeTimes = data.map(d => getAdjustedTime(d.wakeUpTime));
+                    const durations = data.map(d => d.sleepDurationNum || extractDuration(d.sleepDuration));
+
+                    const bedAvg = calculateMovingAverage(bedTimes, 14);
+                    const wakeAvg = calculateMovingAverage(wakeTimes, 14);
+                    const durAvg = calculateMovingAverage(durations, 14);
+
+                    // --- Charts zeichnen ---
+                    if (sleepPhaseChartInstance) sleepPhaseChartInstance.destroy();
+                    if (sleepDurationChartInstance) sleepDurationChartInstance.destroy();
+
+                    const commonOptions = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: '#ccc', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        },
+                        plugins: { legend: { labels: { color: '#fff' } } }
+                    };
+
+                    // 1. Phasen-Chart
+                    const ctxPhase = document.getElementById('sleepPhaseChart').getContext('2d');
+                    sleepPhaseChartInstance = new Chart(ctxPhase, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { label: 'Einschlafen', data: bedTimes, borderColor: '#bb86fc', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: false },
+                                { label: 'Aufwachen', data: wakeTimes, borderColor: '#03dac6', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: '-1', backgroundColor: 'rgba(3, 218, 198, 0.05)' },
+                                { label: 'Ø Bettzeit (14T)', data: bedAvg, borderColor: '#ffb74d', borderWidth: 2, pointRadius: 0, tension: 0.4 },
+                                { label: 'Ø Aufstehen (14T)', data: wakeAvg, borderColor: '#ffd54f', borderWidth: 2, pointRadius: 0, tension: 0.4 }
+                            ]
+                        },
+                        options: {
+                            ...commonOptions,
+                            scales: {
+                                ...commonOptions.scales,
+                                y: { 
+                                    min: 18, max: 36, 
+                                    ticks: { color: '#ccc', callback: v => (v >= 24 ? v-24 : v).toString().padStart(2, '0') + ":00" },
+                                    grid: { color: 'rgba(255,255,255,0.1)' }
+                                }
+                            },
+                            plugins: {
+                                ...commonOptions.plugins,
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => {
+                                            let val = context.raw;
+                                            if (val === null || isNaN(val)) return '';
+                                            let h = Math.floor(val);
+                                            let m = Math.round((val - h) * 60);
+                                            if (h >= 24) h -= 24;
+                                            return `${context.dataset.label}: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')} Uhr`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 2. Dauer-Chart
+                    const ctxDuration = document.getElementById('sleepDurationChart').getContext('2d');
+                    sleepDurationChartInstance = new Chart(ctxDuration, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { label: 'Stunden', data: durations, backgroundColor: (ctx) => data[ctx.dataIndex].isPlaceholder ? 'rgba(255, 255, 255, 0.05)' : 'rgba(187, 134, 252, 0.4)', borderRadius: 4 },
+                                { label: '14-Tage Schnitt', data: durAvg, type: 'line', borderColor: '#ffd54f', borderWidth: 2, pointRadius: 0 }
+                            ]
+                        },
+                        options: {
+                            ...commonOptions,
+                            scales: {
+                                ...commonOptions.scales,
+                                y: { beginAtZero: true, max: 14, ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                            },
+                            plugins: {
+                                ...commonOptions.plugins,
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => {
+                                            let val = context.raw;
+                                            if (val === null || isNaN(val)) return '';
+                                            let h = Math.floor(val);
+                                            let m = Math.round((val - h) * 60);
+                                            return `${context.dataset.label}: ${h} Std ${m} Min`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Fehler beim Laden der Schlafanalyse:", error);
+                }
+            }
+            // ====== ENDE: Schlafanalyse & Charts Logik ======
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
