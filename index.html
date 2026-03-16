@@ -3717,14 +3717,15 @@
             }
 
             // ====== START: Code für Biologika Countdown ======
+
             function updateBiologikaCountdown() {
+
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
                 const initialDates = [
                     '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
                 ];
                 initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
-
                 let monthlyDate = new Date('2026-04-27T00:00:00');
                 for (let i = 0; i < 60; i++) {
                     injectionDates.push(new Date(monthlyDate));
@@ -3739,11 +3740,10 @@
                 // Setzt den Status für den Dot standardmäßig auf "false"
                 if(notificationDot) notificationDot.dataset.isInjectionDay = 'false';
 
-
                 // 3. Sucht den nächsten anstehenden Termin
                 const nextInjectionDate = injectionDates.find(date => date >= today);
-
                 const countdownElement = document.getElementById('biologika-countdown');
+
                 if (!countdownElement) {
                     console.error("Element für Biologika-Countdown nicht gefunden!");
                     return;
@@ -3753,7 +3753,6 @@
                 if (nextInjectionDate) {
                     const diffTime = nextInjectionDate.getTime() - today.getTime();
                     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
                     let countdownText = '';
 
                     // 5. Prüft, ob heute der Spritzentag ist
@@ -3762,9 +3761,12 @@
                         
                         // Setzt den Status für den Notification-Dot auf "true"
                         if(notificationDot) notificationDot.dataset.isInjectionDay = 'true';
-
-                        // GEÄNDERT: localStorage Logik entfernt, damit der Alert bei jedem Reload erscheint
-                        alert('Cosentyx®-Spritze bitte heute verabreichen');
+                        
+                        // NEU: Ermittelt die Nummer der aktuellen Spritze
+                        const injectionNumber = injectionDates.findIndex(date => date.getTime() === nextInjectionDate.getTime()) + 1;
+                        
+                        // GEÄNDERT: Alert-Nachricht mit der Nummer der Spritze
+                        alert(`Cosentyx®-Spritze Nr. ${injectionNumber} bitte heute verabreichen`);
 
                     } else if (diffDays === 1) {
                         countdownText = 'morgen';
@@ -3773,15 +3775,15 @@
                     }
                     
                     countdownElement.innerHTML = `Rheumatologie: Biologika | JAK <br>nächste Spritze: ${countdownText}`;
-
                 } else {
                     countdownElement.textContent = 'Biologika | JAK<br>Keine nächste Spritze geplant.';
                 }
-
-                // NEU: Ruft am Ende die Funktion auf, um den Dot-Status zu aktualisieren
+                
+                // Ruft am Ende die Funktion auf, um den Dot-Status zu aktualisieren
                 updateNotificationDot();
             }
             // ====== ENDE: Code für Biologika Countdown ======
+
 
             // ====== START: Blutwerte & Charts Logik ======
             const biologikaTrigger = document.getElementById('biologika-countdown');
