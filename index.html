@@ -1519,7 +1519,7 @@
                         <option value="tzValue">Thrombozyten-Wert (/nl)</option>
 
                         <option value="lzValue">Leukozyten-Wert (/nl)</option>
-                        <option value="npValue">Neutrophilie-Wert (%)</option>
+                        <option value="npValue">Neutrophile-Wert (%)</option>
                         <option value="alatValue">ALAT-Wert (U/l)</option>
 
                         <option value="hbValue">Hämoglobin-Wert (g/dl)</option>
@@ -1641,7 +1641,7 @@
                         <input type="number" id="lzInput" step="0.1" class="styled-input" placeholder="z.B. 5.0" style="width: 93%;">
                     </div>
                     <div>
-                        <label style="color: #00f2fe; font-size: 0.9em;">Neutrophilie (%)</label>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Neutrophile (%)</label>
                         <input type="number" id="npInput" step="0.1" class="styled-input" placeholder="z.B. 50" style="width: 93%;">
                     </div>
                     <div>
@@ -1669,22 +1669,11 @@
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
                 <h3 style="color: white;">Historischer Verlauf</h3>
 
-                <p style="font-size: 0.9em; font-weight: bold;" >Aktivität:</p>
+                <p style="font-size: 0.9em; font-weight: bold;" >Entzündungsaktivität:</p>
                 <p style="font-size: 0.8em;" >CRP: Entzündungs-Benchmark</p>
                 <p style="font-size: 0.8em;" >BSG: Ein Trägheitswert parallel CRP</p>
                 <p style="font-size: 0.8em;" >Tz: Bestätigung für Abklingen der sys. Entzündung</p>
-                <br>
-
-                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Sicherheit:</p>
-                <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
-                <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
-                <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
-                <br>
-
-                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
-                <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
-                <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
-
+                
                 <!-- Aktivität -->
                 <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                     <canvas id="crpChart"></canvas>
@@ -1696,6 +1685,11 @@
                     <canvas id="tzChart"></canvas>
                 </div>
 
+                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Biologika-Sicherheit:</p>
+                <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
+                <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
+                <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
+                
                 <!-- Sicherheit -->
                 <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                     <canvas id="lzChart"></canvas>
@@ -1706,6 +1700,10 @@
                 <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                     <canvas id="alatChart"></canvas>
                 </div>
+
+                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
+                <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
+                <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
 
                 <!-- Vitalität -->
                 <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
@@ -3918,7 +3916,7 @@
                     tzChartInstance = createBloodChart(tzChartInstance, 'tzChart', 'Thrombozyten (/nl)', 'tzValue', '#ff4757', 138, 347);
 
                     lzChartInstance = createBloodChart(lzChartInstance, 'lzChart', 'Leukozyten (/nl)', 'lzValue', '#ff4757', 4.06, 11.89);
-                    npChartInstance = createBloodChart(npChartInstance, 'npChart', 'Neutrophilie (%)', 'npValue', '#ff4757', 40.3, 74.8);
+                    npChartInstance = createBloodChart(npChartInstance, 'npChart', 'Neutrophile (%)', 'npValue', '#ff4757', 40.3, 74.8);
                     alatChartInstance = createBloodChart(alatChartInstance, 'alatChart', 'ALAT (U/l)', 'alatValue', '#ff4757', 0, 50);
 
                     hbChartInstance = createBloodChart(hbChartInstance, 'hbChart', 'Hämoglobin (g/dl)', 'hbValue', '#ff4757', 12.6, 17.4);
