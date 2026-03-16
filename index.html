@@ -24,7 +24,6 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
     <!-- ====== ENDE: Flatpickr Bibliotheken ====== -->
 
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
@@ -700,8 +699,6 @@
             z-index: 1;
         }
 
-        /* ----- HIER DEN NEUEN CODE EINFÜGEN ----- */
-
         /* Neuer Stil für den speziellen Button */
         .notes-tag-button.special-tag {
             background-color: #3a3a5a;
@@ -724,7 +721,6 @@
         }
 
         /* --- NEUES STATISTIK SPLIT-LAYOUT --- */
-
         /* Standard (Mobile First): Untereinander mit Abstand */
         .stats-split-container {
             display: flex;
@@ -1041,12 +1037,9 @@
                 grid-template-columns: repeat(3, 1fr); /* Erstellt 3 gleich breite Spalten */
                 gap: 10px; /* Abstand zwischen den Spalten */
             }
-            /* ----- ENDE: CSS-Regel ----- */
-
         }
 
         /* ====== START: Code für Desktop Date Picker ====== */
-
         /* Container für den Kalender, standardmäßig unsichtbar */
         #desktop-datepicker-wrapper {
             display: none;
@@ -1113,7 +1106,6 @@
             opacity: 0.2;
             color: #fff;
         }
-
         /* ====== ENDE: Code für Desktop Date Picker ====== */
 
         /* Desktop: Nebeneinander, jeweils 50% Platz */
@@ -1175,7 +1167,6 @@
             padding-right: 15px; /* Platz für die Scrollbar, um Verschiebungen zu vermeiden */
         }
         /* ----- ENDE: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
-
 
     </style>
 </head>
@@ -1958,7 +1949,6 @@
             saveFitnessDataToFirebase();
         }
         
-
         function deleteFitnessEx(index) {
             if(confirm("Übung wirklich löschen?")) {
                 fitnessExercises.splice(index, 1);
@@ -2006,7 +1996,6 @@
             renderFitnessPlan();
             saveFitnessDataToFirebase();
         }
-
         // ====== ENDE: Fitness-Tracker JS Logik ======
 
         let painMapDateHistory = [];
@@ -2025,7 +2014,6 @@
         backImage.src = 'body_back.png';   
 
         // ====== START: NEUER CODE FÜR DOPPELKLICK & LANGES DRÜCKEN ======
-
         /**
          * Erfasst die aktuell im Formular eingestellten Werte und gibt sie als Objekt zurück.
          * Dies vermeidet Code-Dopplung zwischen Speicher- und Submit-Funktion.
@@ -3776,7 +3764,6 @@
             }
 
             // ====== START: Code für Biologika Countdown ======
-
             function updateBiologikaCountdown() {
 
                 // 1. Definiert alle zukünftigen Spritzentermine
@@ -3842,7 +3829,6 @@
                 updateNotificationDot();
             }
             // ====== ENDE: Code für Biologika Countdown ======
-
 
             // ====== START: Blutwerte & Charts Logik ======
             const biologikaTrigger = document.getElementById('biologika-countdown');
@@ -4038,8 +4024,6 @@
                 }
             });
         });
-
     </script>
-
 </body>
 </html>
