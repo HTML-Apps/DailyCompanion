@@ -1125,6 +1125,41 @@
             transform: translateY(-7px);
         }
 
+        /* ----- START: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
+        /* 1. Das Popup wird zum Flex-Container, der selbst nicht mehr scrollt. */
+        #statsPopup {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Verhindert das Scrollen des gesamten Popups */
+        }
+
+        /* 2. Die Überschrift wird sticky gemacht und bekommt einen Hintergrund. */
+        #statsPopup > h2 {
+            position: sticky;
+            top: 0;
+            background: #19192d; /* Hintergrund, damit der Text nicht durchscheint */
+            z-index: 10;
+            /* Optional: Etwas Abstand und eine Trennlinie für die Optik */
+            padding-top: 15px;
+            padding-bottom: 20px;
+            margin-top: 0;
+            border-bottom: 1px solid rgba(40, 40, 65, 0.9);
+        }
+
+        /* 3. Der Close-Button wird über die sticky-Überschrift gelegt. */
+        #statsPopup .close-btn {
+            z-index: 20;
+        }
+
+        /* 4. NUR der Inhalts-Container wird scrollbar gemacht. */
+        #statsPopup .popup-content {
+            overflow-y: auto; /* Hier findet das Scrollen statt */
+            flex-grow: 1; /* Füllt den Rest des verfügbaren Platzes */
+            padding-right: 15px; /* Platz für die Scrollbar, um Verschiebungen zu vermeiden */
+        }
+        /* ----- ENDE: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
+
+
     </style>
 </head>
 <body>
