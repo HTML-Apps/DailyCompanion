@@ -1034,7 +1034,15 @@
             #alatInput {width: 98% !important;}
             #hbInput {width: 98% !important;}
             #d3Input {width: 98% !important;}
-    
+
+            /* ----- START: 2-SPALTEN-GRID FÜR BLUTWERTE-CHARTS (DESKTOP) ----- */
+            .blood-charts-grid-wrapper {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* Erstellt 2 gleich breite Spalten */
+                gap: 30px; /* Abstand zwischen den Spalten */
+            }
+            /* ----- ENDE: CSS-Regel ----- */
+
         }
 
         /* ====== START: Code für Desktop Date Picker ====== */
@@ -1713,50 +1721,55 @@
                 </div>
 
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+                
                 <h3 style="color: white;">Historischer Verlauf</h3>
 
-                <p style="font-size: 0.9em; font-weight: bold;" >Entzündungsaktivität:</p>
-                <p style="font-size: 0.8em;" >CRP: Entzündungs-Benchmark</p>
-                <p style="font-size: 0.8em;" >BSG: Ein Trägheitswert parallel CRP</p>
-                <p style="font-size: 0.8em;" >Tz: Bestätigung für Abklingen der sys. Entzündung</p>
-                
-                <!-- Aktivität -->
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="crpChart"></canvas>
-                </div>
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="bsgChart"></canvas>
-                </div>
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="tzChart"></canvas>
-                </div>
+                <div class="blood-charts-grid-wrapper">
 
-                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Biologika-Sicherheit:</p>
-                <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
-                <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
-                <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
-                
-                <!-- Sicherheit -->
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="lzChart"></canvas>
-                </div>
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="npChart"></canvas>
-                </div>
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="alatChart"></canvas>
-                </div>
+                    <p style="font-size: 0.9em; font-weight: bold;" >Entzündungsaktivität:</p>
+                    <p style="font-size: 0.8em;" >CRP: Entzündungs-Benchmark</p>
+                    <p style="font-size: 0.8em;" >BSG: Ein Trägheitswert parallel CRP</p>
+                    <p style="font-size: 0.8em;" >Tz: Bestätigung für Abklingen der sys. Entzündung</p>
+                    
+                    <!-- Aktivität -->
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="crpChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="bsgChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="tzChart"></canvas>
+                    </div>
 
-                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
-                <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
-                <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
+                    <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Biologika-Sicherheit:</p>
+                    <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
+                    <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
+                    <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
+                    
+                    <!-- Sicherheit -->
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="lzChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="npChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="alatChart"></canvas>
+                    </div>
 
-                <!-- Vitalität -->
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="hbChart"></canvas>
-                </div>
-                <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
-                    <canvas id="d3Chart"></canvas>
+                    <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
+                    <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
+                    <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
+
+                    <!-- Vitalität -->
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="hbChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
+                        <canvas id="d3Chart"></canvas>
+                    </div>
+
                 </div>
 
             </div>
