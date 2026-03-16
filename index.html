@@ -2563,13 +2563,13 @@
                 }
             } catch (error) {
                 console.error("Fehler beim Laden des Eintrags:", error);
-                alert("Fehler beim Laden des Eintrags: " + error.message);
+                alert("❌ Fehler beim Laden des Eintrags: " + error.message);
             }
         }
 
         async function loadStatistics() {
             const user = auth.currentUser;
-            if (!user) { alert("Bitte anmelden."); return; }
+            if (!user) { alert("ℹ️ Bitte anmelden."); return; }
 
             document.getElementById('statsOverlay').style.display = 'flex';
             document.getElementById('bestDayDate').innerText = "Lade Daten...";
@@ -2978,7 +2978,7 @@
 
             try {
                 const snapshot = await db.collection("dailyEntries").get();
-                if (snapshot.empty) { alert("Keine Daten gefunden."); return; }
+                if (snapshot.empty) { alert("❌ Keine Daten gefunden."); return; }
 
                 const data = [];
                 snapshot.forEach(doc => {
@@ -2999,10 +2999,10 @@
 
                 const colabUrl = "https://colab.research.google.com/drive/1piBjU0iztd0SxBgdI6V_zY-UTjvcFepM?authuser=0#scrollTo=7PmZkF32yOkM";
                 window.open(colabUrl, '_blank');
-                alert(`Export erfolgreich! JSON heruntergeladen. Google Colab geöffnet.`);
+                alert(`ℹ️ Export erfolgreich! JSON heruntergeladen. Google Colab geöffnet.`);
             } catch (error) {
                 console.error("Fehler:", error);
-                alert("Vorgang fehlgeschlagen!");
+                alert("❌ Vorgang fehlgeschlagen!");
             }
         }
         
@@ -3201,7 +3201,7 @@
                                 // Wenn nach der Wartezeit immer noch kein zweiter Klick kam (lastClickTime wurde nicht zurückgesetzt),
                                 // dann zeigen wir den Hinweis an.
                                 if (lastClickTime !== 0) {
-                                    alert("Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
+                                    alert("ℹ️ Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
                                 }
                             }, 400); // Diese Zeit muss mit der Doppelklick-Zeit übereinstimmen.
                         }
@@ -3317,9 +3317,9 @@
 
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const user = auth.currentUser;
-                if (!user) { alert('Bitte melden Sie sich zuerst an, um Daten zu speichern.'); return; }
+                if (!user) { alert('🔓 Bitte melden Sie sich zuerst an, um Daten zu speichern.'); return; }
                 const YOUR_UID = "VgrOSS05xEPvvFUXQdybgQTCbX52";
-                if (user.uid !== YOUR_UID) { alert('Sie sind nicht berechtigt, Daten zu speichern.'); return; }
+                if (user.uid !== YOUR_UID) { alert('❌ Sie sind nicht berechtigt, Daten zu speichern.'); return; }
 
                 let missingFields = [];
                 const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
@@ -3373,7 +3373,7 @@
                 if (!digestionRating) missingFields.push('Verdauung');
                 if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
 
-                if (missingFields.length > 0) { alert(`Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
+                if (missingFields.length > 0) { alert(`✒️ Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
                 
                 const dataToSave = { 
                     userId: user.uid, wakeUpTime, bedTime,
@@ -3408,13 +3408,13 @@
                 try {
                     if (currentEntryId) {
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
-                        alert("Eintrag erfolgreich aktualisiert!");
+                        alert("💾 Eintrag erfolgreich aktualisiert!");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
                         // 1. Dokument in Firebase anlegen und die Referenz (docRef) abfangen
                         const docRef = await db.collection("dailyEntries").add(dataToSave);
-                        alert(`Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
+                        alert(`💾 Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
                         
                         // 2. Die neue ID speichern, damit bei erneuten Klicks aktualisiert (update) statt neu angelegt (add) wird
                         currentEntryId = docRef.id; 
