@@ -3409,7 +3409,7 @@
                     if (currentEntryId) {
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
                         //alert("💾 Eintrag erfolgreich aktualisiert!");
-                        alert(`💾 Eintrag (${formattedDate})erfolgreich aktualisiert!`);
+                        alert(`💾 Eintrag (${formattedDate}) erfolgreich aktualisiert!`);
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
