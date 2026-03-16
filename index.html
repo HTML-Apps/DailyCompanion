@@ -1781,7 +1781,7 @@
                     <canvas id="sleepPhaseChart"></canvas>
                 </div>
 
-                <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+                <hr style="border-color: rgba(255,255,255,0.1); margin-top: 70px;">
 
                 <div class="chart-container" style="height: 350px; margin-bottom: 30px;">
                     <h4 style="text-align:center; color:#00f2fe; margin-top:0;">Schlafdauer (Stunden & Schnitt)</h4>
@@ -4154,8 +4154,8 @@
                             datasets: [
                                 { label: 'Einschlafen', data: bedTimes, borderColor: '#bb86fc', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: false },
                                 { label: 'Aufwachen', data: wakeTimes, borderColor: '#03dac6', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: '-1', backgroundColor: 'rgba(3, 218, 198, 0.05)' },
-                                { label: 'Ø Bettzeit (14T)', data: bedAvg, borderColor: '#ffb74d', borderWidth: 2, pointRadius: 0, tension: 0.4 },
-                                { label: 'Ø Aufstehen (14T)', data: wakeAvg, borderColor: '#ffd54f', borderWidth: 2, pointRadius: 0, tension: 0.4 }
+                                { label: 'Ø Einschlafzeit (14T)', data: bedAvg, borderColor: '#ffb74d', borderWidth: 2, pointRadius: 0, tension: 0.4 },
+                                { label: 'Ø Aufstehzeit (14T)', data: wakeAvg, borderColor: '#ffd54f', borderWidth: 2, pointRadius: 0, tension: 0.4 }
                             ]
                         },
                         options: {
