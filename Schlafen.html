@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Schlaf-Analyse Dashboard (Fixed)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #333; }
+        .controls { text-align: center; border: 2px dashed #444; padding: 25px; border-radius: 12px; margin-bottom: 30px; background: #1a1a1a; }
+        h2 { color: #bb86fc; font-size: 1.1rem; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        button { background: #03dac6; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #000; }
+        .chart-container { position: relative; height: 400px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="controls">
+        <input type="file" id="fileInput" accept=".json">
+        <button id="renderBtn">DATEN ANALYSIEREN</button>
+    </div>
+
+    <div class="card">
+        <h2>Schlafphasen & Rhythmus (Lücken gefüllt)</h2>
+        <div class="chart-container">
+            <canvas id="phaseChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Schlafdauer (Stunden & 14-Tage Schnitt)</h2>
+        <div class="chart-container">
+            <canvas id="durationChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    let phaseChart = null;
+    let durationChart = null;
+
+    // Standardwerte
+    const DEFAULT_BED = "22:15";
+    const DEFAULT_WAKE = "06:20";
+    const DEFAULT_DUR_HOURS = 8.08; // 8 Std 05 Min
+
+    const getAdjustedTime = (t) => {
+        if(!t || typeof t !== 'string') return null;
+        let [h, m] = t.split(':').map(Number);
+        if (isNaN(h)) return null;
+        if (h < 12) h += 24; 
+        return h + (m / 60);
+    };
+
+    const extractDuration = (str) => {
+        if(!str || typeof str !== 'string') return 0;
+        const hMatch = str.match(/(\d+)\s*Std/);
+        const mMatch = str.match(/(\d+)\s*Min/);
+        const h = hMatch ? parseInt(hMatch[1]) : 0;
+        const m = mMatch ? parseInt(mMatch[1]) : 0;
+        return h + (m / 60);
+    };
+
+    const calculateMovingAverage = (data, windowSize) => {
+        return data.map((_, i, arr) => {
+            const start = Math.max(0, i - windowSize + 1);
+            const subset = arr.slice(start, i + 1);
+            const validPoints = subset.filter(v => v !== null);
+            return validPoints.reduce((a, b) => a + b, 0) / validPoints.length;
+        });
+    };
+
+    const fillMissingDays = (rawData) => {
+        // Filtere ungültige Daten aus
+        const validEntries = rawData.filter(d => d.date && !isNaN(Date.parse(d.date)));
+        if (validEntries.length === 0) return [];
+        
+        validEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const filledData = [];
+        const firstDate = new Date(validEntries[0].date);
+        const lastDate = new Date(validEntries[validEntries.length - 1].date);
+        
+        // Normalisiere Datum auf Mitternacht für den Vergleich
+        const dataMap = new Map();
+        validEntries.forEach(item => {
+            const d = new Date(item.date);
+            const dateStr = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+            dataMap.set(dateStr, item);
+        });
+
+        let current = new Date(firstDate);
+        current.setHours(0,0,0,0);
+        const end = new Date(lastDate);
+        end.setHours(0,0,0,0);
+
+        while (current <= end) {
+            const dateStr = current.getFullYear() + "-" + (current.getMonth()+1) + "-" + current.getDate();
+            
+            if (dataMap.has(dateStr)) {
+                filledData.push(dataMap.get(dateStr));
+            } else {
+                filledData.push({
+                    date: current.toISOString(),
+                    bedTime: DEFAULT_BED,
+                    wakeUpTime: DEFAULT_WAKE,
+                    durationNum: DEFAULT_DUR_HOURS,
+                    isPlaceholder: true
+                });
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return filledData;
+    };
+
+    document.getElementById('renderBtn').onclick = () => {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if(!file) return alert("Bitte Datei auswählen!");
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const rawData = JSON.parse(e.target.result);
+                const data = fillMissingDays(rawData);
+                console.log("Verarbeitete Tage:", data.length);
+                renderCharts(data);
+            } catch (err) {
+                console.error(err);
+                alert("Fehler beim Verarbeiten der Datei. Details in der Konsole (F12).");
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    function renderCharts(data) {
+        const labels = data.map(d => {
+            const date = new Date(d.date);
+            return date.toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'2-digit'});
+        });
+
+        const bedTimes = data.map(d => getAdjustedTime(d.bedTime));
+        const wakeTimes = data.map(d => getAdjustedTime(d.wakeUpTime));
+        const durations = data.map(d => d.durationNum || extractDuration(d.sleepDuration));
+
+        const bedAvg = calculateMovingAverage(bedTimes, 14);
+        const wakeAvg = calculateMovingAverage(wakeTimes, 14);
+        const durAvg = calculateMovingAverage(durations, 14);
+
+        if(phaseChart) phaseChart.destroy();
+        if(durationChart) durationChart.destroy();
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { ticks: { color: '#888', maxRotation: 45 } }
+            },
+            plugins: { legend: { labels: { color: '#fff' } } }
+        };
+
+        phaseChart = new Chart(document.getElementById('phaseChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Einschlafen', data: bedTimes, borderColor: '#bb86fc', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: false },
+                    { label: 'Aufwachen', data: wakeTimes, borderColor: '#03dac6', borderWidth: 1, pointRadius: (ctx) => data[ctx.dataIndex].isPlaceholder ? 0 : 2, tension: 0.3, fill: '-1', backgroundColor: 'rgba(3, 218, 198, 0.05)' },
+                    { label: 'Ø Bettzeit (14T)', data: bedAvg, borderColor: '#ffb74d', borderWidth: 3, pointRadius: 0, tension: 0.4 },
+                    { label: 'Ø Aufstehen (14T)', data: wakeAvg, borderColor: '#ffd54f', borderWidth: 3, pointRadius: 0, tension: 0.4 }
+                ]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    ...commonOptions.scales,
+                    y: { min: 18, max: 36, ticks: { color: '#888', callback: v => (v >= 24 ? v-24 : v).toString().padStart(2, '0') + ":00" } }
+                }
+            }
+        });
+
+        durationChart = new Chart(document.getElementById('durationChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Stunden', data: durations, backgroundColor: (ctx) => data[ctx.dataIndex].isPlaceholder ? 'rgba(255, 255, 255, 0.05)' : 'rgba(187, 134, 252, 0.4)', borderRadius: 4 },
+                    { label: '14-Tage Schnitt', data: durAvg, type: 'line', borderColor: '#ffd54f', borderWidth: 3, pointRadius: 0 }
+                ]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    ...commonOptions.scales,
+                    y: { beginAtZero: true, max: 14, ticks: { color: '#888' } }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
