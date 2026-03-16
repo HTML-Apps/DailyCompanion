@@ -1724,13 +1724,12 @@
                 
                 <h3 style="color: white;">Historischer Verlauf</h3>
 
-                <div class="blood-charts-grid-wrapper">
-
-                    <p style="font-size: 0.9em; font-weight: bold;" >Entzündungsaktivität:</p>
-                    <p style="font-size: 0.8em;" >CRP: Entzündungs-Benchmark</p>
-                    <p style="font-size: 0.8em;" >BSG: Ein Trägheitswert parallel CRP</p>
-                    <p style="font-size: 0.8em;" >Tz: Bestätigung für Abklingen der sys. Entzündung</p>
+                <p style="font-size: 0.9em; font-weight: bold;" >Entzündungsaktivität:</p>
+                <p style="font-size: 0.8em;" >CRP: Entzündungs-Benchmark</p>
+                <p style="font-size: 0.8em;" >BSG: Ein Trägheitswert parallel CRP</p>
+                <p style="font-size: 0.8em;" >Tz: Bestätigung für Abklingen der sys. Entzündung</p>
                     
+                <div class="blood-charts-grid-wrapper">
                     <!-- Aktivität -->
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="crpChart"></canvas>
@@ -1741,12 +1740,14 @@
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="tzChart"></canvas>
                     </div>
+                </div>
 
-                    <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Biologika-Sicherheit:</p>
-                    <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
-                    <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
-                    <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
-                    
+                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Biologika-Sicherheit:</p>
+                <p style="font-size: 0.8em;" >Leukozyten: Abwehr von Krankheitserregern</p>
+                <p style="font-size: 0.8em;" >Neutrophile: Schnelle Immunzellen</p>
+                <p style="font-size: 0.8em;" >ALAT: Enzym der Leberzellen</p>
+                
+                <div class="blood-charts-grid-wrapper">
                     <!-- Sicherheit -->
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="lzChart"></canvas>
@@ -1757,11 +1758,13 @@
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="alatChart"></canvas>
                     </div>
+                </div>
 
-                    <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
-                    <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
-                    <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
+                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0px; margin-top: 0px;" >Vitalität:</p>
+                <p style="font-size: 0.8em;" >Hb: Verlauf Entzündungsanämie + Energielevel</p>
+                <p style="font-size: 0.8em;" >D3: Essentiell für Immunsystem</p>
 
+                <div class="blood-charts-grid-wrapper">
                     <!-- Vitalität -->
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="hbChart"></canvas>
@@ -1769,7 +1772,6 @@
                     <div class="chart-container" style="height: 250px; margin-bottom: 30px;">
                         <canvas id="d3Chart"></canvas>
                     </div>
-
                 </div>
 
             </div>
