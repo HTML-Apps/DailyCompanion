@@ -1191,17 +1191,32 @@
             gap: 15px;
             cursor: grab;
             touch-action: none; /* Verhindert Scrollen beim Swipen */
+
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
         }
 
         #toast-update:active {
             cursor: grabbing;
         }
 
+        @keyframes slideUp {
+            from { 
+                transform: translateX(-50%) translateY(150%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(-50%) translateY(0); 
+                opacity: 1; 
+            }
+        }
+
+        #toast-update:active { cursor: grabbing; }
+
         #custom-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            inset: 0;
             background: rgba(0,0,0,0.7);
-            /*backdrop-filter: blur(4px);*/
+            backdrop-filter: blur(4px);
             display: none;
             z-index: 2000;
         }
@@ -1872,51 +1887,37 @@
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
 
-        // Diese Funktion ersetzt den Standard alert()
         let currentToast = null;
-        let startX = 0;
-        let currentX = 0;
+        let startX = 0, startY = 0;
+        let currentX = 0, currentY = 0;
         let isDragging = false;
 
-        // Die neue Haupt-Funktion (ersetzt alert)
-        // Aufruf: showCustomAlert("Eintrag gespeichert", "💾");
         function showCustomAlert(message, icon = "🚀") {
             const toast = document.getElementById('toast-update');
             const overlay = document.getElementById('custom-overlay');
             
-            // 1. Inhalt setzen
             toast.querySelector('.toast-icon').textContent = icon;
             toast.querySelector('.toast-text').textContent = message;
 
-            // 2. Sichtbarkeit
             currentToast = toast;
             overlay.style.display = 'block';
             toast.style.display = 'flex';
             
-            // Reset Position (falls vorher weggewischt)
-            toast.style.transition = 'none';
-            toast.style.transform = 'translateX(-50%) translateY(0)';
-            toast.style.opacity = '1';
+            // Animation wird durch CSS-Klasse/Reflow neu getriggert
+            toast.style.animation = 'none';
+            toast.offsetHeight; /* Reflow */
+            toast.style.animation = null;
 
-            // 3. Event Listener für Swipe & Desktop-Drag initialisieren
             toast.onmousedown = dragStart;
             toast.ontouchstart = dragStart;
         }
 
-        function hideToast() {
-            if (!currentToast) return;
-            document.getElementById('toast-update').style.display = 'none';
-            document.getElementById('custom-overlay').style.display = 'none';
-            currentToast = null;
-        }
-
-        // --- SWIPE & DRAG LOGIK ---
         function dragStart(e) {
             isDragging = true;
             startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             currentToast.style.transition = 'none';
             
-            // Events für das Bewegen und Loslassen registrieren
             document.onmousemove = dragMove;
             document.ontouchmove = dragMove;
             document.onmouseup = dragEnd;
@@ -1926,11 +1927,19 @@
         function dragMove(e) {
             if (!isDragging || !currentToast) return;
             const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            currentX = x - startX;
+            const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             
-            // Bewegen (relativ zur Mitte -50%)
-            currentToast.style.transform = `translateX(calc(-50% + ${currentX}px))`;
-            currentToast.style.opacity = 1 - (Math.abs(currentX) / 250);
+            currentX = x - startX;
+            currentY = y - startY;
+
+            // Nur nach unten swipen erlauben (y > 0)
+            const displayY = currentY > 0 ? currentY : currentY * 0.2; // Widerstand nach oben
+
+            currentToast.style.transform = `translateX(calc(-50% + ${currentX}px)) translateY(${displayY}px)`;
+            
+            // Opazität sinkt bei Bewegung in jede der 3 Richtungen
+            const distance = Math.max(Math.abs(currentX), currentY);
+            currentToast.style.opacity = 1 - (distance / 250);
         }
 
         function dragEnd() {
@@ -1938,21 +1947,33 @@
             isDragging = false;
             currentToast.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
 
-            if (Math.abs(currentX) > 100) {
-                // Wegwischen Effekt
-                const side = currentX > 0 ? '100vw' : '-100vw';
-                currentToast.style.transform = `translateX(${side})`;
+            // Check ob weit genug geswiped wurde (links, rechts ODER unten)
+            if (Math.abs(currentX) > 100 || currentY > 100) {
+                if (currentY > 100) {
+                    // Swipe nach unten
+                    currentToast.style.transform = `translateX(-50%) translateY(100vh)`;
+                } else {
+                    // Swipe zur Seite
+                    const side = currentX > 0 ? '100vw' : '-100vw';
+                    currentToast.style.transform = `translateX(${side})`;
+                }
                 currentToast.style.opacity = '0';
-                setTimeout(hideToast, 200);
+                setTimeout(hideToast, 250);
             } else {
-                // Zurück zur Mitte
-                currentToast.style.transform = 'translateX(-50%)';
+                // Zurück zur Startposition
+                currentToast.style.transform = 'translateX(-50%) translateY(0)';
                 currentToast.style.opacity = '1';
             }
             
-            // Listener aufräumen
             document.onmousemove = null;
             document.ontouchmove = null;
+        }
+
+        function hideToast() {
+            if (!currentToast) return;
+            document.getElementById('toast-update').style.display = 'none';
+            document.getElementById('custom-overlay').style.display = 'none';
+            currentToast = null;
         }
 
         // ====== START: Fitness-Tracker JS Logik ======
