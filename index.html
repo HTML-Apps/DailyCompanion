@@ -1168,31 +1168,42 @@
         }
         /* ----- ENDE: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
 
-        /* Banner-CSS*/
+        /* Banner-CSS */
         #toast-update {
             position: fixed;
             bottom: 20px;
             left: 50%;
-            transform: translateX(-50%);
-            z-index: 2001; /* Über dem Overlay */
-            display: none;
-            width: 85%;
-            max-width: 380px;
-            padding: 30px 20px;
-            border-radius: 15px;
-            background: #313131; /* Passend zu suche.html */
-            border: 1px solid;
-            /* Dein violetter Button-Verlauf */
-            /*border-image: linear-gradient(45deg, #a770ef, #f297a7) 1;*/
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            /* WICHTIG: Die Startposition muss exakt mit der Animation übereinstimmen */
+            transform: translateX(-50%) translateY(150%); 
+            
+            will-change: transform, opacity;
+            z-index: 2100; /* Etwas höher, um sicherzugehen */
+            
+            display: none; /* Wird per JS auf 'flex' gesetzt */
+            width: 90%;
+            max-width: 400px;
+            padding: 20px; /* Padding etwas reduziert für kompakten Look */
+            border-radius: 20px; /* Schön abgerundet wie deine Container */
+            
+            /* Hintergrund & Border: 
+            Hier nutzen wir einen Trick für abgerundete Ecken + Verlauf */
+            background: linear-gradient(#313131, #313131) padding-box,
+                        linear-gradient(45deg, #a770ef, #f297a7) border-box;
+            border: 2px solid transparent;
+            
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             color: white;
             font-family: 'Poppins', sans-serif;
-            align-items: center;
+            
+            /* Flexbox Korrektur für Icon + Text nebeneinander */
+            align-items: flex-start; 
             gap: 15px;
+            
             cursor: grab;
-            touch-action: none; /* Verhindert Scrollen beim Swipen */
-
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+            touch-action: none;
+            
+            /* Die Animation wird per JS getriggert oder hier als Standard gelassen */
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
         }
 
         #toast-update:active {
@@ -1210,13 +1221,15 @@
             }
         }
 
-        #toast-update:active { cursor: grabbing; }
-
         #custom-overlay {
             position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px); /* Etwas stärkerer Blur für mehr Fokus */
+            -webkit-backdrop-filter: blur(6px); /* Safari Support */
             display: none;
             z-index: 2000;
         }
@@ -1887,10 +1900,12 @@
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
 
+        // Banner-Funktion
         let currentToast = null;
         let startX = 0, startY = 0;
         let currentX = 0, currentY = 0;
         let isDragging = false;
+        let rafId = null; // Für flüssige 60fps Animation
 
         function showCustomAlert(message, icon = "🚀") {
             const toast = document.getElementById('toast-update');
@@ -1903,10 +1918,15 @@
             overlay.style.display = 'block';
             toast.style.display = 'flex';
             
-            // Animation wird durch CSS-Klasse/Reflow neu getriggert
+            // Reset für neuen Aufruf
+            currentX = 0; currentY = 0;
+            toast.style.opacity = "1";
+            toast.style.transform = "translateX(-50%) translateY(0)";
+            
+            // Trigger CSS Animation (slideUp)
             toast.style.animation = 'none';
-            toast.offsetHeight; /* Reflow */
-            toast.style.animation = null;
+            toast.offsetHeight; 
+            toast.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards';
 
             toast.onmousedown = dragStart;
             toast.ontouchstart = dragStart;
@@ -1914,9 +1934,12 @@
 
         function dragStart(e) {
             isDragging = true;
+            // Animation sofort stoppen, damit JS die volle Kontrolle übernimmt
+            currentToast.style.animation = 'none';
+            currentToast.style.transition = 'none';
+
             startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            currentToast.style.transition = 'none';
             
             document.onmousemove = dragMove;
             document.ontouchmove = dragMove;
@@ -1926,41 +1949,46 @@
 
         function dragMove(e) {
             if (!isDragging || !currentToast) return;
+            
             const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             
             currentX = x - startX;
             currentY = y - startY;
 
-            // Nur nach unten swipen erlauben (y > 0)
-            const displayY = currentY > 0 ? currentY : currentY * 0.2; // Widerstand nach oben
-
-            currentToast.style.transform = `translateX(calc(-50% + ${currentX}px)) translateY(${displayY}px)`;
-            
-            // Opazität sinkt bei Bewegung in jede der 3 Richtungen
-            const distance = Math.max(Math.abs(currentX), currentY);
-            currentToast.style.opacity = 1 - (distance / 250);
+            // requestAnimationFrame sorgt dafür, dass die Bewegung nicht "laggt"
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                // Widerstand nach oben, freier Lauf nach unten
+                const constrainedY = currentY < 0 ? currentY * 0.2 : currentY;
+                
+                currentToast.style.transform = `translateX(calc(-50% + ${currentX}px)) translateY(${constrainedY}px)`;
+                
+                // Berechnung der Sichtbarkeit basierend auf der weitesten Entfernung
+                const dist = Math.max(Math.abs(currentX), currentY);
+                currentToast.style.opacity = 1 - (dist / 300);
+            });
         }
 
         function dragEnd() {
             if (!isDragging) return;
             isDragging = false;
-            currentToast.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            cancelAnimationFrame(rafId);
 
-            // Check ob weit genug geswiped wurde (links, rechts ODER unten)
+            currentToast.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
+
+            // Schwellenwert für das Wegwischen (100px)
             if (Math.abs(currentX) > 100 || currentY > 100) {
                 if (currentY > 100) {
-                    // Swipe nach unten
-                    currentToast.style.transform = `translateX(-50%) translateY(100vh)`;
+                    currentToast.style.transform = `translateX(-50%) translateY(120vh)`;
                 } else {
-                    // Swipe zur Seite
-                    const side = currentX > 0 ? '100vw' : '-100vw';
-                    currentToast.style.transform = `translateX(${side})`;
+                    const side = currentX > 0 ? '120vw' : '-120vw';
+                    currentToast.style.transform = `translateX(${side}) translateY(${currentY}px)`;
                 }
                 currentToast.style.opacity = '0';
-                setTimeout(hideToast, 250);
+                setTimeout(hideToast, 300);
             } else {
-                // Zurück zur Startposition
+                // Zurück-Snappen zur Mitte
                 currentToast.style.transform = 'translateX(-50%) translateY(0)';
                 currentToast.style.opacity = '1';
             }
