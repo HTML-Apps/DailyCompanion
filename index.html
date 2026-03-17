@@ -2003,26 +2003,39 @@
 
             currentToast.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
-            // Logik für das Wegwerfen basierend auf der gesperrten Richtung
-            if (lockDirection === 'h' && Math.abs(currentX) > 100) {
-                const side = currentX > 0 ? '120vw' : '-120vw';
-                currentToast.style.transform = `translateX(${side}) translateY(0)`;
+            // Schwellenwerte: 100px für links/rechts, aber nur 50px für unten
+            const horizontalDismiss = lockDirection === 'h' && Math.abs(currentX) > 100;
+            const verticalDismiss = lockDirection === 'v' && currentY > 50; // Viel sensibler nach unten
+
+            if (horizontalDismiss || verticalDismiss) {
+                const overlay = document.getElementById('custom-overlay');
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.3s ease';
+
+                if (verticalDismiss) {
+                    // Schneller Abgang nach unten
+                    currentToast.style.transform = `translateX(-50%) translateY(120vh)`;
+                } else {
+                    // Abgang zur Seite
+                    const side = currentX > 0 ? '120vw' : '-120vw';
+                    currentToast.style.transform = `translateX(${side}) translateY(0)`;
+                }
+                
                 currentToast.style.opacity = '0';
-                setTimeout(hideToast, 300);
-            } 
-            else if (lockDirection === 'v' && currentY > 100) {
-                currentToast.style.transform = `translateX(-50%) translateY(120vh)`;
-                currentToast.style.opacity = '0';
-                setTimeout(hideToast, 300);
-            } 
-            else {
-                // Zurück zur Ausgangsposition
+
+                setTimeout(() => {
+                    hideToast();
+                }, 300);
+            } else {
+                // Zurück-Snappen, wenn die Bewegung zu klein war
                 currentToast.style.transform = 'translateX(-50%) translateY(0)';
                 currentToast.style.opacity = '1';
             }
             
             document.onmousemove = null;
             document.ontouchmove = null;
+            document.onmouseup = null;
+            document.ontouchend = null;
         }
 
         function hideToast() {
