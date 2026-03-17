@@ -1830,11 +1830,18 @@
     </div>
 
     <!-- Custom Banner -->
+
     <div id="custom-overlay" onclick="hideToast()"></div>
 
     <div id="toast-update">
         <span class="toast-icon" style="font-size: 1.4rem;">🚀</span>
-        <span class="toast-text">Nachricht erscheint hier...</span>
+        
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-weight: 600; font-size: 0.75rem; color: #a770ef; text-transform: uppercase; letter-spacing: 0.5px;">
+                Hinweis:
+            </span>
+            <span class="toast-text">Nachricht erscheint hier...</span>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
