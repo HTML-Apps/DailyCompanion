@@ -2028,6 +2028,19 @@
             document.ontouchmove = null;
         }
 
+        function hideToast() {
+            const toast = document.getElementById('toast-update');
+            const overlay = document.getElementById('custom-overlay');
+            
+            // Alles hart ausblenden
+            toast.style.display = 'none';
+            overlay.style.display = 'none';
+            overlay.style.opacity = '1'; // Reset für das nächste Mal
+            
+            currentToast = null;
+            lockDirection = null;
+        }
+
         // ====== START: Fitness-Tracker JS Logik ======
         let fitnessExercises = [];
 
