@@ -1911,6 +1911,31 @@
         let rafId = null;
         let lockDirection = null; // 'h' für horizontal, 'v' für vertikal, null für offen
 
+        function showCustomAlert(message, icon = "🚀") {
+            const toast = document.getElementById('toast-update');
+            const overlay = document.getElementById('custom-overlay');
+            
+            toast.querySelector('.toast-icon').textContent = icon;
+            toast.querySelector('.toast-text').textContent = message;
+
+            currentToast = toast;
+            overlay.style.display = 'block';
+            toast.style.display = 'flex';
+            
+            // Reset für neuen Aufruf
+            currentX = 0; currentY = 0;
+            toast.style.opacity = "1";
+            toast.style.transform = "translateX(-50%) translateY(0)";
+            
+            // Trigger CSS Animation (slideUp)
+            toast.style.animation = 'none';
+            toast.offsetHeight; 
+            toast.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards';
+
+            toast.onmousedown = dragStart;
+            toast.ontouchstart = dragStart;
+        }
+
         function dragStart(e) {
             isDragging = true;
             lockDirection = null; // Sperre zurücksetzen
