@@ -4025,7 +4025,7 @@
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
                 const initialDates = [
-                    '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
+                    '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-17', '2026-03-30'
                 ];
                 initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
                 let monthlyDate = new Date('2026-04-27T00:00:00');
@@ -4068,7 +4068,8 @@
                         const injectionNumber = injectionDates.findIndex(date => date.getTime() === nextInjectionDate.getTime()) + 1;
                         
                         // GEÄNDERT: Alert-Nachricht mit der Nummer der Spritze
-                        alert(`📅 Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}`);
+                        //alert(`📅 Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}`);
+                        showCustomAlert(`Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}`, "📅");
 
                     } else if (diffDays === 1) {
                         countdownText = 'morgen';
