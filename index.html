@@ -1168,6 +1168,31 @@
         }
         /* ----- ENDE: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
 
+        /* Banner-CSS*/
+        .toast-update {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: none;
+            width: 85%;
+            max-width: 350px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: #1a1a2e; /* Dunkler Hintergrund wie deine Container */
+            /* Verlauf-Rahmen wie dein Submit-Button */
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #a770ef, #f297a7) 1; 
+            box-shadow: 0 0 15px rgba(207, 139, 243, 0.4);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            align-items: center;
+            gap: 12px;
+            cursor: grab;
+            touch-action: none;
+        }
+
     </style>
 </head>
 <body>
@@ -1791,6 +1816,14 @@
         </div>
     </div>
 
+    <!-- Custom Banner -->
+    <div id="custom-overlay"></div>
+
+    <div id="toast-update" class="custom-toast toast-update">
+        <span class="toast-icon">🚀</span>
+        <span class="toast-text"></span> 
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -1818,6 +1851,31 @@
 
         let painMapCanvas, painMapCtx;
         let painMapData = { frontPoints: [], backPoints: [] };
+
+        // Diese Funktion ersetzt den Standard alert()
+        function showCustomAlert(message) {
+            const toast = document.getElementById('toast-update');
+            const overlay = document.getElementById('custom-overlay');
+            const textSpan = toast.querySelector('.toast-text'); // Wir suchen das Text-Feld
+
+            // Nachricht im Banner aktualisieren
+            textSpan.textContent = message;
+
+            // Banner und Overlay anzeigen
+            toast.style.display = 'flex';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            toast.style.opacity = '1';
+            overlay.style.display = 'block';
+
+            // Optional: Auto-Close nach 4 Sekunden, falls der User nicht swiped
+            /*
+            setTimeout(() => {
+                if(currentToast === toast) hideToast();
+            }, 4000);
+            */
+            
+            currentToast = toast; // Für die Swipe-Logik registrieren
+        }
 
         // ====== START: Fitness-Tracker JS Logik ======
         let fitnessExercises = [];
@@ -3430,8 +3488,8 @@
                 try {
                     if (currentEntryId) {
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
-                        alert("💾 Eintrag erfolgreich aktualisiert!");
-                        //alert(`💾 Eintrag (${formattedDate}) erfolgreich aktualisiert!`);
+                        //alert("💾 Eintrag erfolgreich aktualisiert!");
+                        showCustomAlert("💾 Eintrag erfolgreich aktualisiert!");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
