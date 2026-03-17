@@ -1204,6 +1204,9 @@
             
             /* Die Animation wird per JS getriggert oder hier als Standard gelassen */
             animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+
+            user-select: none; /* Verhindert, dass Text markiert wird beim Swipen */
+            -webkit-user-drag: none; /* Verhindert natives Dragging in Safari */
         }
 
         #toast-update:active {
@@ -1905,36 +1908,13 @@
         let startX = 0, startY = 0;
         let currentX = 0, currentY = 0;
         let isDragging = false;
-        let rafId = null; // Für flüssige 60fps Animation
-
-        function showCustomAlert(message, icon = "🚀") {
-            const toast = document.getElementById('toast-update');
-            const overlay = document.getElementById('custom-overlay');
-            
-            toast.querySelector('.toast-icon').textContent = icon;
-            toast.querySelector('.toast-text').textContent = message;
-
-            currentToast = toast;
-            overlay.style.display = 'block';
-            toast.style.display = 'flex';
-            
-            // Reset für neuen Aufruf
-            currentX = 0; currentY = 0;
-            toast.style.opacity = "1";
-            toast.style.transform = "translateX(-50%) translateY(0)";
-            
-            // Trigger CSS Animation (slideUp)
-            toast.style.animation = 'none';
-            toast.offsetHeight; 
-            toast.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards';
-
-            toast.onmousedown = dragStart;
-            toast.ontouchstart = dragStart;
-        }
+        let rafId = null;
+        let lockDirection = null; // 'h' für horizontal, 'v' für vertikal, null für offen
 
         function dragStart(e) {
             isDragging = true;
-            // Animation sofort stoppen, damit JS die volle Kontrolle übernimmt
+            lockDirection = null; // Sperre zurücksetzen
+            
             currentToast.style.animation = 'none';
             currentToast.style.transition = 'none';
 
@@ -1953,20 +1933,44 @@
             const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             
-            currentX = x - startX;
-            currentY = y - startY;
+            const diffX = x - startX;
+            const diffY = y - startY;
 
-            // requestAnimationFrame sorgt dafür, dass die Bewegung nicht "laggt"
+            // Richtung bestimmen, wenn noch nicht gesperrt (nach 5px Bewegung)
+            if (!lockDirection) {
+                if (Math.abs(diffX) > 5) {
+                    lockDirection = 'h';
+                } else if (Math.abs(diffY) > 5) {
+                    lockDirection = 'v';
+                }
+            }
+
             if (rafId) cancelAnimationFrame(rafId);
             rafId = requestAnimationFrame(() => {
-                // Widerstand nach oben, freier Lauf nach unten
-                const constrainedY = currentY < 0 ? currentY * 0.2 : currentY;
-                
-                currentToast.style.transform = `translateX(calc(-50% + ${currentX}px)) translateY(${constrainedY}px)`;
-                
-                // Berechnung der Sichtbarkeit basierend auf der weitesten Entfernung
-                const dist = Math.max(Math.abs(currentX), currentY);
-                currentToast.style.opacity = 1 - (dist / 300);
+                let transformStr = "";
+                let opacityVal = 1;
+
+                if (lockDirection === 'h') {
+                    // Nur horizontale Bewegung zulassen
+                    currentX = diffX;
+                    currentY = 0;
+                    transformStr = `translateX(calc(-50% + ${currentX}px)) translateY(0)`;
+                    opacityVal = 1 - (Math.abs(currentX) / 300);
+                } 
+                else if (lockDirection === 'v') {
+                    // Nur vertikale Bewegung zulassen
+                    currentX = 0;
+                    currentY = diffY < 0 ? diffY * 0.2 : diffY; // Widerstand nach oben
+                    transformStr = `translateX(-50%) translateY(${currentY}px)`;
+                    opacityVal = 1 - (currentY / 300);
+                } 
+                else {
+                    // Noch keine Sperre, Banner bleibt zentriert
+                    transformStr = `translateX(-50%) translateY(0)`;
+                }
+
+                currentToast.style.transform = transformStr;
+                currentToast.style.opacity = opacityVal;
             });
         }
 
@@ -1975,33 +1979,28 @@
             isDragging = false;
             cancelAnimationFrame(rafId);
 
-            currentToast.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2)';
+            currentToast.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
-            // Schwellenwert für das Wegwischen (100px)
-            if (Math.abs(currentX) > 100 || currentY > 100) {
-                if (currentY > 100) {
-                    currentToast.style.transform = `translateX(-50%) translateY(120vh)`;
-                } else {
-                    const side = currentX > 0 ? '120vw' : '-120vw';
-                    currentToast.style.transform = `translateX(${side}) translateY(${currentY}px)`;
-                }
+            // Logik für das Wegwerfen basierend auf der gesperrten Richtung
+            if (lockDirection === 'h' && Math.abs(currentX) > 100) {
+                const side = currentX > 0 ? '120vw' : '-120vw';
+                currentToast.style.transform = `translateX(${side}) translateY(0)`;
                 currentToast.style.opacity = '0';
                 setTimeout(hideToast, 300);
-            } else {
-                // Zurück-Snappen zur Mitte
+            } 
+            else if (lockDirection === 'v' && currentY > 100) {
+                currentToast.style.transform = `translateX(-50%) translateY(120vh)`;
+                currentToast.style.opacity = '0';
+                setTimeout(hideToast, 300);
+            } 
+            else {
+                // Zurück zur Ausgangsposition
                 currentToast.style.transform = 'translateX(-50%) translateY(0)';
                 currentToast.style.opacity = '1';
             }
             
             document.onmousemove = null;
             document.ontouchmove = null;
-        }
-
-        function hideToast() {
-            if (!currentToast) return;
-            document.getElementById('toast-update').style.display = 'none';
-            document.getElementById('custom-overlay').style.display = 'none';
-            currentToast = null;
         }
 
         // ====== START: Fitness-Tracker JS Logik ======
