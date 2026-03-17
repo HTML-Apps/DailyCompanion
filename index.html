@@ -3560,7 +3560,8 @@
                     if (currentEntryId) {
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
                         //alert("💾 Eintrag erfolgreich aktualisiert!");
-                        showCustomAlert("💾 Eintrag erfolgreich aktualisiert!");
+                        //showCustomAlert("💾 Eintrag erfolgreich aktualisiert!");
+                        showCustomAlert("Eintrag erfolgreich aktualisiert!", "💾");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
