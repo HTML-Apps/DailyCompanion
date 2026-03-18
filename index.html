@@ -1234,6 +1234,53 @@
             z-index: 2000;
         }
 
+        /* ====== START: Kalorien-Tracker Styles ====== */
+        .nutrition-week-card {
+            flex: 0 0 100%;
+            box-sizing: border-box;
+            padding: 0 5px;
+        }
+        .nutrition-week-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: rgba(25, 25, 45, 0.9);
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 5px;
+        }
+        .nutrition-carousel-button {
+            background: none; border: none; color: #87879e; font-size: 32px; font-weight: bold; cursor: pointer; padding: 0 15px; line-height: 1; transition: 0.2s;
+        }
+        .nutrition-carousel-button:hover { color: #00f2fe; }
+        .nutrition-week-grid {
+            display: grid; grid-template-columns: 0.8fr 1fr 1fr 1fr 1.2fr; gap: 8px; align-items: center;
+        }
+        .nutrition-grid-header {
+            font-weight: 600; font-size: 0.75em; text-align: center; color: #87879e; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nutrition-day-label {
+            font-weight: 600; text-align: right; padding-right: 5px; font-size: 0.9em; color: #fff;
+        }
+        .nutrition-week-grid input[type="number"] {
+            width: 100%; padding: 8px 4px; border: 1px solid #45456a; background-color: #2a2a4a; color: #FFFFFF; border-radius: 8px; font-size: 0.9em; text-align: center; box-sizing: border-box; font-family: 'Poppins', sans-serif; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2); transition: all 0.2s;
+        }
+        .nutrition-week-grid input[type="number"]:focus {
+            border-color: #00f2fe; outline: none; box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+        }
+        /* Pfeile im Input verstecken */
+        .nutrition-week-grid input::-webkit-outer-spin-button, .nutrition-week-grid input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .nutrition-week-grid input[type="number"] { -moz-appearance: textfield; }
+        
+        .nutrition-calories-display {
+            text-align: center; font-weight: 700; color: #00f2fe; font-size: 0.95em;
+        }
+        .nutrition-week-totals {
+            margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(0, 242, 254, 0.3); font-weight: 600; text-align: center; color: #fff;
+        }
+        /* ====== ENDE: Kalorien-Tracker Styles ====== */
+
     </style>
 </head>
 <body>
@@ -1478,8 +1525,7 @@
                 <div class="category-item">
                     <label for="notes">Anmerkungen 🏷️</label>
                     <div class="notes-tags-group">
-                        <div class="tag-category"style="text-align:center; margin-top = 0px;">Ernährung | Magen</div>
-                        <button type="button" class="notes-tag-button special-tag" data-tag="Bosch-Kantine">Kantine</button>
+                        <div id="openNutritionBtn" class="tag-category" style="text-align:center; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#00f2fe'">Ernährung | Magen 🥗 (Kalorien)</div>                        <button type="button" class="notes-tag-button special-tag" data-tag="Bosch-Kantine">Kantine</button>
                         <button type="button" class="notes-tag-button special-tag" data-tag="Schokolade">Schoko</button>
                         <button type="button" class="notes-tag-button special-tag" data-tag="Eis">Eis</button>
                         <button type="button" class="notes-tag-button special-tag" data-tag="Müsli">Müsli</button>
@@ -1705,6 +1751,54 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
+    <!-- Kalorien-Tracker -->
+    <div class="overlay" id="nutritionOverlay">
+        <div class="popup" id="nutritionPopup">
+            <span class="close-btn" id="closeNutritionBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">Kalorien-Tracker</h2>
+            
+            <div class="popup-content" style="max-height: 85vh; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+                <div class="carousel-container" style="position: relative; overflow: hidden; width: 100%;">
+                    <div class="carousel-slider" id="nutritionSlider" style="display: flex; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+                        </div>
+                </div>
+                <p id="nutrition-save-status" style="text-align: center; font-style: italic; color: #87879e; font-size: 0.9em; min-height: 1.2em; margin-top: 15px;">Änderungen werden automatisch gespeichert.</p>
+            </div>
+        </div>
+    </div>
+
+    <template id="week-card-template">
+        <div class="nutrition-week-card">
+            <div class="nutrition-week-title-container">
+                <button class="nutrition-carousel-button prev" title="Vorherige Woche">‹</button>
+                <h3 class="nutrition-week-title" style="margin:0; color:#00f2fe;"></h3>
+                <button class="nutrition-carousel-button next" title="Nächste Woche">›</button>
+            </div>
+            <div class="nutrition-week-grid">
+                <div class="nutrition-grid-header">Tag</div>
+                <div class="nutrition-grid-header">💪 Pro</div>
+                <div class="nutrition-grid-header">⚡ KH</div>
+                <div class="nutrition-grid-header">🥑 Fett</div>
+                <div class="nutrition-grid-header">🔥 Kcal</div>
+                </div>
+            <div class="nutrition-week-totals">
+                </div>
+        </div>
+    </template>
+
+
+
+
+
+
+
 
     <!-- Kommentarsuche -->
     <div class="overlay" id="searchOverlay">
@@ -4458,6 +4552,287 @@
                 }
             }
             // ====== ENDE: Schlafanalyse & Charts Logik ======
+
+
+
+
+
+
+
+
+            // ====== START: Kalorientracker Logik ======
+            const nutritionOverlay = document.getElementById('nutritionOverlay');
+            const openNutritionBtn = document.getElementById('openNutritionBtn');
+            const closeNutritionBtn = document.getElementById('closeNutritionBtn');
+            const nutritionSlider = document.getElementById('nutritionSlider');
+            const weekCardTemplate = document.getElementById('week-card-template');
+            
+            let nutritionWeeks = [];
+            let nutritionCurrentIndex = 0;
+            let isNutritionInitialized = false;
+            
+            const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const CALS_PER_GRAM = { protein: 4, carbs: 4, fat: 9 };
+
+            if (openNutritionBtn && nutritionOverlay) {
+                openNutritionBtn.addEventListener('click', () => {
+                    if (!auth.currentUser) {
+                        alert("🔓 Bitte melden Sie sich an, um den Kalorientracker zu nutzen.");
+                        return;
+                    }
+                    nutritionOverlay.style.display = 'flex';
+                    if (!isNutritionInitialized) {
+                        initNutritionTracker();
+                        isNutritionInitialized = true;
+                    }
+                });
+            }
+
+            if (closeNutritionBtn) closeNutritionBtn.addEventListener('click', () => nutritionOverlay.style.display = 'none');
+            if (nutritionOverlay) nutritionOverlay.addEventListener('click', (e) => { if (e.target.id === 'nutritionOverlay') nutritionOverlay.style.display = 'none'; });
+
+            function getWeekInfo(date) {
+                const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+                return { week: weekNo, year: d.getUTCFullYear() };
+            }
+
+            function getMondayOfWeek(weekOffset) {
+                const today = new Date();
+                const dayOfWeek = today.getDay() || 7;
+                today.setDate(today.getDate() - dayOfWeek + 1 + (weekOffset * 7));
+                today.setHours(0,0,0,0);
+                return today;
+            }
+
+            function createNutritionWeekCard(weekOffset) {
+                const monday = getMondayOfWeek(weekOffset);
+                const { week, year } = getWeekInfo(monday);
+                const weekId = `${year}-W${week}`;
+
+                const cardClone = weekCardTemplate.content.cloneNode(true);
+                const weekCard = cardClone.querySelector('.nutrition-week-card');
+                weekCard.dataset.weekId = weekId;
+                weekCard.dataset.mondayTs = monday.getTime();
+                weekCard.querySelector('.nutrition-week-title').textContent = `KW ${week} (${year})`;
+
+                const grid = weekCard.querySelector('.nutrition-week-grid');
+
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(monday.getTime() + (i * 24 * 60 * 60 * 1000));
+                    // ISO String lokal anpassen, um Zeitzonen-Probleme zu vermeiden
+                    const yyyy = dayDate.getFullYear();
+                    const mm = String(dayDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(dayDate.getDate()).padStart(2, '0');
+                    const dayId = `${yyyy}-${mm}-${dd}`;
+                    
+                    grid.innerHTML += `
+                        <div class="nutrition-day-label">${DAY_NAMES[(i + 1) % 7]} <span style="font-size:0.7em; color:#87879e; display:block;">${dd}.${mm}.</span></div>
+                        <input type="number" data-day-id="${dayId}" data-macro="protein" placeholder="-">
+                        <input type="number" data-day-id="${dayId}" data-macro="carbs" placeholder="-">
+                        <input type="number" data-day-id="${dayId}" data-macro="fat" placeholder="-">
+                        <div class="nutrition-calories-display" data-day-id="${dayId}">0</div>
+                    `;
+                }
+
+                weekCard.querySelector('.prev').addEventListener('click', () => navigateNutrition(-1));
+                weekCard.querySelector('.next').addEventListener('click', () => navigateNutrition(1));
+                
+                loadFirebaseDataForWeek(weekCard, monday);
+                return weekCard;
+            }
+
+            function updateNutritionCalculations(weekCard) {
+                let weeklyTotalCalories = 0;
+                let daysWithData = 0;
+
+                const dayDisplays = weekCard.querySelectorAll('.nutrition-calories-display');
+                
+                dayDisplays.forEach(display => {
+                    const dayId = display.dataset.dayId;
+                    const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
+                    const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
+                    const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
+                    
+                    const p = parseFloat(pInput.value) || 0;
+                    const c = parseFloat(cInput.value) || 0;
+                    const f = parseFloat(fInput.value) || 0;
+
+                    if (pInput.value || cInput.value || fInput.value) daysWithData++;
+
+                    const dailyCalories = (p * CALS_PER_GRAM.protein) + (c * CALS_PER_GRAM.carbs) + (f * CALS_PER_GRAM.fat);
+                    display.textContent = Math.round(dailyCalories);
+                    weeklyTotalCalories += dailyCalories;
+                });
+
+                const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
+                weekCard.querySelector('.nutrition-week-totals').textContent = `Ø Woche: ${average} kcal / Tag`;
+            }
+
+            async function loadFirebaseDataForWeek(weekCard, mondayDate) {
+                const user = auth.currentUser;
+                if(!user) return;
+
+                const sundayDate = new Date(mondayDate.getTime() + (6 * 24 * 60 * 60 * 1000));
+                sundayDate.setHours(23, 59, 59, 999);
+
+                try {
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .where("date", ">=", mondayDate)
+                        .where("date", "<=", sundayDate)
+                        .get();
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.macros && data.date) {
+                            const d = data.date.toDate();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const dayId = `${yyyy}-${mm}-${dd}`;
+
+                            const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
+                            const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
+                            const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
+
+                            if(pInput && data.macros.protein) pInput.value = data.macros.protein;
+                            if(cInput && data.macros.carbs) cInput.value = data.macros.carbs;
+                            if(fInput && data.macros.fat) fInput.value = data.macros.fat;
+                        }
+                    });
+                    updateNutritionCalculations(weekCard);
+                } catch (e) {
+                    console.error("Fehler beim Laden der Woche:", e);
+                }
+            }
+
+            // Sofort-Update bei Eingabe (nur visuell)
+            nutritionSlider.addEventListener('input', (e) => {
+                if (e.target.matches('input[type="number"]')) {
+                    const weekCard = e.target.closest('.nutrition-week-card');
+                    updateNutritionCalculations(weekCard);
+                }
+            });
+
+            // Speichern bei Verlassen des Feldes (Datenbank)
+            nutritionSlider.addEventListener('change', async (e) => {
+                if (e.target.matches('input[type="number"]')) {
+                    const weekCard = e.target.closest('.nutrition-week-card');
+                    const dayId = e.target.dataset.dayId; // Format: YYYY-MM-DD
+                    
+                    const p = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`).value) || null;
+                    const c = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`).value) || null;
+                    const f = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`).value) || null;
+                    
+                    const cal = Math.round((p*CALS_PER_GRAM.protein || 0) + (c*CALS_PER_GRAM.carbs || 0) + (f*CALS_PER_GRAM.fat || 0));
+                    
+                    const macrosData = { protein: p, carbs: c, fat: f, calories: cal };
+                    saveMacroToFirebase(dayId, macrosData);
+                }
+            });
+
+            async function saveMacroToFirebase(dateStr, macrosData) {
+                const user = auth.currentUser;
+                if(!user) return;
+                
+                const statusEl = document.getElementById('nutrition-save-status');
+                statusEl.textContent = "Speichere...";
+                statusEl.style.color = "#00f2fe";
+
+                const [year, month, day] = dateStr.split('-').map(Number);
+                const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+                const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+                try {
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .where("date", ">=", startOfDay)
+                        .where("date", "<=", endOfDay)
+                        .limit(1).get();
+
+                    if (!snapshot.empty) {
+                        // Existierenden Tag updaten, merge: true lässt Rest unangetastet!
+                        const docId = snapshot.docs[0].id;
+                        await db.collection("dailyEntries").doc(docId).set({ macros: macrosData }, { merge: true });
+                    } else {
+                        // Neuen, leeren Tag anlegen (falls vorab/nachab geplant wird)
+                        await db.collection("dailyEntries").add({
+                            userId: user.uid,
+                            date: firebase.firestore.Timestamp.fromDate(new Date(year, month - 1, day, 12, 0, 0)),
+                            macros: macrosData
+                        });
+                    }
+                    statusEl.textContent = "Erfolgreich gespeichert!";
+                    statusEl.style.color = "#2ecc71";
+                    setTimeout(() => {
+                        statusEl.textContent = "Änderungen werden automatisch gespeichert.";
+                        statusEl.style.color = "#87879e";
+                    }, 2000);
+                } catch (e) {
+                    console.error("Speicherfehler:", e);
+                    statusEl.textContent = "Fehler beim Speichern!";
+                    statusEl.style.color = "#e74c3c";
+                }
+            }
+
+            function updateNutritionCarousel() {
+                const offset = -nutritionCurrentIndex * 100;
+                nutritionSlider.style.transform = `translateX(${offset}%)`;
+            }
+
+            function navigateNutrition(direction) {
+                const targetIndex = nutritionCurrentIndex + direction;
+
+                if (direction === 1 && targetIndex >= nutritionWeeks.length) {
+                    const newWeekOffset = nutritionWeeks[nutritionWeeks.length - 1] + 1;
+                    nutritionWeeks.push(newWeekOffset);
+                    nutritionSlider.appendChild(createNutritionWeekCard(newWeekOffset));
+                } else if (direction === -1 && targetIndex < 0) {
+                    const newWeekOffset = nutritionWeeks[0] - 1;
+                    nutritionWeeks.unshift(newWeekOffset);
+                    nutritionSlider.prepend(createNutritionWeekCard(newWeekOffset));
+                    
+                    nutritionSlider.style.transition = 'none';
+                    nutritionCurrentIndex++; 
+                    updateNutritionCarousel();
+                    
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            nutritionSlider.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                            nutritionCurrentIndex--;
+                            updateNutritionCarousel();
+                        });
+                    });
+                    return;
+                }
+                
+                nutritionCurrentIndex = targetIndex;
+                updateNutritionCarousel();
+            }
+
+            function initNutritionTracker() {
+                nutritionSlider.innerHTML = '';
+                nutritionWeeks = [-1, 0, 1];
+                nutritionWeeks.forEach(offset => {
+                    nutritionSlider.appendChild(createNutritionWeekCard(offset));
+                });
+                nutritionCurrentIndex = 1; // Startet auf "0" (aktuelle Woche)
+                updateNutritionCarousel();
+            }
+            // ====== ENDE: Kalorientracker Logik ======
+
+
+
+
+
+
+
+
+
+
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
