@@ -3970,7 +3970,7 @@
                         // Absteigend sortieren (Neueste zuerst)
                         searchEntriesCache.sort((a, b) => b.dateObj - a.dateObj);
 
-                        searchStatusMessage.textContent = `${searchEntriesCache.length} Einträge geladen. Du kannst jetzt suchen. Begriffkategorien: Flow, Physio, Essen, Verdauung, Haut, Biologika`;
+                        searchStatusMessage.textContent = `${searchEntriesCache.length} Einträge geladen. Du kannst jetzt suchen.`;
                         searchInput.focus();
                     } catch (error) {
                         console.error("Fehler beim Laden für die Suche:", error);
@@ -4004,7 +4004,7 @@
                 searchResultsContainer.innerHTML = '';
 
                 if (!searchTerm) {
-                    searchStatusMessage.textContent = 'Gib einen Suchbegriff ein, um die Notizen zu filtern. Begriffkategorien: Flow, Physio, Essen, Verdauung, Haut, Biologika';
+                    //searchStatusMessage.textContent = 'Gib einen Suchbegriff ein';
                     return;
                 }
 
@@ -4842,12 +4842,6 @@
             }
             // ====== ENDE: Kalorientracker Logik ======
 
-
-
-
-
-
-
             // ====== START: Quick-Tag Such-Logik ======
             const searchQuickTags = document.querySelectorAll('.search-quick-tag');
             // WICHTIG: Prüfe, ob die ID deines Such-Eingabefelds wirklich 'searchInput' ist!
@@ -4871,17 +4865,6 @@
                 });
             }
             // ====== ENDE: Quick-Tag Such-Logik ======
-
-
-
-
-
-
-
-
-
-
-            
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
