@@ -1281,6 +1281,28 @@
         }
         /* ====== ENDE: Kalorien-Tracker Styles ====== */
 
+        /* ====== START: Search Quick-Tags ====== */
+        .search-quick-tag {
+            background-color: #2a2a4a;
+            color: #00f2fe;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #45456a;
+            transition: all 0.2s ease;
+            user-select: none; /* Verhindert, dass der Text beim schnellen Tippen markiert wird */
+        }
+        
+        .search-quick-tag:hover {
+            background-color: #00f2fe;
+            color: #19192d;
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+            transform: translateY(-1px);
+        }
+        /* ====== ENDE: Search Quick-Tags ====== */
+
     </style>
 </head>
 <body>
@@ -1794,13 +1816,6 @@
         </div>
     </template>
 
-
-
-
-
-
-
-
     <!-- Kommentarsuche -->
     <div class="overlay" id="searchOverlay">
         <div class="popup" id="searchPopup">
@@ -1811,6 +1826,15 @@
                 <input type="text" id="searchInput" class="styled-input" placeholder="Suche in Notizen..." style="margin-bottom: 20px; max-width: 93%;">
                 <div id="searchStatusMessage" style="color: #aaa; font-size: 0.9em; margin-bottom: 15px; text-align: center;">Bitte warten, Daten werden geladen...</div>
                 
+                <div id="searchTagsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 20px;">
+                    <span class="search-quick-tag">Flow</span>
+                    <span class="search-quick-tag">Physio</span>
+                    <span class="search-quick-tag">Essen</span>
+                    <span class="search-quick-tag">Verdauung</span>
+                    <span class="search-quick-tag">Haut</span>
+                    <span class="search-quick-tag">Biologika</span>
+                </div>
+
                 <div id="searchResultsContainer" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;"></div>
             </div>
         </div>
@@ -4554,13 +4578,6 @@
             }
             // ====== ENDE: Schlafanalyse & Charts Logik ======
 
-
-
-
-
-
-
-
             // ====== START: Kalorientracker Logik ======
             const nutritionOverlay = document.getElementById('nutritionOverlay');
             const openNutritionBtn = document.getElementById('openNutritionBtn');
@@ -4831,9 +4848,40 @@
 
 
 
+            // ====== START: Quick-Tag Such-Logik ======
+            const searchQuickTags = document.querySelectorAll('.search-quick-tag');
+            // WICHTIG: Prüfe, ob die ID deines Such-Eingabefelds wirklich 'searchInput' ist!
+            const searchInputField = document.getElementById('searchInput'); 
+
+            if (searchInputField && searchQuickTags.length > 0) {
+                searchQuickTags.forEach(tag => {
+                    tag.addEventListener('click', () => {
+                        // 1. Tag-Text in das Suchfeld übernehmen
+                        searchInputField.value = tag.textContent;
+                        
+                        // 2. Ein 'input'-Event simulieren. 
+                        // Das sorgt dafür, dass deine bestehende Suchfunktion sofort anspringt,
+                        // als hättest du es selbst eingetippt.
+                        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+                        searchInputField.dispatchEvent(inputEvent);
+                        
+                        // Optional: Fokus in das Feld setzen, falls du noch was anhängen willst (z.B. "Essen Apfel")
+                        searchInputField.focus();
+                    });
+                });
+            }
+            // ====== ENDE: Quick-Tag Such-Logik ======
 
 
 
+
+
+
+
+
+
+
+            
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
