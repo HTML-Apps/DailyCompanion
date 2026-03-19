@@ -1303,6 +1303,30 @@
         }
         /* ====== ENDE: Search Quick-Tags ====== */
 
+        /* ====== START: Makro Quick-Tags ====== */
+        .macro-quick-tag {
+            background-color: #2a2a4a;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #45456a;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .macro-quick-tag:hover {
+            background-color: #00f2fe;
+            color: #19192d;
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+        }
+        .nutrition-week-grid input.active-day {
+            background-color: rgba(0, 242, 254, 0.15);
+            border-color: #00f2fe;
+        }
+        /* ====== ENDE: Makro Quick-Tags ====== */
+
     </style>
 </head>
 <body>
@@ -1792,7 +1816,18 @@
                     <div class="carousel-slider" id="nutritionSlider" style="display: flex; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
                         </div>
                 </div>
+
                 <p id="nutrition-save-status" style="text-align: center; font-style: italic; color: #87879e; font-size: 0.9em; min-height: 1.2em; margin-top: 15px;">Änderungen werden automatisch gespeichert.</p>
+
+                <div id="macro-tags-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; padding-bottom: 20px;">
+                    <div style="width: 100%; text-align: center; color: #87879e; font-size: 0.8em; margin-bottom: 5px;">Schnell-Eingabe (Makros addieren für markierten Tag):</div>
+                    
+                    <button class="macro-quick-tag" data-p="25" data-c="50" data-f="10">Proteinmüsli</button>
+                    <button class="macro-quick-tag" data-p="40" data-c="200" data-f="20">Nudeln</button>
+                    <button class="macro-quick-tag" data-p="30" data-c="0" data-f="15">Lachs (Beispiel)</button>
+                    <button class="macro-quick-tag" data-p="12" data-c="5" data-f="0">Quark (Beispiel)</button>
+                </div>
+            
             </div>
         </div>
     </div>
@@ -4595,6 +4630,11 @@
             const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
             const CALS_PER_GRAM = { protein: 4, carbs: 4, fat: 9 };
 
+            // NEU: Variablen für aktiven Tag, Debouncing und Lock
+            let activeNutritionDayId = null;
+            let nutritionSaveTimers = {}; // Sammelt Tastendrücke, um nicht sofort zu speichern
+            let isNutritionSaving = {};   // Lock gegen doppelte DB-Einträge
+
             if (openNutritionBtn && nutritionOverlay) {
                 openNutritionBtn.addEventListener('click', () => {
                     if (!auth.currentUser) {
@@ -4730,34 +4770,98 @@
                 }
             }
 
-            // Sofort-Update bei Eingabe (nur visuell)
+            // --- NEU: Tracking, welcher Tag gerade markiert ist ---
+            nutritionSlider.addEventListener('focusin', (e) => {
+                if (e.target.matches('input[type="number"]')) {
+                    activeNutritionDayId = e.target.dataset.dayId;
+                    
+                    // Markiere alle Inputs dieses Tages visuell
+                    document.querySelectorAll('.nutrition-week-grid input').forEach(inp => inp.classList.remove('active-day'));
+                    document.querySelectorAll(`.nutrition-week-grid input[data-day-id="${activeNutritionDayId}"]`).forEach(inp => inp.classList.add('active-day'));
+                }
+            });
+
+            // --- NEU: Logik für die Quick-Tags ---
+            // Prüft, ob Tag-Buttons vorhanden sind, und weist ihnen die Addier-Logik zu
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.macro-quick-tag')) {
+                    const btn = e.target;
+                    if (!activeNutritionDayId) {
+                        alert("ℹ️ Bitte klicke zuerst in ein Feld des Tages, für den du die Makros hinzufügen möchtest.");
+                        return;
+                    }
+                    
+                    // Werte aus dem Button auslesen
+                    const pTag = parseFloat(btn.dataset.p) || 0;
+                    const cTag = parseFloat(btn.dataset.c) || 0;
+                    const fTag = parseFloat(btn.dataset.f) || 0;
+                    
+                    // Die Inputs des markierten Tages finden
+                    const pInput = document.querySelector(`input[data-day-id="${activeNutritionDayId}"][data-macro="protein"]`);
+                    const cInput = document.querySelector(`input[data-day-id="${activeNutritionDayId}"][data-macro="carbs"]`);
+                    const fInput = document.querySelector(`input[data-day-id="${activeNutritionDayId}"][data-macro="fat"]`);
+                    
+                    if(pInput && cInput && fInput) {
+                        // Werte addieren (bestehende Werte + neue Werte)
+                        pInput.value = (parseFloat(pInput.value) || 0) + pTag;
+                        cInput.value = (parseFloat(cInput.value) || 0) + cTag;
+                        fInput.value = (parseFloat(fInput.value) || 0) + fTag;
+                        
+                        const weekCard = pInput.closest('.nutrition-week-card');
+                        updateNutritionCalculations(weekCard); // Visuelles Update der Kcal
+                        
+                        // Speichern anstoßen
+                        triggerDebouncedSave(activeNutritionDayId, weekCard);
+                    }
+                }
+            });
+
+            // --- NEU: Funktion für verzögertes Speichern (Debouncing) ---
+            function triggerDebouncedSave(dayId, weekCard) {
+                const statusEl = document.getElementById('nutrition-save-status');
+                statusEl.textContent = "Warte auf Eingabeende...";
+                statusEl.style.color = "#f39c12";
+
+                // Lösche den alten Timer, falls einer lief
+                if (nutritionSaveTimers[dayId]) clearTimeout(nutritionSaveTimers[dayId]);
+                
+                // Setze einen neuen Timer für 1000 Millisekunden (1 Sekunde)
+                nutritionSaveTimers[dayId] = setTimeout(() => {
+                    const p = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`).value) || null;
+                    const c = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`).value) || null;
+                    const f = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`).value) || null;
+                    const cal = Math.round((p * CALS_PER_GRAM.protein || 0) + (c * CALS_PER_GRAM.carbs || 0) + (f * CALS_PER_GRAM.fat || 0));
+                    
+                    const macrosData = { protein: p, carbs: c, fat: f, calories: cal };
+                    saveMacroToFirebase(dayId, macrosData);
+                }, 1000); 
+            }
+
+            // --- GEÄNDERT: Sofort-Update bei Eingabe (visuell) UND verzögertes Speichern ---
             nutritionSlider.addEventListener('input', (e) => {
                 if (e.target.matches('input[type="number"]')) {
                     const weekCard = e.target.closest('.nutrition-week-card');
                     updateNutritionCalculations(weekCard);
+                    
+                    // Speichern verzögert anstoßen
+                    triggerDebouncedSave(e.target.dataset.dayId, weekCard);
                 }
             });
 
-            // Speichern bei Verlassen des Feldes (Datenbank)
-            nutritionSlider.addEventListener('change', async (e) => {
-                if (e.target.matches('input[type="number"]')) {
-                    const weekCard = e.target.closest('.nutrition-week-card');
-                    const dayId = e.target.dataset.dayId; // Format: YYYY-MM-DD
-                    
-                    const p = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`).value) || null;
-                    const c = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`).value) || null;
-                    const f = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`).value) || null;
-                    
-                    const cal = Math.round((p*CALS_PER_GRAM.protein || 0) + (c*CALS_PER_GRAM.carbs || 0) + (f*CALS_PER_GRAM.fat || 0));
-                    
-                    const macrosData = { protein: p, carbs: c, fat: f, calories: cal };
-                    saveMacroToFirebase(dayId, macrosData);
-                }
-            });
-
+            // --- GEÄNDERT: Speicherfunktion mit Lock ---
             async function saveMacroToFirebase(dateStr, macrosData) {
                 const user = auth.currentUser;
                 if(!user) return;
+                
+                // LOCK-PRÜFUNG: Läuft für diesen Tag bereits ein Speichervorgang?
+                if (isNutritionSaving[dateStr]) {
+                    // Lege den Befehl auf Wiedervorlage in 500ms
+                    setTimeout(() => saveMacroToFirebase(dateStr, macrosData), 500);
+                    return;
+                }
+                
+                // Lock setzen
+                isNutritionSaving[dateStr] = true;
                 
                 const statusEl = document.getElementById('nutrition-save-status');
                 statusEl.textContent = "Speichere...";
@@ -4779,7 +4883,7 @@
                         const docId = snapshot.docs[0].id;
                         await db.collection("dailyEntries").doc(docId).set({ macros: macrosData }, { merge: true });
                     } else {
-                        // Neuen, leeren Tag anlegen (falls vorab/nachab geplant wird)
+                        // Neuen, leeren Tag anlegen
                         await db.collection("dailyEntries").add({
                             userId: user.uid,
                             date: firebase.firestore.Timestamp.fromDate(new Date(year, month - 1, day, 12, 0, 0)),
@@ -4789,13 +4893,19 @@
                     statusEl.textContent = "Erfolgreich gespeichert!";
                     statusEl.style.color = "#2ecc71";
                     setTimeout(() => {
-                        statusEl.textContent = "Änderungen werden automatisch gespeichert.";
-                        statusEl.style.color = "#87879e";
+                        // Verhindert Flackern, wenn in der Zwischenzeit schon wieder getippt wurde
+                        if (statusEl.textContent === "Erfolgreich gespeichert!") {
+                            statusEl.textContent = "Änderungen werden automatisch gespeichert.";
+                            statusEl.style.color = "#87879e";
+                        }
                     }, 2000);
                 } catch (e) {
                     console.error("Speicherfehler:", e);
                     statusEl.textContent = "Fehler beim Speichern!";
                     statusEl.style.color = "#e74c3c";
+                } finally {
+                    // Lock aufheben, damit der nächste Tag wieder speichern darf
+                    isNutritionSaving[dateStr] = false; 
                 }
             }
 
@@ -4844,6 +4954,26 @@
                 updateNutritionCarousel();
             }
             // ====== ENDE: Kalorientracker Logik ======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             // ====== START: Quick-Tag Such-Logik ======
             const searchQuickTags = document.querySelectorAll('.search-quick-tag');
