@@ -3829,11 +3829,28 @@
                 };
 
                 try {
+                    // NEU: Sicherheitsprüfung! Falls in der Zwischenzeit (z.B. durch den Kalorientracker) 
+                    // heimlich ein Eintrag für heute erstellt wurde, fangen wir das hier ab.
+                    if (!currentEntryId) {
+                        const startOfDay = new Date(currentEditingDate.getFullYear(), currentEditingDate.getMonth(), currentEditingDate.getDate(), 0, 0, 0, 0);
+                        const endOfDay = new Date(currentEditingDate.getFullYear(), currentEditingDate.getMonth(), currentEditingDate.getDate(), 23, 59, 59, 999);
+                        
+                        const snap = await db.collection("dailyEntries")
+                            .where("userId", "==", user.uid)
+                            .where("date", ">=", startOfDay)
+                            .where("date", "<=", endOfDay)
+                            .limit(1).get();
+                            
+                        if (!snap.empty) {
+                            currentEntryId = snap.docs[0].id; // Eintrag gefunden! ID übernehmen, um Duplikate zu verhindern.
+                        }
+                    }
+
                     if (currentEntryId) {
-                        await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
+                        // ÄNDERUNG: Wir nutzen .set() mit merge: true anstatt .update(). 
+                        // Das ist sicherer und fasst die neuen Daten sauber mit den Makros zusammen, ohne sie zu löschen.
+                        await db.collection("dailyEntries").doc(currentEntryId).set(dataToSave, { merge: true });
                         alert("💾 Eintrag erfolgreich aktualisiert!");
-                        //showCustomAlert("💾 Eintrag erfolgreich aktualisiert!");
-                        //showCustomAlert("Eintrag in der Datenbank parallel aktualisiert!", "💾");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
@@ -3841,18 +3858,16 @@
                         const docRef = await db.collection("dailyEntries").add(dataToSave);
                         alert(`💾 Neuer Eintrag für ${currentEditingDate.toLocaleDateString()} erfolgreich gespeichert!`);
                         
-                        // 2. Die neue ID speichern, damit bei erneuten Klicks aktualisiert (update) statt neu angelegt (add) wird
+                        // 2. Die neue ID speichern, damit bei erneuten Klicks aktualisiert statt neu angelegt wird
                         currentEntryId = docRef.id; 
                         
-                        // 3. Den Button optisch in den Update-Modus versetzen (genau wie in deiner fillFormWithData-Funktion)
+                        // 3. Den Button optisch in den Update-Modus versetzen
                         const submitBtn = document.getElementById('submitBtn');
                         submitBtn.textContent = "Eintrag aktualisieren";
                         submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
-                        
-                        // 4. WICHTIG: resetForm() weglassen, damit die Daten im Formular stehen bleiben!
                     }
 
-                    // NEU: Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
+                    // Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
                     painMapDateHistory = [];
                     await refreshPainMapState(); 
 
@@ -3860,6 +3875,7 @@
                     console.error("Fehler beim Speichern/Aktualisieren: ", e);
                     alert("❌ Fehler: " + e.message);
                 }
+
             });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
@@ -4925,18 +4941,39 @@
                         .where("date", "<=", endOfDay)
                         .limit(1).get();
 
+                    let docIdToUse;
+
                     if (!snapshot.empty) {
                         // Existierenden Tag updaten, merge: true lässt Rest unangetastet!
-                        const docId = snapshot.docs[0].id;
-                        await db.collection("dailyEntries").doc(docId).set({ macros: macrosData }, { merge: true });
+                        docIdToUse = snapshot.docs[0].id;
+                        await db.collection("dailyEntries").doc(docIdToUse).set({ macros: macrosData }, { merge: true });
                     } else {
                         // Neuen, leeren Tag anlegen
-                        await db.collection("dailyEntries").add({
+                        const docRef = await db.collection("dailyEntries").add({
                             userId: user.uid,
                             date: firebase.firestore.Timestamp.fromDate(new Date(year, month - 1, day, 12, 0, 0)),
                             macros: macrosData
                         });
+                        docIdToUse = docRef.id;
                     }
+
+                    // WICHTIG: Prüfen, ob der Tag, den wir im Tracker speichern, 
+                    // auch der Tag ist, der gerade im Hauptformular geöffnet ist.
+                    const isEditingActiveDay = (
+                        currentEditingDate.getFullYear() === year &&
+                        currentEditingDate.getMonth() === month - 1 &&
+                        currentEditingDate.getDate() === day
+                    );
+
+                    // Falls ja, und das Formular dachte noch, es gibt keinen Eintrag: Status updaten!
+                    if (isEditingActiveDay && !currentEntryId) {
+                        currentEntryId = docIdToUse;
+                        // Button optisch sofort in den "Update-Modus" versetzen
+                        const submitBtn = document.getElementById('submitBtn');
+                        submitBtn.textContent = "Eintrag aktualisieren";
+                        submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
+                    }
+
                     statusEl.textContent = "Erfolgreich gespeichert!";
                     statusEl.style.color = "#2ecc71";
                     setTimeout(() => {
