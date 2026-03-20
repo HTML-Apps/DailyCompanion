@@ -1807,12 +1807,6 @@
             
             <div class="popup-content" style="max-height: 85vh; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
 
-                <div class="nutrition-week-title-container">
-                    <button class="nutrition-carousel-button prev" title="Vorherige Woche">‹</button>
-                    <h3 class="nutrition-week-title" style="margin:0; color:#00f2fe;"></h3>
-                    <button class="nutrition-carousel-button next" title="Nächste Woche">›</button>
-                </div>
-
                 <div id="macro-tags-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 15px; padding-bottom: 20px;">
                     <button class="macro-quick-tag" data-p="25" data-c="80" data-f="5">P-Müsli</button>
                     <button class="macro-quick-tag" data-p="19" data-c="3" data-f="3">Shake</button>
@@ -1842,7 +1836,11 @@
 
     <template id="week-card-template">
         <div class="nutrition-week-card">
-
+            <div class="nutrition-week-title-container">
+                <button class="nutrition-carousel-button prev" title="Vorherige Woche">‹</button>
+                <h3 class="nutrition-week-title" style="margin:0; color:#00f2fe;"></h3>
+                <button class="nutrition-carousel-button next" title="Nächste Woche">›</button>
+            </div>
             <div class="nutrition-week-grid">
                 <div class="nutrition-grid-header">Tag</div>
                 <div class="nutrition-grid-header">💪 Pro</div>
