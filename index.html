@@ -1807,21 +1807,7 @@
             
             <div class="popup-content" style="max-height: 85vh; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
 
-                <div id="macro-tags-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 15px; padding-bottom: 20px;">
-                    <button class="macro-quick-tag" data-p="25" data-c="80" data-f="5">P-Müsli</button>
-                    <button class="macro-quick-tag" data-p="19" data-c="3" data-f="3">Shake</button>
-                    <button class="macro-quick-tag" data-p="40" data-c="350" data-f="15">Nudeln 500</button>
-                    <button class="macro-quick-tag" data-p="40" data-c="260" data-f="15">Reis 320</button>
-                    <button class="macro-quick-tag" data-p="32" data-c="270" data-f="7">Polenta 350</button>
-                    <button class="macro-quick-tag" data-p="18" data-c="180" data-f="12">Puffer</button>
-                    <button class="macro-quick-tag" data-p="18" data-c="150" data-f="18">🥔</button>
-                    <button class="macro-quick-tag" data-p="10" data-c="50" data-f="15">Bowl</button>
-                    <button class="macro-quick-tag" data-p="22" data-c="1" data-f="22">Fisch</button>
-                    <button class="macro-quick-tag" data-p="5" data-c="50" data-f="3">Gemüse</button>
-                    <button class="macro-quick-tag" data-p="35" data-c="1" data-f="20">Fleisch</button>
-                    <button class="macro-quick-tag" data-p="16" data-c="150" data-f="8">Reis ½</button>
-                    <button class="macro-quick-tag" data-p="14" data-c="160" data-f="8">Nudeln ½</button>
-                </div>
+
 
                 <div class="carousel-container" style="position: relative; overflow: hidden; width: 100%;">
                     <div class="carousel-slider" id="nutritionSlider" style="display: flex; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
@@ -1836,11 +1822,32 @@
 
     <template id="week-card-template">
         <div class="nutrition-week-card">
+
             <div class="nutrition-week-title-container">
                 <button class="nutrition-carousel-button prev" title="Vorherige Woche">‹</button>
                 <h3 class="nutrition-week-title" style="margin:0; color:#00f2fe;"></h3>
                 <button class="nutrition-carousel-button next" title="Nächste Woche">›</button>
             </div>
+
+            <div id="macro-tags-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 15px; padding-bottom: 20px;">
+                <button class="macro-quick-tag" data-p="25" data-c="80" data-f="5">P-Müsli</button>
+                <button class="macro-quick-tag" data-p="19" data-c="3" data-f="3">Shake</button>
+                <button class="macro-quick-tag" data-p="40" data-c="350" data-f="15">Nudeln 500</button>
+                <button class="macro-quick-tag" data-p="40" data-c="260" data-f="15">Reis 320</button>
+                <button class="macro-quick-tag" data-p="32" data-c="270" data-f="7">Polenta 350</button>
+                <button class="macro-quick-tag" data-p="18" data-c="180" data-f="12">Puffer</button>
+                <button class="macro-quick-tag" data-p="18" data-c="150" data-f="18">🥔</button>
+                <button class="macro-quick-tag" data-p="10" data-c="50" data-f="15">Bowl</button>
+                <button class="macro-quick-tag" data-p="22" data-c="1" data-f="22">Fisch</button>
+                <button class="macro-quick-tag" data-p="5" data-c="50" data-f="3">Gemüse</button>
+                <button class="macro-quick-tag" data-p="35" data-c="1" data-f="20">Fleisch</button>
+                <button class="macro-quick-tag" data-p="16" data-c="150" data-f="8">Reis ½</button>
+                <button class="macro-quick-tag" data-p="14" data-c="160" data-f="8">Nudeln ½</button>
+            </div>
+
+
+
+
             <div class="nutrition-week-grid">
                 <div class="nutrition-grid-header">Tag</div>
                 <div class="nutrition-grid-header">💪 Pro</div>
