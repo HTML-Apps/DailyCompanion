@@ -3821,9 +3821,9 @@
                 try {
                     if (currentEntryId) {
                         await db.collection("dailyEntries").doc(currentEntryId).update(dataToSave);
-                        //alert("💾 Eintrag erfolgreich aktualisiert!");
+                        alert("💾 Eintrag erfolgreich aktualisiert!");
                         //showCustomAlert("💾 Eintrag erfolgreich aktualisiert!");
-                        showCustomAlert("Eintrag in der Datenbank parallel aktualisiert!", "💾");
+                        //showCustomAlert("Eintrag in der Datenbank parallel aktualisiert!", "💾");
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
