@@ -4732,32 +4732,50 @@
                 return weekCard;
             }
 
-            function updateNutritionCalculations(weekCard) {
-                let weeklyTotalCalories = 0;
-                let daysWithData = 0;
+        function updateNutritionCalculations(weekCard) {
+            let weeklyTotalCalories = 0;
+            let daysWithData = 0;
 
-                const dayDisplays = weekCard.querySelectorAll('.nutrition-calories-display');
+            const dayDisplays = weekCard.querySelectorAll('.nutrition-calories-display');
+            
+            dayDisplays.forEach(display => {
+                const dayId = display.dataset.dayId;
+                const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
+                const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
+                const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
                 
-                dayDisplays.forEach(display => {
-                    const dayId = display.dataset.dayId;
-                    const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
-                    const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
-                    const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
-                    
-                    const p = parseFloat(pInput.value) || 0;
-                    const c = parseFloat(cInput.value) || 0;
-                    const f = parseFloat(fInput.value) || 0;
+                const p = parseFloat(pInput.value) || 0;
+                const c = parseFloat(cInput.value) || 0;
+                const f = parseFloat(fInput.value) || 0;
 
-                    if (pInput.value || cInput.value || fInput.value) daysWithData++;
+                if (pInput.value || cInput.value || fInput.value) daysWithData++;
 
-                    const dailyCalories = (p * CALS_PER_GRAM.protein) + (c * CALS_PER_GRAM.carbs) + (f * CALS_PER_GRAM.fat);
-                    display.textContent = Math.round(dailyCalories);
-                    weeklyTotalCalories += dailyCalories;
-                });
+                const dailyCalories = (p * CALS_PER_GRAM.protein) + (c * CALS_PER_GRAM.carbs) + (f * CALS_PER_GRAM.fat);
+                const roundedCalories = Math.round(dailyCalories);
+                
+                display.textContent = roundedCalories;
+                weeklyTotalCalories += dailyCalories;
 
-                const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
-                weekCard.querySelector('.nutrition-week-totals').textContent = `Ø Woche: ${average} kcal / Tag`;
-            }
+                // --- NEU: Bedingte Formatierung (Farben) ---
+
+                // 1. Protein Check: Wenn Protein < 120 und ein Wert eingetragen ist -> Rot, sonst normal (weiß/hell)
+                if (pInput.value !== "" && p < 120) {
+                    pInput.style.color = "#ff4d4d"; // Rot
+                } else {
+                    pInput.style.color = ""; // Standardfarbe (wird vom CSS übernommen)
+                }
+
+                // 2. Kalorien Check: Wenn Kalorien < 2900 und Daten vorhanden -> Rot
+                if ((pInput.value || cInput.value || fInput.value) && roundedCalories < 2900) {
+                    display.style.color = "#ff4d4d"; // Rot
+                } else {
+                    display.style.color = ""; // Standardfarbe
+                }
+            });
+
+            const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
+            weekCard.querySelector('.nutrition-week-totals').textContent = `Ø Woche: ${average} kcal / Tag`;
+        }
 
             async function loadFirebaseDataForWeek(weekCard, mondayDate) {
                 const user = auth.currentUser;
