@@ -2728,12 +2728,13 @@
             const now = new Date();
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(now.getDate() - 7);
+            oneWeekAgo.setHours(0, 0, 0, 0); // Ab Mitternacht des Starttages
 
             try {
-                // Holen der Einträge der letzten 7 Tage aus Firestore
+                // FEHLERBEHEBUNG 2: Wir übergeben das pure Date-Objekt an Firebase, keinen Text-String!
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
-                    .where("date", ">=", oneWeekAgo.toISOString().split('T')[0])
+                    .where("date", ">=", oneWeekAgo)
                     .get();
 
                 const tagCounts = {};
@@ -2748,23 +2749,24 @@
                     }
                 });
 
-                // Alle Physiotherapie-Buttons finden und prüfen
-                // Wir identifizieren sie hier über den Container (die Kategorie)
-                const physioContainer = document.querySelector('.tag-category[style*="text-align:center"]');
-                if (physioContainer && physioContainer.textContent.includes("Physiotherapie")) {
+                // FEHLERBEHEBUNG 1: Wir suchen gezielt die "Physiotherapie"-Überschrift
+                const categories = Array.from(document.querySelectorAll('.tag-category'));
+                const physioContainer = categories.find(el => el.textContent.includes("Physiotherapie"));
+
+                if (physioContainer) {
                     // Wir nehmen alle Buttons, die NACH dieser Überschrift kommen, bis zur nächsten Kategorie
                     let nextEl = physioContainer.nextElementSibling;
                     while (nextEl && !nextEl.classList.contains('tag-category')) {
-                        const buttons = nextEl.querySelectorAll('.notes-tag-button');
-                        buttons.forEach(btn => {
-                            const tagName = btn.dataset.tag;
+                        // Prüfen, ob das nächste Element wirklich ein Button ist
+                        if (nextEl.classList.contains('notes-tag-button')) {
+                            const tagName = nextEl.dataset.tag;
                             if (tagCounts[tagName] > 2) {
-                                btn.classList.add('physio-frequent');
-                                btn.title = `Diesen Tag hast du ${tagCounts[tagName]}x in den letzten 7 Tagen genutzt!`;
+                                nextEl.classList.add('physio-frequent');
+                                nextEl.title = `Diesen Tag hast du ${tagCounts[tagName]}x in den letzten 7 Tagen genutzt!`;
                             } else {
-                                btn.classList.remove('physio-frequent');
+                                nextEl.classList.remove('physio-frequent');
                             }
-                        });
+                        }
                         nextEl = nextEl.nextElementSibling;
                     }
                 }
