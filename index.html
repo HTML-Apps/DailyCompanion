@@ -4233,7 +4233,7 @@
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
                 const initialDates = [
-                    '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
+                    '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-21', '2026-03-30'
                 ];
                 initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
                 let monthlyDate = new Date('2026-04-27T00:00:00');
@@ -4269,15 +4269,27 @@
                     if (diffDays === 0) {
                         countdownText = '<span style="color: rgba(231, 76, 60, 0.85) ; font-weight: bold;">heute</span>';
                         
-                        // Setzt den Status für den Notification-Dot auf "true"
                         if(notificationDot) notificationDot.dataset.isInjectionDay = 'true';
                         
-                        // NEU: Ermittelt die Nummer der aktuellen Spritze
+                        // Ermittelt die Nummer der aktuellen Spritze (1-basiert)
                         const injectionNumber = injectionDates.findIndex(date => date.getTime() === nextInjectionDate.getTime()) + 1;
-                        
-                        // GEÄNDERT: Alert-Nachricht mit der Nummer der Spritze
-                        //alert(`📅 Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}`);
-                        showCustomAlert(`Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}`, "📅");
+
+                        // --- NEU: Bestimmung der Position ---
+                        const positions = [
+                            "Femur links",  // Index 0
+                            "Femur rechts", // Index 1
+                            "Bauch rechts", // Index 2
+                            "Bauch links"   // Index 3
+                        ];
+
+                        // Da injectionNumber bei 1 startet, ziehen wir 1 ab, 
+                        // um mit dem Modulo-Operator (0, 1, 2, 3) zu arbeiten.
+                        const positionIndex = (injectionNumber - 1) % positions.length;
+                        const currentPosition = positions[positionIndex];
+                        // ------------------------------------
+
+                        // GEÄNDERT: Alert-Nachricht inkl. Position
+                        alert(`📅 Heute 20 Uhr: Cosentyx®-Spritze Nr. ${injectionNumber}\n📍 Position: ${currentPosition}`);
 
                     } else if (diffDays === 1) {
                         countdownText = 'morgen';
