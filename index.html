@@ -723,7 +723,9 @@
         /* Stil für Physiotherapie-Tags, die häufiger als 2x pro Woche genutzt wurden */
         .notes-tag-button.physio-frequent {
             border: 2px solid #e74c3c !important; /* Roter Rand */
-            box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+            background-color: #942a2a;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
         }
 
         /* --- NEUES STATISTIK SPLIT-LAYOUT --- */
@@ -2709,13 +2711,6 @@
             submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
         }
 
-
-
-
-
-
-
-
         /**
          * Prüft die Häufigkeit der Physiotherapie-Tags in der letzten Woche
          * und markiert diese rot, wenn sie öfter als 2x vorkamen.
@@ -2774,16 +2769,6 @@
                 console.error("Fehler beim Prüfen der Tag-Häufigkeit:", e);
             }
         }
-
-
-
-
-
-
-
-
-
-
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
