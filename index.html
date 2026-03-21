@@ -1348,6 +1348,68 @@
         }
         /* ====== ENDE: Makro Quick-Tags ====== */
 
+        /* ====== START: Stoppuhr Styles ====== */
+        .stopwatch-banner {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%); /* Zentriert das fixed Element */
+            display: flex;
+            width: 85%;
+            max-width: 400px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 25px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            z-index: 3500; /* Sehr hoch, damit es über deinen anderen Popups liegt */
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            will-change: transform, opacity;
+            user-select: none;
+            -webkit-user-select: none;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .stopwatch-banner.hidden {
+            display: none !important;
+        }
+
+        .stopwatch-time-display {
+            font-variant-numeric: tabular-nums;
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+            color: white;
+        }
+
+        .stopwatch-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stopwatch-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 5px;
+            transition: color 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #stopwatchStartStop { color: #888888; }
+        #stopwatchStartStop:hover { color: #ffffff; }
+        #stopwatchReset { color: #ff3131; }
+        #stopwatchReset:hover { color: #ff6b6b; }
+        /* ====== ENDE: Stoppuhr Styles ====== */
+
     </style>
 </head>
 <body>
@@ -1793,8 +1855,7 @@
             <span class="close-btn" id="closeFitnessBtn">&times;</span>
             
             <div class="fitness-header-nav">
-                <h2 style="margin: 0; background: none; -webkit-text-fill-color: #fff; color: #fff;">Workout-Plan</h2>
-                <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">OK</button>
+                <h2 id="triggerStopwatch" style="margin: 0; background: none; -webkit-text-fill-color: #fff; color: #fff; cursor: pointer;" title="Stoppuhr öffnen">Workout-Plan ⏱️</h2>                <button onclick="document.getElementById('slide-oberkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn active-tab" id="tab-oberkoerper">OK</button>
                 <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">UK</button>
                 <button onclick="document.getElementById('slide-physio').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-physio">PH</button>
 
@@ -2055,6 +2116,15 @@
                     <canvas id="sleepDurationChart"></canvas>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Stoppuhr -->
+    <div class="stopwatch-banner hidden" id="stopwatchBanner">
+        <div class="stopwatch-time-display" id="stopwatchDisplay">00:00</div>
+        <div class="stopwatch-controls">
+            <button class="stopwatch-btn" id="stopwatchStartStop">Start</button>
+            <button class="stopwatch-btn" id="stopwatchReset">Reset</button>
         </div>
     </div>
 
@@ -4748,6 +4818,118 @@
                 }
             }
             // ====== ENDE: Schlafanalyse & Charts Logik ======
+
+
+
+
+            // ====== START: Stoppuhr Logik ======
+            let swStartTime;
+            let swElapsedTime = 0;
+            let swTimerInterval;
+            let swRunning = false;
+            const swAlertLimitMs = 120000; // 2 Minuten
+
+            const swBanner = document.getElementById('stopwatchBanner');
+            const swDisplay = document.getElementById('stopwatchDisplay');
+            const swStartStopBtn = document.getElementById('stopwatchStartStop');
+            const swResetBtn = document.getElementById('stopwatchReset');
+            const swTrigger = document.getElementById('triggerStopwatch');
+
+            function formatSwTime(time) {
+                if (time >= swAlertLimitMs) {
+                    swDisplay.style.color = '#FF3131';
+                    swDisplay.style.fontWeight = '600';
+                } else {
+                    swDisplay.style.color = 'white';
+                    swDisplay.style.fontWeight = '400';
+                }
+
+                let diffInMin = time / 60000;
+                let mm = Math.floor(diffInMin).toString().padStart(2, "0");
+                let diffInSec = (diffInMin - Math.floor(diffInMin)) * 60;
+                let ss = Math.floor(diffInSec).toString().padStart(2, "0");
+
+                return `${mm}:${ss}`;
+            }
+
+            function swStart() {
+                swStartTime = Date.now() - swElapsedTime;
+                swTimerInterval = setInterval(() => {
+                    swElapsedTime = Date.now() - swStartTime;
+                    swDisplay.innerHTML = formatSwTime(swElapsedTime);
+                }, 1000);
+                swStartStopBtn.innerHTML = "Stopp";
+                swStartStopBtn.style.color = '#ffffff';
+            }
+
+            function swStop() {
+                clearInterval(swTimerInterval);
+                swStartStopBtn.innerHTML = "Start";
+                swStartStopBtn.style.color = '#888888';
+            }
+
+            function swReset() {
+                clearInterval(swTimerInterval);
+                swElapsedTime = 0;
+                swDisplay.innerHTML = "00:00";
+                swDisplay.style.color = 'white';
+                swDisplay.style.fontWeight = '400';
+                swStop();
+                swRunning = false;
+            }
+
+            // Button Events
+            swStartStopBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (!swRunning) { swStart(); swRunning = true; } 
+                else { swStop(); swRunning = false; }
+            });
+
+            swResetBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                swReset();
+            });
+
+            // Trigger: Banner einblenden, wenn auf "Workout-Plan" geklickt wird
+            if (swTrigger) {
+                swTrigger.addEventListener('click', () => {
+                    swBanner.classList.remove('hidden');
+                    // Reset transform to center it properly
+                    swBanner.style.transform = 'translateX(-50%)'; 
+                    swBanner.style.opacity = '1';
+                });
+            }
+
+            // Swipe-to-Dismiss Logik
+            let swTouchStartX = 0;
+            swBanner.addEventListener('touchstart', e => {
+                swTouchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            swBanner.addEventListener('touchend', e => {
+                let touchEndX = e.changedTouches[0].screenX;
+                let distance = touchEndX - swTouchStartX;
+
+                if (Math.abs(distance) > 80) { // Swipe Threshold
+                    const direction = distance > 0 ? 1 : -1;
+                    // Wichtig: calc(-50% + ...) hält die ursprüngliche Zentrierung bei
+                    swBanner.style.transform = `translateX(calc(-50% + ${direction * 150}%))`;
+                    swBanner.style.opacity = '0';
+
+                    swReset(); // Stoppt und nullt die Zeit beim Wegwischen
+
+                    setTimeout(() => {
+                        swBanner.classList.add('hidden');
+                    }, 300);
+                }
+            }, { passive: true });
+            // ====== ENDE: Stoppuhr Logik ======
+
+
+
+
+
+            
 
             // ====== START: Kalorientracker Logik ======
             const nutritionOverlay = document.getElementById('nutritionOverlay');
