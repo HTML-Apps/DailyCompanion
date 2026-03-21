@@ -720,6 +720,12 @@
             color: #ffffff;
         }
 
+        /* Stil für Physiotherapie-Tags, die häufiger als 2x pro Woche genutzt wurden */
+        .notes-tag-button.physio-frequent {
+            border: 2px solid #e74c3c !important; /* Roter Rand */
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+        }
+
         /* --- NEUES STATISTIK SPLIT-LAYOUT --- */
         /* Standard (Mobile First): Untereinander mit Abstand */
         .stats-split-container {
@@ -2702,6 +2708,80 @@
             submitBtn.textContent = "Eintrag aktualisieren";
             submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
         }
+
+
+
+
+
+
+
+
+        /**
+         * Prüft die Häufigkeit der Physiotherapie-Tags in der letzten Woche
+         * und markiert diese rot, wenn sie öfter als 2x vorkamen.
+         */
+        async function highlightFrequentPhysioTags() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Zeitfenster: Letzte 7 Tage
+            const now = new Date();
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(now.getDate() - 7);
+
+            try {
+                // Holen der Einträge der letzten 7 Tage aus Firestore
+                const snapshot = await db.collection("dailyEntries")
+                    .where("userId", "==", user.uid)
+                    .where("date", ">=", oneWeekAgo.toISOString().split('T')[0])
+                    .get();
+
+                const tagCounts = {};
+                
+                // Zählen, wie oft jeder Tag vorkam
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
+                        data.selectedNotesTags.forEach(tag => {
+                            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                        });
+                    }
+                });
+
+                // Alle Physiotherapie-Buttons finden und prüfen
+                // Wir identifizieren sie hier über den Container (die Kategorie)
+                const physioContainer = document.querySelector('.tag-category[style*="text-align:center"]');
+                if (physioContainer && physioContainer.textContent.includes("Physiotherapie")) {
+                    // Wir nehmen alle Buttons, die NACH dieser Überschrift kommen, bis zur nächsten Kategorie
+                    let nextEl = physioContainer.nextElementSibling;
+                    while (nextEl && !nextEl.classList.contains('tag-category')) {
+                        const buttons = nextEl.querySelectorAll('.notes-tag-button');
+                        buttons.forEach(btn => {
+                            const tagName = btn.dataset.tag;
+                            if (tagCounts[tagName] > 2) {
+                                btn.classList.add('physio-frequent');
+                                btn.title = `Diesen Tag hast du ${tagCounts[tagName]}x in den letzten 7 Tagen genutzt!`;
+                            } else {
+                                btn.classList.remove('physio-frequent');
+                            }
+                        });
+                        nextEl = nextEl.nextElementSibling;
+                    }
+                }
+            } catch (e) {
+                console.error("Fehler beim Prüfen der Tag-Häufigkeit:", e);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -5228,11 +5308,6 @@
                 }
             });
 
-
-
-
-
-
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
@@ -5261,6 +5336,9 @@
 
                         // Lädt die Fitness-Daten, sobald der User eingeloggt ist
                         await loadFitnessData();
+
+                        // NEU: Tags nach Häufigkeit prüfen
+                        await highlightFrequentPhysioTags();
 
                         setTimeout(() => {
                             updateBiologikaCountdown();
