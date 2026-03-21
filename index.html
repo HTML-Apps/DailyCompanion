@@ -1038,7 +1038,11 @@
                 gap: 10px; /* Abstand zwischen den Spalten */
             }
 
-            /*#nutritionSlider {width: 32%; gap: 10px; transform: translateX(0%);}*/
+            /* Kalorien-Tracker 3-Spalten Layout */
+            .nutrition-week-card {
+                flex: 0 0 33.3333%;
+                padding: 0 10px; /* Leichter Abstand zwischen den Karten */
+            }
 
             /* ==== Canvas Desktop-Mode ==== */
             .painmap-main-container { gap: 10px;}
@@ -5003,26 +5007,39 @@
             }
 
             function updateNutritionCarousel() {
-                const offset = -nutritionCurrentIndex * 100;
+                const isDesktop = window.innerWidth >= 1024;
+                const cardWidth = isDesktop ? 33.3333 : 100;
+                // Auf dem Desktop verschieben wir den Fokus um 1 Karte nach links, 
+                // damit die "aktuelle" Karte in der Mitte der 3 Spalten ist.
+                const centerOffset = isDesktop ? 1 : 0; 
+                
+                const offset = -(nutritionCurrentIndex - centerOffset) * cardWidth;
                 nutritionSlider.style.transform = `translateX(${offset}%)`;
             }
 
             function navigateNutrition(direction) {
                 const targetIndex = nutritionCurrentIndex + direction;
+                const isDesktop = window.innerWidth >= 1024;
+                // Desktop sieht eine Karte weiter nach links/rechts voraus
+                const lookAhead = isDesktop ? 1 : 0; 
 
-                if (direction === 1 && targetIndex >= nutritionWeeks.length) {
+                // Nach rechts scrollen: Neue Woche ans Ende anhängen, wenn wir den Rand erreichen
+                if (direction === 1 && (targetIndex + lookAhead) >= nutritionWeeks.length) {
                     const newWeekOffset = nutritionWeeks[nutritionWeeks.length - 1] + 1;
                     nutritionWeeks.push(newWeekOffset);
                     nutritionSlider.appendChild(createNutritionWeekCard(newWeekOffset));
-                } else if (direction === -1 && targetIndex < 0) {
+                } 
+                // Nach links scrollen: Neue Woche an den Anfang hängen
+                else if (direction === -1 && (targetIndex - lookAhead) < 0) {
                     const newWeekOffset = nutritionWeeks[0] - 1;
                     nutritionWeeks.unshift(newWeekOffset);
                     nutritionSlider.prepend(createNutritionWeekCard(newWeekOffset));
                     
                     nutritionSlider.style.transition = 'none';
-                    nutritionCurrentIndex++; 
+                    nutritionCurrentIndex++; // Index anpassen, da das ganze Array nach rechts gerutscht ist
                     updateNutritionCarousel();
                     
+                    // Trick, um die Animation beim nachladen sauber zu halten
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             nutritionSlider.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
@@ -5039,13 +5056,26 @@
 
             function initNutritionTracker() {
                 nutritionSlider.innerHTML = '';
-                nutritionWeeks = [-1, 0, 1];
+                // 5 Wochen vorladen, damit Desktop-Mode (3 Spalten) immer Puffer hat
+                nutritionWeeks = [-2, -1, 0, 1, 2]; 
                 nutritionWeeks.forEach(offset => {
                     nutritionSlider.appendChild(createNutritionWeekCard(offset));
                 });
-                nutritionCurrentIndex = 1; // Startet auf "0" (aktuelle Woche)
+                // Der aktuelle Tag (Woche 0) ist jetzt am Index 2
+                nutritionCurrentIndex = 2; 
                 updateNutritionCarousel();
             }
+
+            // Wenn sich die Fenstergröße ändert (z.B. Mobile zu Desktop Switch), Slider neu ausrichten
+            window.addEventListener('resize', () => {
+                if (isNutritionInitialized) {
+                    nutritionSlider.style.transition = 'none'; // Verhindert wirres Herumfliegen
+                    updateNutritionCarousel();
+                    requestAnimationFrame(() => {
+                        nutritionSlider.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                    });
+                }
+            });
             // ====== ENDE: Kalorientracker Logik ======
 
 
