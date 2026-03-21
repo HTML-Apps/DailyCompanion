@@ -1877,6 +1877,16 @@
         </div>
     </template>
 
+    <!-- Macro-Quick-Tags-Popup -->
+    <div class="overlay" id="tagHistoryOverlay" style="z-index: 3000;">
+        <div class="popup" style="width: 80%; max-width: 300px; min-height: auto; padding: 20px; text-align: center;">
+            <span class="close-btn" id="closeTagHistoryBtn">&times;</span>
+            <h3 style="margin-top: 0; color: #00f2fe; font-size: 1.2em;">Gegessen</h3>
+            <div id="tagHistoryContent" style="font-size: 1.3em; line-height: 1.8;"></div>
+            <button id="clearTagHistoryBtn" class="action-button" style="margin-top: 20px; background: #e74c3c; width: 100%; font-size: 0.9em; padding: 8px;">Historie löschen</button>
+        </div>
+    </div>
+
     <!-- Kommentarsuche -->
     <div class="overlay" id="searchOverlay">
         <div class="popup" id="searchPopup">
@@ -4688,6 +4698,7 @@
 
             // NEU: Variablen für aktiven Tag, Debouncing und Lock
             let activeNutritionDayId = null;
+            let consumedQuickTags = {}; // Speichert die geklickten Tags: { "2023-10-25": { "🥣": 2, "🥪": 1 } }
             let nutritionSaveTimers = {}; // Sammelt Tastendrücke, um nicht sofort zu speichern
             let isNutritionSaving = {};   // Lock gegen doppelte DB-Einträge
 
@@ -4746,8 +4757,7 @@
                     const dayId = `${yyyy}-${mm}-${dd}`;
                     
                     grid.innerHTML += `
-                        <div class="nutrition-day-label">${DAY_NAMES[(i + 1) % 7]} <span style="font-size:0.7em; color:#87879e; display:block;">${dd}.${mm}.</span></div>
-                        <input type="number" data-day-id="${dayId}" data-macro="protein" placeholder="-">
+                        <div class="nutrition-day-label" data-day-id="${dayId}" style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#fff'" title="Details anzeigen">${DAY_NAMES[(i + 1) % 7]} <span style="font-size:0.7em; color:#87879e; display:block;">${dd}.${mm}.</span></div>                        <input type="number" data-day-id="${dayId}" data-macro="protein" placeholder="-">
                         <input type="number" data-day-id="${dayId}" data-macro="carbs" placeholder="-">
                         <input type="number" data-day-id="${dayId}" data-macro="fat" placeholder="-">
                         <div class="nutrition-calories-display" data-day-id="${dayId}">0</div>
@@ -4853,6 +4863,13 @@
                             if(pInput && data.macros.protein) pInput.value = data.macros.protein;
                             if(cInput && data.macros.carbs) cInput.value = data.macros.carbs;
                             if(fInput && data.macros.fat) fInput.value = data.macros.fat;
+
+                            // Lade die geklickten Tags aus der Datenbank
+                            if(data.macros.consumedTags) {
+                                consumedQuickTags[dayId] = data.macros.consumedTags;
+                            } else {
+                                consumedQuickTags[dayId] = {};
+                            }
                         }
                     });
                     updateNutritionCalculations(weekCard);
@@ -4886,6 +4903,15 @@
                     const pTag = parseFloat(btn.dataset.p) || 0;
                     const cTag = parseFloat(btn.dataset.c) || 0;
                     const fTag = parseFloat(btn.dataset.f) || 0;
+
+                    // --- NEU: Tag in die Historie aufnehmen ---
+                    const emoji = btn.textContent.trim(); // Liest das Emoji aus dem Button
+                    if (!consumedQuickTags[activeNutritionDayId]) {
+                        consumedQuickTags[activeNutritionDayId] = {};
+                    }
+                    // Zähler um 1 erhöhen
+                    consumedQuickTags[activeNutritionDayId][emoji] = (consumedQuickTags[activeNutritionDayId][emoji] || 0) + 1;
+                    // ------------------------------------------
                     
                     // Die Inputs des markierten Tages finden
                     const pInput = document.querySelector(`input[data-day-id="${activeNutritionDayId}"][data-macro="protein"]`);
@@ -4923,7 +4949,10 @@
                     const f = parseFloat(weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`).value) || null;
                     const cal = Math.round((p * CALS_PER_GRAM.protein || 0) + (c * CALS_PER_GRAM.carbs || 0) + (f * CALS_PER_GRAM.fat || 0));
                     
-                    const macrosData = { protein: p, carbs: c, fat: f, calories: cal };
+                    // Füge die Historie an die zu speichernden Daten an
+                    const tagsToSave = consumedQuickTags[dayId] || {};
+                    const macrosData = { protein: p, carbs: c, fat: f, calories: cal, consumedTags: tagsToSave };
+
                     saveMacroToFirebase(dayId, macrosData);
                 }, 1000); 
             }
@@ -5136,6 +5165,61 @@
                 });
             }
             // ====== ENDE: Quick-Tag Such-Logik ======
+
+
+
+
+
+            // --- NEU: Popup für Mahlzeiten-Historie anzeigen ---
+            let historyDayId = null; // Merkt sich, welcher Tag im Popup offen ist
+
+            document.addEventListener('click', (e) => {
+                const dayLabel = e.target.closest('.nutrition-day-label');
+                if (dayLabel) {
+                    historyDayId = dayLabel.dataset.dayId;
+                    const content = document.getElementById('tagHistoryContent');
+                    const tags = consumedQuickTags[historyDayId];
+
+                    if (!tags || Object.keys(tags).length === 0) {
+                        content.innerHTML = "<p style='color: #888; font-size: 0.8em;'>Keine Mahlzeiten-Tags getrackt.</p>";
+                    } else {
+                        let html = "";
+                        for (const [emoji, count] of Object.entries(tags)) {
+                            html += `<div style="background: rgba(255,255,255,0.05); margin: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">${count}x ${emoji}</div>`;
+                        }
+                        content.innerHTML = html;
+                    }
+                    document.getElementById('tagHistoryOverlay').style.display = 'flex';
+                }
+            });
+
+            // Popup schließen
+            document.getElementById('closeTagHistoryBtn')?.addEventListener('click', () => {
+                document.getElementById('tagHistoryOverlay').style.display = 'none';
+            });
+            document.getElementById('tagHistoryOverlay')?.addEventListener('click', (e) => {
+                if (e.target.id === 'tagHistoryOverlay') e.target.style.display = 'none';
+            });
+
+            // Optional: Historie manuell löschen (falls man sich verklickt hat)
+            document.getElementById('clearTagHistoryBtn')?.addEventListener('click', () => {
+                if (historyDayId && confirm("Möchtest du die Tag-Historie für diesen Tag leeren? (Die Makro-Zahlen bleiben erhalten und müssen bei Bedarf manuell auf 0 gesetzt werden)")) {
+                    consumedQuickTags[historyDayId] = {};
+                    
+                    // Speichern anstoßen
+                    const pInput = document.querySelector(`input[data-day-id="${historyDayId}"][data-macro="protein"]`);
+                    if(pInput) {
+                        const weekCard = pInput.closest('.nutrition-week-card');
+                        triggerDebouncedSave(historyDayId, weekCard);
+                    }
+                    document.getElementById('tagHistoryOverlay').style.display = 'none';
+                }
+            });
+
+
+
+
+
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
