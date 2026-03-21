@@ -4800,10 +4800,10 @@
                 if (pInput.value !== "" && p > 120) {
                     pInput.style.color = '#1dfe00'; // neon-grün
                     pInput.style.fontWeight = "700";    // Fett (700 oder "bold")
-                } else {
-                    pInput.style.color = "";             // Standardfarbe
-                    pInput.style.fontWeight = "normal"; // Standardgewicht
-                }
+                } //else {
+                    //pInput.style.color = "";             // Standardfarbe
+                    //pInput.style.fontWeight = "normal"; // Standardgewicht
+                //}
 
                 // 3. Kalorien Check: Wenn Kalorien < 2900 und Daten vorhanden -> Rot
                 if ((pInput.value || cInput.value || fInput.value) && roundedCalories < 2900) {
@@ -4813,13 +4813,13 @@
                 }
 
                 // 4. Wenn Protein > 120g UND Kalorien > 2900, wird die Anzeige neongrün
-                    if (p > 120 && dailyCalories > 2900) {
-                        display.style.color = '#1dfe00'; // neon-grün
-                    } else {
-                        // Zurücksetzen auf die Standardfarbe (dein hellblau), falls Werte sinken
-                        display.style.color = '#00f2fe';
-                        display.style.textShadow = 'none';
-                    }
+                if (p > 120 && dailyCalories > 2900) {
+                    display.style.color = '#1dfe00'; // neon-grün
+                } else {
+                    // Zurücksetzen auf die Standardfarbe (dein hellblau), falls Werte sinken
+                    display.style.color = '#00f2fe';
+                    display.style.textShadow = 'none';
+                }
             });
 
             const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
