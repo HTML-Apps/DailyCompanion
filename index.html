@@ -4828,7 +4828,7 @@
             let swElapsedTime = 0;
             let swTimerInterval;
             let swRunning = false;
-            const swAlertLimitMs = 120000; // 2 Minuten
+            const swAlertLimitMs = 120000; // 2 Minuten, '#FF3131';
 
             const swBanner = document.getElementById('stopwatchBanner');
             const swDisplay = document.getElementById('stopwatchDisplay');
@@ -4838,7 +4838,8 @@
 
             function formatSwTime(time) {
                 if (time >= swAlertLimitMs) {
-                    swDisplay.style.color = '#FF3131';
+                    swDisplay.style.color = '#ff0000';
+                    swDisplay.style.filter = 'drop-shadow(0 0 1px #ff0000)';
                     swDisplay.style.fontWeight = '600';
                 } else {
                     swDisplay.style.color = 'white';
