@@ -4802,6 +4802,16 @@
                 } else {
                     display.style.color = ""; // Standardfarbe
                 }
+
+                // 3. Wenn Protein > 120g UND Kalorien > 2900, wird die Anzeige neongrün
+                    if (p > 120 && dayCals > 2900) {
+                        display.style.color = '#1dfe00';
+                        display.style.textShadow = '0 0 8px rgba(29, 254, 0, 0.4)'; // Optionaler Glow-Effekt
+                    } else {
+                        // Zurücksetzen auf die Standardfarbe (dein hellblau), falls Werte sinken
+                        display.style.color = '#00f2fe';
+                        display.style.textShadow = 'none';
+                    }
             });
 
             const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
