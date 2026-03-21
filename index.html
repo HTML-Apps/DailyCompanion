@@ -4796,8 +4796,8 @@
                     pInput.style.fontWeight = "normal"; // Standardgewicht
                 }
 
-                // 2. Protein Check: Wenn Protein > 120 und ein Wert eingetragen ist -> grün, sonst normal (weiß/hell)
-                if (pInput.value !== "" && p > 120) {
+                // 2. Protein Check: Wenn Protein >= 120 und ein Wert eingetragen ist -> grün, sonst normal (weiß/hell)
+                if (pInput.value !== "" && p >= 120) {
                     pInput.style.color = '#1dfe00'; // neon-grün
                     pInput.style.fontWeight = "700";    // Fett (700 oder "bold")
                 } //else {
