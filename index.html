@@ -4880,38 +4880,51 @@
             const swResetBtn = document.getElementById('stopwatchReset');
             const swTrigger = document.getElementById('triggerStopwatch');
 
-            let hasAlerted = false; // Variable außerhalb der Funktion
+            // Zwei verschiedene Limits definieren
+            const swSoundLimitMs = 2000; // 105000 = 1:45 Minuten für den Ton
+            const swVisualLimitMs = 4000; // 120000 = 2:00 Minuten für die Optik
+
+            let hasAlerted = false; // Verhindert Dauerschleife des Tons
 
             function formatSwTime(time) {
-                const isOverLimit = time >= swAlertLimitMs;
-
-                if (isOverLimit) {
-                    // Optischen Alarm aktivieren
-                    swBanner.classList.add('stopwatch-alarm-active');
+                // 1. Logik für den Sound (ab 1:45 Min)
+                if (time >= swSoundLimitMs && !hasAlerted) {
+                    // Erster Piep
+                    alarmSound.play().catch(e => console.log("Audio-Autoplay verhindert:", e));
                     
-                    // Schrift "saftig" rot machen (mit dem Trick von vorhin)
+                    // Zweiter Piep nach 150ms (für den Doppel-Effekt)
+                    setTimeout(() => {
+                        alarmSound.currentTime = 0;
+                        alarmSound.play();
+                    }, 150);
+
+                    // Haptisches Feedback passend zum Doppel-Piep
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    
+                    hasAlerted = true; 
+                }
+
+                // 2. Logik für die Optik (ab 2:00 Min)
+                const isOverVisualLimit = time >= swVisualLimitMs;
+
+                if (isOverVisualLimit) {
+                    swBanner.classList.add('stopwatch-alarm-active');
                     swDisplay.style.color = '#ff0000';
                     swDisplay.style.textShadow = '0 0 8px rgba(255, 0, 0, 0.7)';
                     swDisplay.style.fontWeight = '700';
-
-                    // Ton nur EINMALIG abspielen, wenn das Limit erreicht wird
-                    if (!hasAlerted) {
-                        alarmSound.play().catch(e => console.log("Audio-Autoplay verhindert:", e));
-                        
-                        // Optional: Kurze Vibration für das Handy in der Tasche
-                        //if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                        
-                        hasAlerted = true; 
-                    }
                 } else {
-                    // Normalzustand
                     swBanner.classList.remove('stopwatch-alarm-active');
                     swDisplay.style.color = 'white';
                     swDisplay.style.textShadow = 'none';
                     swDisplay.style.fontWeight = '400';
-                    hasAlerted = false;
+                    
+                    // Reset des Ton-Flags nur, wenn die Zeit unter das Sound-Limit fällt (z.B. bei Reset)
+                    if (time < swSoundLimitMs) {
+                        hasAlerted = false;
+                    }
                 }
 
+                // Zeitberechnung für das Display
                 let diffInMin = time / 60000;
                 let mm = Math.floor(diffInMin).toString().padStart(2, "0");
                 let diffInSec = (diffInMin - Math.floor(diffInMin)) * 60;
