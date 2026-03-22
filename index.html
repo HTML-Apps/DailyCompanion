@@ -1407,7 +1407,14 @@
 
         #stopwatchStartStop { color: #888888; }
         #stopwatchStartStop:hover { color: #ffffff; }
-        #stopwatchReset { color: #00f2fe;}
+        /*#stopwatchReset { color: #00f2fe;}*/
+
+        #stopwatchReset { 
+            color: #ff0000 !important;
+            transform: translateZ(0); /* Aktiviert GPU-Rendering */
+            -webkit-font-smoothing: antialiased;
+        }
+
         #stopwatchReset:hover { color: #ff6b6b; }
         /* ====== ENDE: Stoppuhr Styles ====== */
 
