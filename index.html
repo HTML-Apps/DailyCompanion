@@ -1426,6 +1426,28 @@
         #stopwatchReset:hover { color: #ff6b6b; }
         /* ====== ENDE: Stoppuhr Styles ====== */
 
+        /* Der optische Alarm: Ein pulsierendes rotes Glühen */
+        @keyframes visual-alarm-pulse {
+            0% { 
+                border-color: rgba(255, 0, 0, 1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            }
+            50% { 
+                border-color: rgba(255, 49, 49, 0.3);
+                box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+                transform: translateX(-50%) scale(1.02); /* Minimales "Atmen" des Banners */
+            }
+            100% { 
+                border-color: rgba(255, 0, 0, 1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        .stopwatch-alarm-active {
+            animation: visual-alarm-pulse 0.8s infinite ease-in-out;
+            border: 2px solid #ff0000 !important; /* Kräftiges Rot für den Alarm */
+        }
+
     </style>
 </head>
 <body>
@@ -4850,9 +4872,8 @@
             const swResetBtn = document.getElementById('stopwatchReset');
             const swTrigger = document.getElementById('triggerStopwatch');
 
-            function formatSwTime(time) {
+            /*function formatSwTime(time) {
                 if (time >= swAlertLimitMs) {
-                    /*swDisplay.style.color = '#00f2fe';*/
                     swDisplay.style.color = 'rgba(0, 242, 254, 0.7)';
                     swDisplay.style.fontWeight = '600';
                 } else {
@@ -4866,7 +4887,44 @@
                 let ss = Math.floor(diffInSec).toString().padStart(2, "0");
 
                 return `${mm}:${ss}`;
+            }*/
+
+
+
+
+
+            function formatSwTime(time) {
+                const isOverLimit = time >= swAlertLimitMs;
+
+                if (isOverLimit) {
+                    // Optischen Alarm aktivieren
+                    swBanner.classList.add('stopwatch-alarm-active');
+                    
+                    // Schrift "saftig" rot machen (mit dem Trick von vorhin)
+                    swDisplay.style.color = '#ff0000';
+                    swDisplay.style.textShadow = '0 0 8px rgba(255, 0, 0, 0.7)';
+                    swDisplay.style.fontWeight = '700';
+                } else {
+                    // Normalzustand
+                    swBanner.classList.remove('stopwatch-alarm-active');
+                    swDisplay.style.color = 'white';
+                    swDisplay.style.textShadow = 'none';
+                    swDisplay.style.fontWeight = '400';
+                }
+
+                let diffInMin = time / 60000;
+                let mm = Math.floor(diffInMin).toString().padStart(2, "0");
+                let diffInSec = (diffInMin - Math.floor(diffInMin)) * 60;
+                let ss = Math.floor(diffInSec).toString().padStart(2, "0");
+
+                return `${mm}:${ss}`;
             }
+
+
+
+
+
+
 
             function swStart() {
                 swStartTime = Date.now() - swElapsedTime;
@@ -4890,6 +4948,10 @@
                 swDisplay.innerHTML = "00:00";
                 swDisplay.style.color = 'white';
                 swDisplay.style.fontWeight = '400';
+
+                // Alarm-Klasse sicherheitshalber entfernen
+                swBanner.classList.remove('stopwatch-alarm-active');
+
                 swStop();
                 swRunning = false;
             }
