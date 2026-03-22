@@ -4866,6 +4866,10 @@
             let swRunning = false;
             const swAlertLimitMs = 5000; // 2 Minuten, '#FF3131'; 120000
 
+            // Audio-Objekt erstellen (nutze einen kurzen System-Sound oder eine URL)
+            const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
+            alarmSound.volume = 0.5; // 50% Lautstärke, damit es nicht in den Ohren wehtut
+
             const swBanner = document.getElementById('stopwatchBanner');
             const swDisplay = document.getElementById('stopwatchDisplay');
             const swStartStopBtn = document.getElementById('stopwatchStartStop');
@@ -4891,7 +4895,7 @@
 
 
 
-
+            let hasAlerted = false; // Variable außerhalb der Funktion
 
             function formatSwTime(time) {
                 const isOverLimit = time >= swAlertLimitMs;
@@ -4904,12 +4908,23 @@
                     swDisplay.style.color = '#ff0000';
                     swDisplay.style.textShadow = '0 0 8px rgba(255, 0, 0, 0.7)';
                     swDisplay.style.fontWeight = '700';
+
+                    // Ton nur EINMALIG abspielen, wenn das Limit erreicht wird
+                    if (!hasAlerted) {
+                        alarmSound.play().catch(e => console.log("Audio-Autoplay verhindert:", e));
+                        
+                        // Optional: Kurze Vibration für das Handy in der Tasche
+                        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                        
+                        hasAlerted = true; 
+                    }
                 } else {
                     // Normalzustand
                     swBanner.classList.remove('stopwatch-alarm-active');
                     swDisplay.style.color = 'white';
                     swDisplay.style.textShadow = 'none';
                     swDisplay.style.fontWeight = '400';
+                    hasAlerted = false;
                 }
 
                 let diffInMin = time / 60000;
