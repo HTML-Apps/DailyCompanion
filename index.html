@@ -4864,39 +4864,21 @@
             let swElapsedTime = 0;
             let swTimerInterval;
             let swRunning = false;
-            const swAlertLimitMs = 5000; // 2 Minuten, '#FF3131'; 120000
+            const swAlertLimitMs = 3000; // 2 Minuten, '#FF3131'; 120000
 
             // Audio-Objekt erstellen (nutze einen kurzen System-Sound oder eine URL)
             //const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
+            
             // Relativer Pfad: Sucht die Datei im selben Ordner wie die index.html
             const alarmSound = new Audio('alarm.mp3');
             alarmSound.preload = 'auto'; // Lädt die Datei vorab in den Cache
-            alarmSound.volume = 0.4;     // Ein dezentes Level für Kopfhörer
+            alarmSound.volume = 0.6;     // Ein dezentes Level für Kopfhörer
 
             const swBanner = document.getElementById('stopwatchBanner');
             const swDisplay = document.getElementById('stopwatchDisplay');
             const swStartStopBtn = document.getElementById('stopwatchStartStop');
             const swResetBtn = document.getElementById('stopwatchReset');
             const swTrigger = document.getElementById('triggerStopwatch');
-
-            /*function formatSwTime(time) {
-                if (time >= swAlertLimitMs) {
-                    swDisplay.style.color = 'rgba(0, 242, 254, 0.7)';
-                    swDisplay.style.fontWeight = '600';
-                } else {
-                    swDisplay.style.color = 'white';
-                    swDisplay.style.fontWeight = '400';
-                }
-
-                let diffInMin = time / 60000;
-                let mm = Math.floor(diffInMin).toString().padStart(2, "0");
-                let diffInSec = (diffInMin - Math.floor(diffInMin)) * 60;
-                let ss = Math.floor(diffInSec).toString().padStart(2, "0");
-
-                return `${mm}:${ss}`;
-            }*/
-
-
 
             let hasAlerted = false; // Variable außerhalb der Funktion
 
@@ -4937,12 +4919,6 @@
 
                 return `${mm}:${ss}`;
             }
-
-
-
-
-
-
 
             function swStart() {
                 swStartTime = Date.now() - swElapsedTime;
