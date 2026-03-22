@@ -4872,7 +4872,7 @@
             // Relativer Pfad: Sucht die Datei im selben Ordner wie die index.html
             const alarmSound = new Audio('alarm.mp3');
             alarmSound.preload = 'auto'; // Lädt die Datei vorab in den Cache
-            alarmSound.volume = 0.7;     // Ein dezentes Level für Kopfhörer
+            alarmSound.volume = 0.8;     // Ein dezentes Level für Kopfhörer
 
             const swBanner = document.getElementById('stopwatchBanner');
             const swDisplay = document.getElementById('stopwatchDisplay');
@@ -4894,22 +4894,12 @@
                     swDisplay.style.textShadow = '0 0 8px rgba(255, 0, 0, 0.7)';
                     swDisplay.style.fontWeight = '700';
 
-                    // Ton 2-mal abpsielen, wenn das Limit erreicht wird
+                    // Ton nur EINMALIG abspielen, wenn das Limit erreicht wird
                     if (!hasAlerted) {
-                        // Erster Piep
-                        alarmSound.play().catch(e => console.log("Audio-Fehler:", e));
+                        alarmSound.play().catch(e => console.log("Audio-Autoplay verhindert:", e));
                         
-                        // Zweiter Piep nach 150ms (etwas länger als die Dateidauer, damit es sauber klingt)
-                        setTimeout(() => {
-                            // Wir setzen die Zeit der Datei zurück auf den Anfang
-                            alarmSound.currentTime = 0; 
-                            alarmSound.play();
-                        }, 150);
-
-                        // Vibration passt perfekt zum Doppel-Piep
-                        if (navigator.vibrate) {
-                            navigator.vibrate([100, 50, 100]); // kurz vibrieren, kurz Pause, kurz vibrieren
-                        }
+                        // Optional: Kurze Vibration für das Handy in der Tasche
+                        //if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                         
                         hasAlerted = true; 
                     }
