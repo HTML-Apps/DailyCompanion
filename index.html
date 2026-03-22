@@ -4867,8 +4867,11 @@
             const swAlertLimitMs = 5000; // 2 Minuten, '#FF3131'; 120000
 
             // Audio-Objekt erstellen (nutze einen kurzen System-Sound oder eine URL)
-            const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
-            alarmSound.volume = 0.5; // 50% Lautstärke, damit es nicht in den Ohren wehtut
+            //const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); 
+            // Relativer Pfad: Sucht die Datei im selben Ordner wie die index.html
+            const alarmSound = new Audio('alarm.mp3');
+            alarmSound.preload = 'auto'; // Lädt die Datei vorab in den Cache
+            alarmSound.volume = 0.4;     // Ein dezentes Level für Kopfhörer
 
             const swBanner = document.getElementById('stopwatchBanner');
             const swDisplay = document.getElementById('stopwatchDisplay');
