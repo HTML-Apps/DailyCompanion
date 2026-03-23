@@ -1143,17 +1143,31 @@
             margin-bottom: 40px;
         }
 
-        .notification-dot {
-            display: none; /* Standardmäßig unsichtbar */
+        /*.notification-dot {
+            display: none;  Standardmäßig unsichtbar 
             width: 8px;
             height: 8px;
-            background-color: #ff0000; /* Leuchtendes Rot */
+            background-color: #ff0000;  Leuchtendes Rot 
             border-radius: 50%;
-            margin-left: 2px; /* Abstand zum Text */
-            vertical-align: super; /* Etwas nach oben verschoben */
+            margin-left: 2px; Abstand zum Text 
+            vertical-align: super;  Etwas nach oben verschoben 
             box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
             transition: all 0.3s ease;
             transform: translateY(-7px);
+        }*/
+
+        .notification-dot {
+            position: absolute;
+            /* Wir setzen ihn rechts oben in die Ecke des Headers */
+            top: 15px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            background-color: #ff4d4d; /* Ein kräftiges Rot */
+            border-radius: 50%;
+            display: none; /* Wird per JS auf 'block' gesetzt, wenn nötig */
+            z-index: 102;  /* Über dem Header-Content */
+            box-shadow: 0 0 8px rgba(255, 77, 77, 0.8);
         }
 
         /* ----- START: FIX FÜR STICKY H2 IN STATS-POPUP ----- */
@@ -1512,7 +1526,10 @@
 <body>
     <div class="header-fixed">
         <button id="quickMenuBtn" class="menu-toggle-btn">☰</button>
-        <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>
+        
+        <h1>Daily Companion</h1>
+        
+        <span id="notificationDot" class="notification-dot"></span>
     </div>
 
     <button id="signInButton" style="
