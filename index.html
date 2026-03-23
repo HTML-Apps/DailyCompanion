@@ -1501,6 +1501,11 @@
             transform: translateY(-2px);
         }
 
+        #quickMenuOverlay {
+            backdrop-filter: none;
+            justify-content: left;
+        }
+
         /* Desktop Anpassung: 2 Spalten für das Menü, falls gewünscht */
         @media (min-width: 1024px) {
             .quick-menu-grid {
@@ -2246,7 +2251,7 @@
 
     <!-- Sidebar -->
     <div class="overlay" id="quickMenuOverlay">
-        <div class="popup" id="quickMenuPopup" style="width: 90%; max-width: 500px; padding: 20px; min-height: auto;">
+        <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px;">
             <span class="close-btn" id="closeQuickMenuBtn">&times;</span>
             <h2 style="margin-top: 0px; color: white;">Schnellzugriff</h2>
             
