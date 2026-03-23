@@ -1448,10 +1448,72 @@
             border: 2px solid #ff0000 !important; /* Kräftiges Rot für den Alarm */
         }
 
+        /* ====== START: Schnellzugriff Styles ====== */
+        .menu-toggle-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00f2fe;
+            font-size: 2.2em;
+            cursor: pointer;
+            z-index: 101;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .menu-toggle-btn:hover {
+            color: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .quick-menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .quick-menu-btn {
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #FFFFFF;
+            font-size: 1.1em;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-menu-btn:hover, .quick-menu-btn:active {
+            background-color: #00f2fe;
+            color: #19192d;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+            border-color: #00f2fe;
+            transform: translateY(-2px);
+        }
+
+        /* Desktop Anpassung: 2 Spalten für das Menü, falls gewünscht */
+        @media (min-width: 1024px) {
+            .quick-menu-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        /* ====== ENDE: Schnellzugriff Styles ====== */
+
     </style>
 </head>
 <body>
     <div class="header-fixed">
+        <button id="quickMenuBtn" class="menu-toggle-btn">☰</button>
         <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>
     </div>
 
@@ -2179,6 +2241,25 @@
                 Information:
             </span>
             <span class="toast-text">Nachricht erscheint hier...</span>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="overlay" id="quickMenuOverlay">
+        <div class="popup" id="quickMenuPopup" style="width: 90%; max-width: 500px; padding: 20px; min-height: auto;">
+            <span class="close-btn" id="closeQuickMenuBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">Schnellzugriff</h2>
+            
+            <div class="quick-menu-grid">
+                <button class="quick-menu-btn" data-target="sleepTimeLabel">😴 Schlaf-Analyse</button>
+                <button class="quick-menu-btn" data-target="openFitnessTrackerBtn">🏋️ Workout-Plan</button>
+                <button class="quick-menu-btn" data-target="openNutritionBtn">🥑 Kalorien-Tracker</button>
+                <button class="quick-menu-btn" data-target="biologika-countdown">🩸 Blutwerte</button>
+                <button class="quick-menu-btn" data-target="openSearchBtn">🔍 Notiz-Suche</button>
+                <button class="quick-menu-btn" data-target="painMapBtn">🗺️ Schmerzkarte</button>
+                <button class="quick-menu-btn" data-target="statsBtn">📊 Statistik</button>
+                <button class="quick-menu-btn" onclick="exportDailyEntries(); document.getElementById('quickMenuOverlay').style.display='none';">💾 Daten Exportieren</button>
+            </div>
         </div>
     </div>
 
@@ -5099,6 +5180,61 @@
                 loadFirebaseDataForWeek(weekCard, monday);
                 return weekCard;
             }
+
+
+
+
+
+
+            // ====== START: Logik für Schnellzugriff Menü ======
+            const quickMenuBtn = document.getElementById('quickMenuBtn');
+            const quickMenuOverlay = document.getElementById('quickMenuOverlay');
+            const closeQuickMenuBtn = document.getElementById('closeQuickMenuBtn');
+
+            // Menü öffnen
+            if (quickMenuBtn && quickMenuOverlay) {
+                quickMenuBtn.addEventListener('click', () => {
+                    quickMenuOverlay.style.display = 'flex';
+                });
+                
+                // Menü schließen über das X
+                closeQuickMenuBtn.addEventListener('click', () => {
+                    quickMenuOverlay.style.display = 'none';
+                });
+                
+                // Menü schließen bei Klick in den Hintergrund
+                quickMenuOverlay.addEventListener('click', (e) => {
+                    if (e.target.id === 'quickMenuOverlay') quickMenuOverlay.style.display = 'none';
+                });
+
+                // Die Klicks auf die neuen Buttons an die Original-Elemente weiterleiten
+                document.querySelectorAll('.quick-menu-btn[data-target]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetId = btn.dataset.target;
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            targetElement.click(); // Simuliert einen physischen Klick auf das Original
+                        } else {
+                            console.warn('Zielelement nicht gefunden:', targetId);
+                        }
+                        
+                        // Danach das Schnellzugriff-Menü schließen
+                        quickMenuOverlay.style.display = 'none';
+                    });
+                });
+            }
+            // ====== ENDE: Logik für Schnellzugriff Menü ======
+
+
+
+
+
+
+
+
+
+
 
         function updateNutritionCalculations(weekCard) {
             let weeklyTotalCalories = 0;
