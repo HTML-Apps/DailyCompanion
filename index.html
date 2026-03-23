@@ -2261,7 +2261,7 @@
     <div class="overlay" id="quickMenuOverlay">
         <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px; height: 100%; border: 0px; border-radius: 0px; animation: swipeIn 0.2s ease-out forwards;">
             <span class="close-btn" id="closeQuickMenuBtn" style="display: none;">&times;</span>
-            <h2 style="margin-top: 0px; color: white;">Schnellzugriff</h2>
+            <h2 id="schnellzugriffHinweis" style="margin-top: 0px; color: white;">Schnellzugriff</h2>
             
             <div class="quick-menu-grid">
                 <button class="quick-menu-btn" data-target="sleepTimeLabel">😴 Schlaf-Analyse</button>
@@ -3878,6 +3878,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+
+            const schnellzugriffTitle = document.querySelector('.schnellzugriffHinweis');
+            if (schnellzugriffTitle) {
+                alert("ℹ️ Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
+            }
+
 
             // NEU: Erweiterte Klick-Logik für die Überschrift
             // Erweiterte Klick-Logik für die Überschrift (mit Einzelklick-Hinweis) '.header-fixed h1'
