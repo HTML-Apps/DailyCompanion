@@ -3879,10 +3879,14 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            const schnellzugriffTitle = document.querySelector('.schnellzugriffHinweis');
-            if (schnellzugriffTitle) {
-                alert("ℹ️ Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
-            }
+            const schnellzugriffTitle = document.getElementById('schnellzugriffHinweis');
+
+                if (schnellzugriffTitle) {
+                    // Zeigt den Hinweis beim einfachen Klick (oder Mouseover)
+                    schnellzugriffTitle.addEventListener('click', () => {
+                        alert("ℹ️ Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
+                    });
+                }
 
 
             // NEU: Erweiterte Klick-Logik für die Überschrift
