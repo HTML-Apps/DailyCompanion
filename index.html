@@ -5253,7 +5253,51 @@
 
 
 
+            // ====== START: Swipe-Geste für Schnellzugriff Sidebar ======
+            let menuTouchStartX = 0;
+            let menuTouchStartY = 0;
 
+            document.addEventListener('touchstart', (e) => {
+                // Startkoordinaten speichern
+                menuTouchStartX = e.changedTouches[0].screenX;
+                menuTouchStartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                const menuTouchEndX = e.changedTouches[0].screenX;
+                const menuTouchEndY = e.changedTouches[0].screenY;
+                
+                const deltaX = menuTouchEndX - menuTouchStartX;
+                const deltaY = menuTouchEndY - menuTouchStartY;
+                
+                // Schwellenwerte (Thresholds) zur Vermeidung von Fehleingaben
+                const SWIPE_DISTANCE = 60; // Mindestens 60px wischen
+                const EDGE_AREA = 30;      // Startpunkt max 30px vom linken Bildschirmrand
+                const MAX_VERTICAL = 50;   // Maximal 50px vertikal wischen (damit Scrollen nicht triggert)
+
+                const quickMenuOverlay = document.getElementById('quickMenuOverlay');
+                if (!quickMenuOverlay) return;
+
+                // 1. Swipe nach RECHTS (Öffnen)
+                // Bedingung: Overlay ist zu, Wisch startete am linken Rand, Wisch war weit genug, kein starkes vertikales Scrollen
+                if (quickMenuOverlay.style.display !== 'flex' && 
+                    menuTouchStartX <= EDGE_AREA && 
+                    deltaX > SWIPE_DISTANCE && 
+                    Math.abs(deltaY) < MAX_VERTICAL) {
+                    
+                    quickMenuOverlay.style.display = 'flex';
+                }
+
+                // 2. Swipe nach LINKS (Schließen)
+                // Bedingung: Overlay ist offen, Wisch nach links war weit genug, kein starkes vertikales Scrollen
+                if (quickMenuOverlay.style.display === 'flex' && 
+                    deltaX < -SWIPE_DISTANCE && 
+                    Math.abs(deltaY) < MAX_VERTICAL) {
+                    
+                    quickMenuOverlay.style.display = 'none';
+                }
+            }, { passive: true });
+            // ====== ENDE: Swipe-Geste für Schnellzugriff Sidebar ======
 
 
 
