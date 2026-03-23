@@ -1527,9 +1527,7 @@
 <body>
     <div class="header-fixed">
         <button id="quickMenuBtn" class="menu-toggle-btn">☰</button>
-        
-        <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>
-        
+        <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>  
     </div>
 
     <button id="signInButton" style="
@@ -3882,8 +3880,8 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // NEU: Erweiterte Klick-Logik für die Überschrift
-            // Erweiterte Klick-Logik für die Überschrift (mit Einzelklick-Hinweis)
-            const headerTitle = document.querySelector('.header-fixed h1');
+            // Erweiterte Klick-Logik für die Überschrift (mit Einzelklick-Hinweis) '.header-fixed h1'
+            const headerTitle = document.querySelector('.popup h2');
             if (headerTitle) {
                 let clickTimer = null;
                 let lastClickTime = 0;
