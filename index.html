@@ -1249,6 +1249,18 @@
             }
         }
 
+        @keyframes swipeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px); /* Startet 20px links von der Endposition */
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0); /* Endet an der finalen Position */
+            }
+        }
+
+
         #custom-overlay {
             position: fixed;
             top: 0;
@@ -2250,7 +2262,7 @@
 
     <!-- Sidebar -->
     <div class="overlay" id="quickMenuOverlay">
-        <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px; height: 100%; border: 0px; border-radius: 0px;">
+        <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px; height: 100%; border: 0px; border-radius: 0px; animation: swipeIn 0.5s ease-out forwards;">
             <span class="close-btn" id="closeQuickMenuBtn">&times;</span>
             <h2 style="margin-top: 0px; color: white;">Schnellzugriff</h2>
             
