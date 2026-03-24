@@ -1292,19 +1292,10 @@
         }
         .nutrition-carousel-button:hover { color: #00f2fe; }
 
-
-
-
-
-
-
-
-
         /* Die äußere Hülle ordnet die Tage nun untereinander an */
         .nutrition-week-grid {
             display: flex; 
             flex-direction: column; 
-            gap: 6px; 
         }
 
         /* Die neue Klasse für jede Reihe (Header und Wochentage) */
@@ -1329,16 +1320,6 @@
             border: 1px solid #ffffff;
             background-color: rgba(255, 255, 255, 0.05); /* Optional: Ein ganz zarter heller Hintergrund */
         }
-
-
-
-
-
-
-
-
-
-
 
         .nutrition-grid-header {
             font-weight: 600; font-size: 0.85em; text-align: center; color: #87879e; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -5343,11 +5324,6 @@
                 return weekCard;
             }
 
-
-
-
-
-
             // ====== START: Logik für Schnellzugriff Menü ======
             const quickMenuBtn = document.getElementById('quickMenuBtn');
             const quickMenuOverlay = document.getElementById('quickMenuOverlay');
@@ -5358,8 +5334,6 @@
                 quickMenuBtn.addEventListener('click', () => {
                     quickMenuOverlay.style.display = 'flex';
                 });
-                
-
                 
                 // Menü schließen bei Klick in den Hintergrund
                 quickMenuOverlay.addEventListener('click', (e) => {
@@ -5384,10 +5358,6 @@
                 });
             }
             // ====== ENDE: Logik für Schnellzugriff Menü ======
-
-
-
-
 
             // ====== START: Swipe-Geste für Schnellzugriff Sidebar ======
             let menuTouchStartX = 0;
@@ -5434,10 +5404,6 @@
                 }
             }, { passive: true });
             // ====== ENDE: Swipe-Geste für Schnellzugriff Sidebar ======
-
-
-
-
 
         function updateNutritionCalculations(weekCard) {
             let weeklyTotalCalories = 0;
