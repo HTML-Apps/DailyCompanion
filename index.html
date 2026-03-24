@@ -1522,6 +1522,88 @@
         }
         /* ====== ENDE: Schnellzugriff Styles ====== */
 
+        /* =========================================
+        SIDEBAR HEADER (Profil & Stats)
+        ========================================= */
+        .sidebar-header {
+            /* Macht den oberen Bereich leicht heller als den restlichen Dark Mode Hintergrund */
+            background-color: rgba(255, 255, 255, 0.08); 
+            padding: 25px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* Macht das Bild perfekt rund */
+            object-fit: cover;  /* Verhindert Verzerrungen des Bildes */
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2); /* Dezenter Rahmen um das Bild */
+        }
+
+        /* Flexbox-Layout für die 3 Stats nebeneinander */
+        .user-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 0.85em;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .stat-label {
+            color: #aaaaaa; /* Leicht ausgegraut für bessere Lesbarkeit */
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .stat-divider {
+            color: #444444; /* Dezente Farbe für die Trennstriche */
+            font-weight: 300;
+        }
+
+        /* =========================================
+        SIDEBAR MENÜ (Listen-Ansicht für Buttons)
+        ========================================= */
+        .sidebar-menu {
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Überschreibt das alte Button-Design im Popup und macht sie zu Listen-Elementen */
+        #quickMenuPopup .sidebar-menu button {
+            background: transparent !important; /* Entfernt die Hintergrundfarbe */
+            border: none !important;            /* Entfernt die 1px Border */
+            color: #ffffff;
+            padding: 16px 25px;
+            text-align: left;                   /* Text linksbündig wie in einer Liste */
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-radius: 0;                   /* Falls vorher abgerundet, jetzt eckig für die Liste */
+        }
+
+        /* Leichter Hover-Effekt, damit man merkt, wo man drüberfährt */
+        #quickMenuPopup .sidebar-menu button:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
     </style>
 </head>
 <body>
@@ -2262,17 +2344,52 @@
         <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px; height: 100%; border: 0px; border-radius: 0px; animation: swipeIn 0.2s ease-out forwards;">
             <span class="close-btn" id="closeQuickMenuBtn" style="display: none;">&times;</span>
             <h2 id="schnellzugriffHinweis" style="margin-top: 0px; color: white;">Schnellzugriff</h2>
+
+
+
+            <div class="sidebar-header">
+
+                <img src="profil.png" alt="Profilbild" class="profile-pic">
             
-            <div class="quick-menu-grid">
-                <button class="quick-menu-btn" data-target="sleepTimeLabel">😴 Schlaf-Analyse</button>
-                <button class="quick-menu-btn" data-target="openFitnessTrackerBtn">🏋️ Workout-Plan</button>
-                <button class="quick-menu-btn" data-target="openNutritionBtn">🥑 Kalorien-Tracker</button>
-                <button class="quick-menu-btn" data-target="biologika-countdown">🩸 Blutwerte</button>
-                <button class="quick-menu-btn" data-target="openSearchBtn">🔍 Notiz-Suche</button>
-                <button class="quick-menu-btn" data-target="painMapBtn">🗺️ Schmerzkarte</button>
-                <button class="quick-menu-btn" data-target="statsBtn">📊 Statistik</button>
-                <button class="quick-menu-btn" onclick="exportDailyEntries(); document.getElementById('quickMenuOverlay').style.display='none';">💾 Daten Exportieren</button>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Gewicht</span>
+                        <span class="stat-value">75kg</span>
+                    </div>
+                    <div class="stat-divider">|</div>
+                    <div class="stat-item">
+                        <span class="stat-label">CRP-Wert</span>
+                        <span class="stat-value">6.3 mg/l</span>
+                    </div>
+                    <div class="stat-divider">|</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vitamin D3</span>
+                        <span class="stat-value">45 ug/l</span>
+                    </div>
+                </div>
             </div>
+
+
+
+
+
+
+
+            <div class="sidebar-menu">
+            
+                <div class="quick-menu-grid">
+                    <button class="quick-menu-btn" data-target="sleepTimeLabel">😴 Schlaf-Analyse</button>
+                    <button class="quick-menu-btn" data-target="openFitnessTrackerBtn">🏋️ Workout-Plan</button>
+                    <button class="quick-menu-btn" data-target="openNutritionBtn">🥑 Kalorien-Tracker</button>
+                    <button class="quick-menu-btn" data-target="biologika-countdown">🩸 Blutwerte</button>
+                    <button class="quick-menu-btn" data-target="openSearchBtn">🔍 Notiz-Suche</button>
+                    <button class="quick-menu-btn" data-target="painMapBtn">🗺️ Schmerzkarte</button>
+                    <button class="quick-menu-btn" data-target="statsBtn">📊 Statistik</button>
+                    <button class="quick-menu-btn" onclick="exportDailyEntries(); document.getElementById('quickMenuOverlay').style.display='none';">💾 Daten Exportieren</button>
+                </div>
+            </div>
+
+            
         </div>
     </div>
 
