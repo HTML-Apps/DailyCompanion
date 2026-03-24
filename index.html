@@ -1490,32 +1490,6 @@
             margin-top: 25px;
         }
 
-        .quick-menu-btn {
-            background-color: #2a2a4a;
-            border: 1px solid #45456a;
-            border-radius: 12px;
-            padding: 15px 20px;
-            color: #FFFFFF;
-            font-size: 1.1em;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .quick-menu-btn:hover, .quick-menu-btn:active {
-            background-color: #00f2fe;
-            color: #19192d;
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
-            border-color: #00f2fe;
-            transform: translateY(-2px);
-        }
-
         #quickMenuOverlay {
             backdrop-filter: none;
             justify-content: left;
@@ -1527,15 +1501,15 @@
         ========================================= */
         .sidebar-header {
             /* Macht den oberen Bereich leicht heller als den restlichen Dark Mode Hintergrund */
-            padding: 25px 0px 0px 0px;
+            padding: 5px 0px 0px 0px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .profile-pic {
-            width: 80px;
-            height: 80px;
+            width: 50%;
+            height: 50%;
             border-radius: 50%; /* Macht das Bild perfekt rund */
             object-fit: cover;  /* Verhindert Verzerrungen des Bildes */
             margin-bottom: 20px;
@@ -2340,14 +2314,10 @@
     <!-- Sidebar -->
     <div class="overlay" id="quickMenuOverlay">
         <div class="popup" id="quickMenuPopup" style="width: 70%; max-width: 500px; padding: 20px; height: 100%; border: 0px; border-radius: 0px; animation: swipeIn 0.2s ease-out forwards;">
-            <span class="close-btn" id="closeQuickMenuBtn" style="display: none;">&times;</span>
-            <h2 id="schnellzugriffHinweis" style="margin-top: 0px; color: white;">Schnellzugriff</h2>
-
-
 
             <div class="sidebar-header">
 
-                <img src="profil.png" alt="Profilbild" class="profile-pic">
+                <img src="profil.png" alt="Profilbild" class="profile-pic" id="schnellzugriffHinweis">
             
                 <div class="user-stats">
                     <div class="stat-item">
