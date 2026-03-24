@@ -1291,14 +1291,60 @@
             background: none; border: none; color: #87879e; font-size: 32px; font-weight: bold; cursor: pointer; padding: 0 15px; line-height: 1; transition: 0.2s;
         }
         .nutrition-carousel-button:hover { color: #00f2fe; }
+
+
+
+
+
+
+
+
+
+        /* Die äußere Hülle ordnet die Tage nun untereinander an */
         .nutrition-week-grid {
-            display: grid; grid-template-columns: 0.8fr 1fr 1fr 1fr 1.2fr; gap: 5px 12px; align-items: center;
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
         }
+
+        /* Die neue Klasse für jede Reihe (Header und Wochentage) */
+        .nutrition-header-row,
+        .nutrition-day-row {
+            display: grid; 
+            grid-template-columns: 0.8fr 1fr 1fr 1fr 1.2fr; 
+            gap: 12px; 
+            align-items: center;
+        }
+
+        /* Standard-Aussehen für einen Wochentag */
+        .nutrition-day-row {
+            padding: 6px 4px;
+            border-radius: 12px;
+            border: 1px solid transparent; /* Unsichtbarer Rahmen verhindert Ruckeln */
+            transition: border 0.3s, background-color 0.3s;
+        }
+
+        /* NEU: Das Design für den HEUTIGEN Tag */
+        .nutrition-day-row.current-today {
+            border: 1px solid #ffffff;
+            background-color: rgba(255, 255, 255, 0.05); /* Optional: Ein ganz zarter heller Hintergrund */
+        }
+
+
+
+
+
+
+
+
+
+
+
         .nutrition-grid-header {
             font-weight: 600; font-size: 0.85em; text-align: center; color: #87879e; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .nutrition-day-label {
-            font-weight: 600; text-align: right; padding-right: 5px; font-size: 0.9em; color: #fff; margin-top: 10px;
+            font-weight: 600; text-align: right; padding-right: 5px; font-size: 0.9em; color: #fff; margin-top: 0px;
         }
         .nutrition-week-grid input[type="number"] {
             width: 100%; padding: 8px 4px; border: 1px solid #45456a; background-color: #2a2a4a; color: #FFFFFF; border-radius: 8px; font-size: 0.9em; text-align: center; box-sizing: border-box; font-family: 'Poppins', sans-serif; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2); transition: all 0.2s;
@@ -2105,14 +2151,17 @@
             </div>
 
             <div class="nutrition-week-grid">
-                <div class="nutrition-grid-header">Tag</div>
-                <div class="nutrition-grid-header">Protein</div>
-                <div class="nutrition-grid-header">KH</div>
-                <div class="nutrition-grid-header">Fett</div>
-                <div class="nutrition-grid-header">Kcal</div>
+                <div class="nutrition-header-row">
+                    <div class="nutrition-grid-header">Tag</div>
+                    <div class="nutrition-grid-header">Protein</div>
+                    <div class="nutrition-grid-header">KH</div>
+                    <div class="nutrition-grid-header">Fett</div>
+                    <div class="nutrition-grid-header">Kcal</div>
                 </div>
-            <div class="nutrition-week-totals">
-                </div>
+            </div>
+
+            <div class="nutrition-week-totals"></div>
+
         </div>
     </template>
 
@@ -5259,6 +5308,10 @@
 
                 const grid = weekCard.querySelector('.nutrition-week-grid');
 
+                // HEUTIGES DATUM ERMITTELN (Einmalig, direkt vor der for-Schleife)
+                const t = new Date();
+                const todayId = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+
                 for (let i = 0; i < 7; i++) {
                     const dayDate = new Date(monday.getTime() + (i * 24 * 60 * 60 * 1000));
                     // ISO String lokal anpassen, um Zeitzonen-Probleme zu vermeiden
@@ -5267,11 +5320,19 @@
                     const dd = String(dayDate.getDate()).padStart(2, '0');
                     const dayId = `${yyyy}-${mm}-${dd}`;
                     
+                    // PRÜFEN, OB DIESER TAG HEUTE IST
+                    const isToday = (dayId === todayId);
+                    const highlightClass = isToday ? ' current-today' : '';
+                    
+                    // ÄNDERUNG HIER: Alles in das neue Wrapper-Div gepackt!
                     grid.innerHTML += `
-                        <div class="nutrition-day-label" data-day-id="${dayId}" style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#fff'" title="Details anzeigen">${DAY_NAMES[(i + 1) % 7]} <span style="font-size:0.7em; color:#87879e; display:block;">${dd}.${mm}.</span></div>                        <input type="number" data-day-id="${dayId}" data-macro="protein" placeholder="-">
-                        <input type="number" data-day-id="${dayId}" data-macro="carbs" placeholder="-">
-                        <input type="number" data-day-id="${dayId}" data-macro="fat" placeholder="-">
-                        <div class="nutrition-calories-display" data-day-id="${dayId}">0</div>
+                        <div class="nutrition-day-row${highlightClass}">
+                            <div class="nutrition-day-label" data-day-id="${dayId}" style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#fff'" title="Details anzeigen">${DAY_NAMES[(i + 1) % 7]} <span style="font-size:0.7em; color:#87879e; display:block;">${dd}.${mm}.</span></div>
+                            <input type="number" data-day-id="${dayId}" data-macro="protein" placeholder="-">
+                            <input type="number" data-day-id="${dayId}" data-macro="carbs" placeholder="-">
+                            <input type="number" data-day-id="${dayId}" data-macro="fat" placeholder="-">
+                            <div class="nutrition-calories-display" data-day-id="${dayId}">0</div>
+                        </div>
                     `;
                 }
 
