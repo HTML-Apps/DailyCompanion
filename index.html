@@ -1501,10 +1501,11 @@
         ========================================= */
         .sidebar-header {
             /* Macht den oberen Bereich leicht heller als den restlichen Dark Mode Hintergrund */
-            padding: 5px 0px 0px 0px;
+            padding: 5px 0px 20px 0px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 1);
         }
 
         .profile-pic {
@@ -1562,13 +1563,14 @@
             background: transparent !important; /* Entfernt die Hintergrundfarbe */
             border: none !important;            /* Entfernt die 1px Border */
             color: #ffffff;
-            padding: 16px 25px;
+            padding: 10px;
             text-align: left;                   /* Text linksbündig wie in einer Liste */
             font-size: 16px;
             width: 100%;
             cursor: pointer;
             transition: background 0.2s ease;
             border-radius: 0;                   /* Falls vorher abgerundet, jetzt eckig für die Liste */
+            font-family: 'Poppins', sans-serif;
         }
 
         /* Leichter Hover-Effekt, damit man merkt, wo man drüberfährt */
