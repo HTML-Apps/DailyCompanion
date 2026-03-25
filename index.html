@@ -721,13 +721,22 @@
             color: #000000;
         }
 
-        /* Stil für Physiotherapie-Tags, die häufiger als 2x pro Woche genutzt wurden */
-        .notes-tag-button.physio-frequent {
-            border: 2px solid #e74c3c !important; /* Roter Rand */
+        /* NEU: Zustand 3: Über Toleranz & NICHT ausgewählt */
+        .notes-tag-button.above-tolerance {
+            background-color: #3a3a5a;
+            border: 2px solid #e74c3c !important;
+            box-shadow: 0 0 0 3px rgba(182, 89, 89, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
+            color: #0a0a1a;
+        }
+
+        /* NEU: Zustand 4: Über Toleranz & AUSGEWÄHLT */
+        .notes-tag-button.above-tolerance.selected {
+            border: 2px solid #e74c3c !important;
             background-color: #00f2fe;
             box-shadow: 0 0 0 3px rgba(182, 89, 89, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
-            color: #000000;
+            color: #0a0a1a;
         }
+
 
         /* --- NEUES STATISTIK SPLIT-LAYOUT --- */
         /* Standard (Mobile First): Untereinander mit Abstand */
@@ -3031,22 +3040,35 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            // Zeitfenster: Letzte 7 Tage
+            // NEU: Definieren Sie hier Ihre individuellen Toleranzschwellen pro Übung.
+            // Der Schlüssel ist der "data-tag" des Buttons, der Wert ist die erlaubte Anzahl pro Woche.
+            const physioTolerance = {
+                "Nackenstretch": 7,
+                "Vorbeuge": 2,
+                "WGS": 4,
+                "Ausfallschritt": 4,
+                "BRS öffnen": 7,
+                "BWS-Alongation": 2,
+                "BWS-Rotation": 3,
+                "Beinkippung liegend": 3,
+                "Eulen-Drehung": 4,
+                "Liegeposition Nugget": 2
+            };
+            // Ein Standardwert für alle Übungen, die nicht in der Liste oben stehen.
+            const defaultTolerance = 2;
+
             const now = new Date();
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(now.getDate() - 7);
-            oneWeekAgo.setHours(0, 0, 0, 0); // Ab Mitternacht des Starttages
+            oneWeekAgo.setHours(0, 0, 0, 0);
 
             try {
-                // FEHLERBEHEBUNG 2: Wir übergeben das pure Date-Objekt an Firebase, keinen Text-String!
                 const snapshot = await db.collection("dailyEntries")
                     .where("userId", "==", user.uid)
                     .where("date", ">=", oneWeekAgo)
                     .get();
 
                 const tagCounts = {};
-                
-                // Zählen, wie oft jeder Tag vorkam
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.selectedNotesTags && Array.isArray(data.selectedNotesTags)) {
@@ -3056,23 +3078,27 @@
                     }
                 });
 
-                // FEHLERBEHEBUNG 1: Wir suchen gezielt die "Physiotherapie"-Überschrift
                 const categories = Array.from(document.querySelectorAll('.tag-category'));
                 const physioContainer = categories.find(el => el.textContent.includes("Physiotherapie"));
 
                 if (physioContainer) {
-                    // Wir nehmen alle Buttons, die NACH dieser Überschrift kommen, bis zur nächsten Kategorie
                     let nextEl = physioContainer.nextElementSibling;
                     while (nextEl && !nextEl.classList.contains('tag-category')) {
-                        // Prüfen, ob das nächste Element wirklich ein Button ist
                         if (nextEl.classList.contains('notes-tag-button')) {
                             const tagName = nextEl.dataset.tag;
-                            if (tagCounts[tagName] > 2) {
-                                nextEl.classList.add('physio-frequent');
-                                nextEl.title = `Diesen Tag hast du ${tagCounts[tagName]}x in den letzten 7 Tagen genutzt!`;
-                                //alert(`Diesen Tag hast du ${tagCounts[tagName]}x in den letzten 7 Tagen genutzt!`);
-                            } else {
-                                nextEl.classList.remove('physio-frequent');
+                            const count = tagCounts[tagName] || 0;
+                            
+                            // NEU: Toleranz aus der Liste oder den Standardwert holen
+                            const tolerance = physioTolerance[tagName] || defaultTolerance;
+
+                            // NEU: Alte Klassen entfernen und Zustand zurücksetzen
+                            nextEl.classList.remove('above-tolerance'); // Ersetzt 'physio-frequent'
+                            nextEl.title = ''; // Titel-Attribut für die Warnung zurücksetzen
+
+                            // NEU: Logik mit der individuellen Toleranz prüfen
+                            if (count > tolerance) {
+                                nextEl.classList.add('above-tolerance');
+                                nextEl.title = `Warnung: ${count}x in 7 Tagen genutzt (Toleranz: ${tolerance}x)!`;
                             }
                         }
                         nextEl = nextEl.nextElementSibling;
@@ -3082,6 +3108,7 @@
                 console.error("Fehler beim Prüfen der Tag-Häufigkeit:", e);
             }
         }
+
 
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
