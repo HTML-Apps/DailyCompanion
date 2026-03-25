@@ -4059,28 +4059,23 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            // FINALE LÖSUNG mit MutationObserver
+            // KORRIGIERTE LÖSUNG mit MutationObserver
             // --------------------------------------------------
             const overlays = document.querySelectorAll('.overlay');
 
             const observer = new MutationObserver((mutationsList) => {
                 for (const mutation of mutationsList) {
-                    // Wir reagieren nur auf Änderungen am 'style'-Attribut
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         const overlayElement = mutation.target;
 
-                        // Speichere den aktuellen zIndex, *bevor* wir ihn potenziell ändern
-                        const oldZIndex = overlayElement.style.zIndex;
-
                         // Prüfen, ob das Overlay gerade sichtbar gemacht wurde
                         if (overlayElement.style.display === 'flex') {
-                            currentZIndex++; // Z-Index-Zähler immer erhöhen
-                            const newZIndex = currentZIndex;
                             
-                            // Wir setzen den neuen zIndex nur, wenn er sich auch wirklich ändert.
-                            // Das verhindert die Endlosschleife auf die sauberste Weise.
-                            if (oldZIndex !== newZIndex) {
-                                overlayElement.style.zIndex = newZIndex;
+                            // NEU: Prüfen, ob der zIndex bereits höher ist als der Startwert.
+                            // Dies verhindert die Endlosschleife!
+                            if (parseInt(overlayElement.style.zIndex) <= 1000) {
+                                currentZIndex++; // Nur dann den Zähler erhöhen
+                                overlayElement.style.zIndex = currentZIndex; // Und nur dann den neuen Z-Index zuweisen
                             }
                         }
                     }
