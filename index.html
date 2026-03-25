@@ -2574,45 +2574,6 @@
             lockDirection = null;
         }
 
-
-
-
-
-
-
-        // NEU: Eine zentrale Funktion zum Öffnen von Overlays
-        function openOverlay(overlayId) {
-            const overlay = document.getElementById(overlayId);
-            if (overlay) {
-                currentZIndex++; // Den Zähler erhöhen
-                overlay.style.zIndex = currentZIndex; // Den neuen, höheren Z-Index zuweisen
-                overlay.style.display = 'flex'; // Das Overlay anzeigen
-            }
-        }
-
-        // NEU: Eine zentrale Funktion zum Schließen von Overlays
-        function closeOverlay(overlayId) {
-            const overlay = document.getElementById(overlayId);
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // ====== START: Fitness-Tracker JS Logik ======
         let fitnessExercises = [];
 
@@ -4098,6 +4059,42 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
+            // KORRIGIERTE LÖSUNG mit MutationObserver
+            // --------------------------------------------------
+            const overlays = document.querySelectorAll('.overlay');
+
+            const observer = new MutationObserver((mutationsList) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const overlayElement = mutation.target;
+
+                        // Prüfen, ob das Overlay gerade sichtbar gemacht wurde
+                        if (overlayElement.style.display === 'flex') {
+                            
+                            // NEU: Prüfen, ob der zIndex bereits höher ist als der Startwert.
+                            // Dies verhindert die Endlosschleife!
+                            if (parseInt(overlayElement.style.zIndex) <= 1000) {
+                                currentZIndex++; // Nur dann den Zähler erhöhen
+                                overlayElement.style.zIndex = currentZIndex; // Und nur dann den neuen Z-Index zuweisen
+                            }
+                        }
+                    }
+                }
+            });
+
+            overlays.forEach(overlay => {
+                observer.observe(overlay, { attributes: true });
+            });
+            // --------------------------------------------------
+
+
+
+
+
+
+
+
+
             const schnellzugriffTitle = document.getElementById('schnellzugriffHinweis');
 
                 if (schnellzugriffTitle) {
@@ -4469,7 +4466,8 @@
             if (openFitBtn && fitOverlay) {
                 openFitBtn.addEventListener('click', () => {
                     // 1. Overlay sichtbar machen
-                    openOverlay('fitnessOverlay'); // Ersetzt durch die neue Funktion
+                    fitOverlay.style.display = 'flex';
+
                     // 2. Zum mittleren Slide springen
                     const swipeWrapper = document.getElementById('fitnessSwipeWrapper');
                     const targetSlide = document.getElementById('slide-unterkoerper');
@@ -4507,7 +4505,7 @@
 
             if (closeFitBtn && fitOverlay) {
                 closeFitBtn.addEventListener('click', () => {
-                    closeOverlay('fitnessOverlay');
+                    fitOverlay.style.display = 'none';
                 });
             }
 
@@ -4538,7 +4536,7 @@
                         return;
                     }
 
-                    openOverlay('searchOverlay');
+                    searchOverlay.style.display = 'flex';
                     searchInput.value = '';
                     searchResultsContainer.innerHTML = '';
                     searchStatusMessage.textContent = 'Lade Daten aus der Datenbank...';
@@ -4572,7 +4570,7 @@
             // 2. Popup schließen
             if (closeSearchBtn) {
                 closeSearchBtn.addEventListener('click', () => {
-                    closeOverlay('searchOverlay');
+                    searchOverlay.style.display = 'none';
                 });
             }
             if (searchOverlay) {
@@ -4827,14 +4825,14 @@
 
             if (biologikaTrigger) {
                 biologikaTrigger.addEventListener('click', async () => {
-                    openOverlay('bloodValuesOverlay');
+                    bloodValuesOverlay.style.display = 'flex';
                     await renderBloodValueCharts();
                 });
             }
 
             if (closeBloodValuesBtn) {
                 closeBloodValuesBtn.addEventListener('click', () => {
-                    closeOverlay('bloodValuesOverlay');
+                    bloodValuesOverlay.style.display = 'none';
                 });
             }
 
@@ -5359,7 +5357,7 @@
                         alert("🔓 Bitte melden Sie sich an, um den Kalorientracker zu nutzen.");
                         return;
                     }
-                    openOverlay('nutritionOverlay');
+                    nutritionOverlay.style.display = 'flex';
                     if (!isNutritionInitialized) {
                         initNutritionTracker();
                         isNutritionInitialized = true;
@@ -5367,7 +5365,7 @@
                 });
             }
 
-            if (closeNutritionBtn) closeNutritionBtn.addEventListener('click', () => closeOverlay('nutritionOverlay'));
+            if (closeNutritionBtn) closeNutritionBtn.addEventListener('click', () => nutritionOverlay.style.display = 'none');
             if (nutritionOverlay) nutritionOverlay.addEventListener('click', (e) => { if (e.target.id === 'nutritionOverlay') nutritionOverlay.style.display = 'none'; });
 
             function getWeekInfo(date) {
@@ -5442,7 +5440,7 @@
             // Menü öffnen
             if (quickMenuBtn && quickMenuOverlay) {
                 quickMenuBtn.addEventListener('click', () => {
-                    openOverlay('quickMenuOverlay');
+                    quickMenuOverlay.style.display = 'flex';
                 });
                 
                 // Menü schließen bei Klick in den Hintergrund
@@ -5463,7 +5461,7 @@
                         }
                         
                         // Danach das Schnellzugriff-Menü schließen
-                        closeOverlay('quickMenuOverlay');
+                        quickMenuOverlay.style.display = 'none';
                     });
                 });
             }
