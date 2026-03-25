@@ -4068,14 +4068,15 @@
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         const overlayElement = mutation.target;
 
-                        // Prüfen, ob das Overlay gerade sichtbar gemacht wurde
-                        if (overlayElement.style.display === 'flex') {
+                        // 1. Prüfen, ob das Overlay gerade sichtbar gemacht wurde (flex oder block)
+                        if (overlayElement.style.display === 'flex' || overlayElement.style.display === 'block') {
                             
-                            // NEU: Prüfen, ob der zIndex bereits höher ist als der Startwert.
-                            // Dies verhindert die Endlosschleife!
-                            if (parseInt(overlayElement.style.zIndex) <= 1000) {
-                                currentZIndex++; // Nur dann den Zähler erhöhen
-                                overlayElement.style.zIndex = currentZIndex; // Und nur dann den neuen Z-Index zuweisen
+                            // 2. Prüfen, ob der z-Index NICHT sowieso schon der aktuell höchste ist.
+                            // Dadurch wird auch die MutationObserver-Endlosschleife verhindert,
+                            // da nach dem Zuweisen des neuen z-index diese Bedingung false ist.
+                            if (overlayElement.style.zIndex !== String(currentZIndex)) {
+                                currentZIndex++; // Globalen Zähler erhöhen
+                                overlayElement.style.zIndex = currentZIndex; // Neuen Rekord-Wert zuweisen
                             }
                         }
                     }
@@ -4083,7 +4084,8 @@
             });
 
             overlays.forEach(overlay => {
-                observer.observe(overlay, { attributes: true });
+                // Es reicht, wenn wir nur auf Style-Änderungen hören
+                observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
             });
             // --------------------------------------------------
 
