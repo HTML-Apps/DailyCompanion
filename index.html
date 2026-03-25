@@ -2648,10 +2648,7 @@
             filtered.forEach((ex) => {
                 const globalIndex = fitnessExercises.findIndex(e => e.id === ex.id);
                 
-                // Fallback für alte Einträge ohne Einheit
                 const unit = ex.unit || 'kg'; 
-                
-                // Initialen Bestwert setzen, falls keiner existiert
                 let currentBest = ex.maxWeight !== undefined ? ex.maxWeight : (ex.startWeight || 0);
 
                 const div = document.createElement('div');
@@ -2676,6 +2673,46 @@
                     </div>
                 `;
                 container.appendChild(div);
+
+                // ================= START: NEUER CODEBLOCK =================
+                // Fügt die Long-Press-Funktionalität nur für Physio-Übungen hinzu
+                if (containerId === 'physio-list') {
+                    let pressTimer;
+
+                    const startPress = (e) => {
+                        // Verhindert, dass die Funktion auslöst, wenn man auf Buttons klickt
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+                        
+                        // Startet den Timer
+                        pressTimer = window.setTimeout(() => {
+                            // Diese Aktion wird nach 800ms ausgeführt
+                            if (ex.link) {
+                                window.open(ex.link, '_blank');
+                            } else {
+                                // Optional: Feedback, wenn kein Link vorhanden ist
+                                alert("Für diese Übung ist kein Link hinterlegt.");
+                            }
+                        }, 800); // 800ms = langes Drücken
+                    };
+
+                    const cancelPress = () => {
+                        // Bricht den Timer ab, wenn die Maustaste/der Finger losgelassen wird
+                        clearTimeout(pressTimer);
+                    };
+
+                    // Events für Desktop (Maus)
+                    div.addEventListener('mousedown', startPress);
+                    div.addEventListener('mouseup', cancelPress);
+                    div.addEventListener('mouseleave', cancelPress); // Bricht ab, wenn man die Karte verlässt
+
+                    // Events für Mobilgeräte (Touch)
+                    div.addEventListener('touchstart', startPress);
+                    div.addEventListener('touchend', cancelPress);
+
+                    // Verhindert das Kontextmenü bei langem Drücken auf Mobilgeräten
+                    div.addEventListener('contextmenu', e => e.preventDefault());
+                }
+                // ================== ENDE: NEUER CODEBLOCK ==================
             });
         }
 
@@ -2732,7 +2769,7 @@
             }
         }
 
-        // Angepasst, um die neue Kategorie "physio" auswählen zu können
+        // Angepasst, um die neue Kategorie "physio" auswählen und einen Link hinzufügen zu können
         function addFitnessExercise() {
             const name = prompt("Name der Übung:");
             if (!name) return;
@@ -2742,7 +2779,8 @@
             const catChoice = prompt("Kategorie: 1 = Oberkörper, 2 = Unterkörper, 3 = Physio", "1");
             let cat = 'oberkoerper';
             let unit = 'kg'; // Standardeinheit
-            
+            let link = null; // NEU: Link-Variable initialisieren
+
             if (catChoice === "2") cat = 'unterkoerper';
             if (catChoice === "3") {
                 cat = 'physio';
@@ -2751,6 +2789,9 @@
                 if (unitChoice === "1") unit = 'cm';
                 else if (unitChoice === "2") unit = '°';
                 else if (unitChoice === "3") unit = 'kg';
+                
+                // NEU: Fragen Sie nach dem Link, wenn es eine Physio-Übung ist
+                link = prompt("Link zur Übung (z.B. YouTube-Video), optional:");
             }
             
             // Text dynamisch anpassen
@@ -2762,15 +2803,17 @@
                 cat: cat,
                 name: name,
                 sets: sets,
-                unit: unit, // Speichert die gewählte Einheit
-                startWeight: valNum, // Wir behalten das Wording für die DB
+                unit: unit, 
+                startWeight: valNum, 
                 weight: valNum,
-                maxWeight: valNum
+                maxWeight: valNum,
+                link: link || null // NEU: Link zum Übungsobjekt hinzufügen
             });
             
             renderFitnessPlan();
             saveFitnessDataToFirebase();
         }
+
         // ====== ENDE: Fitness-Tracker JS Logik ======
 
         let painMapDateHistory = [];
