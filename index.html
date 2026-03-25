@@ -4089,14 +4089,6 @@
             });
             // --------------------------------------------------
 
-
-
-
-
-
-
-
-
             const schnellzugriffTitle = document.getElementById('schnellzugriffHinweis');
 
                 if (schnellzugriffTitle) {
@@ -5719,10 +5711,33 @@
             nutritionSlider.addEventListener('input', (e) => {
                 if (e.target.matches('input[type="number"]')) {
                     const weekCard = e.target.closest('.nutrition-week-card');
+                    const dayId = e.target.dataset.dayId;
+
+                    // ====== START: NEUE LOGIK ZUM LÖSCHEN DER HISTORIE ======
+                    // 1. Finde alle drei Eingabefelder für den aktuellen Tag.
+                    const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
+                    const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
+                    const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
+
+                    // 2. Lese die Werte sicher aus. Leere Felder werden als 0 interpretiert.
+                    const pValue = parseFloat(pInput.value) || 0;
+                    const cValue = parseFloat(cInput.value) || 0;
+                    const fValue = parseFloat(fInput.value) || 0;
+
+                    // 3. Prüfe, ob ALLE drei Werte 0 sind.
+                    if (pValue === 0 && cValue === 0 && fValue === 0) {
+                        // 4. Wenn ja, lösche die Historie für diesen Tag aus dem JavaScript-Objekt.
+                        if (consumedQuickTags[dayId] && Object.keys(consumedQuickTags[dayId]).length > 0) {
+                            console.log(`Tag-Historie für ${dayId} wird gelöscht, da alle Makros 0 sind.`);
+                            consumedQuickTags[dayId] = {};
+                        }
+                    }
+                    // ====== ENDE: NEUE LOGIK ZUM LÖSCHEN DER HISTORIE ======
+
+                    // Diese beiden Funktionen bleiben unverändert. Sie führen die visuelle
+                    // Aktualisierung durch und stoßen das Speichern in der Datenbank an.
                     updateNutritionCalculations(weekCard);
-                    
-                    // Speichern verzögert anstoßen
-                    triggerDebouncedSave(e.target.dataset.dayId, weekCard);
+                    triggerDebouncedSave(dayId, weekCard);
                 }
             });
 
