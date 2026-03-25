@@ -2411,6 +2411,8 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+
+        let currentZIndex = 1000; // Globaler Z-Index-Zähler
         
         let statsChartInstance = null;
         let tagChartInstance = null;
@@ -4056,6 +4058,39 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+
+            // NEU: Elegantere Lösung mit MutationObserver
+            // --------------------------------------------------
+            const overlays = document.querySelectorAll('.overlay'); // Alle Elemente mit der Klasse 'overlay' auswählen
+
+            // Erstellt einen neuen Observer, der eine Funktion ausführt, wenn Änderungen passieren
+            const observer = new MutationObserver((mutationsList) => {
+                for (const mutation of mutationsList) {
+                    // Wir interessieren uns nur für Änderungen am 'style'-Attribut
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const overlayElement = mutation.target;
+
+                        // Prüfen, ob das Overlay gerade sichtbar gemacht wurde
+                        if (overlayElement.style.display === 'flex') {
+                            currentZIndex++; // Z-Index-Zähler erhöhen
+                            overlayElement.style.zIndex = currentZIndex; // Den neuen, höheren Z-Index zuweisen
+                        }
+                    }
+                }
+            });
+
+            // Starte die Überwachung für jedes gefundene Overlay
+            overlays.forEach(overlay => {
+                observer.observe(overlay, { attributes: true }); // Sage dem Observer, er soll auf Attribut-Änderungen achten
+            });
+            // --------------------------------------------------
+
+
+
+
+
+
+
 
             const schnellzugriffTitle = document.getElementById('schnellzugriffHinweis');
 
