@@ -4507,7 +4507,7 @@
 
             if (closeFitBtn && fitOverlay) {
                 closeFitBtn.addEventListener('click', () => {
-                    fitOverlay.style.display = 'none';
+                    closeOverlay('fitnessOverlay');
                 });
             }
 
@@ -4538,7 +4538,7 @@
                         return;
                     }
 
-                    searchOverlay.style.display = 'flex';
+                    openOverlay('searchOverlay');
                     searchInput.value = '';
                     searchResultsContainer.innerHTML = '';
                     searchStatusMessage.textContent = 'Lade Daten aus der Datenbank...';
@@ -4572,7 +4572,7 @@
             // 2. Popup schließen
             if (closeSearchBtn) {
                 closeSearchBtn.addEventListener('click', () => {
-                    searchOverlay.style.display = 'none';
+                    closeOverlay('searchOverlay');
                 });
             }
             if (searchOverlay) {
@@ -4827,14 +4827,14 @@
 
             if (biologikaTrigger) {
                 biologikaTrigger.addEventListener('click', async () => {
-                    bloodValuesOverlay.style.display = 'flex';
+                    openOverlay('bloodValuesOverlay');
                     await renderBloodValueCharts();
                 });
             }
 
             if (closeBloodValuesBtn) {
                 closeBloodValuesBtn.addEventListener('click', () => {
-                    bloodValuesOverlay.style.display = 'none';
+                    closeOverlay('bloodValuesOverlay');
                 });
             }
 
@@ -5359,7 +5359,7 @@
                         alert("🔓 Bitte melden Sie sich an, um den Kalorientracker zu nutzen.");
                         return;
                     }
-                    nutritionOverlay.style.display = 'flex';
+                    openOverlay('nutritionOverlay');
                     if (!isNutritionInitialized) {
                         initNutritionTracker();
                         isNutritionInitialized = true;
@@ -5367,7 +5367,7 @@
                 });
             }
 
-            if (closeNutritionBtn) closeNutritionBtn.addEventListener('click', () => nutritionOverlay.style.display = 'none');
+            if (closeNutritionBtn) closeNutritionBtn.addEventListener('click', () => closeOverlay('nutritionOverlay'));
             if (nutritionOverlay) nutritionOverlay.addEventListener('click', (e) => { if (e.target.id === 'nutritionOverlay') nutritionOverlay.style.display = 'none'; });
 
             function getWeekInfo(date) {
