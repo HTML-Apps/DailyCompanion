@@ -5421,6 +5421,65 @@
 
                 weekCard.querySelector('.prev').addEventListener('click', () => navigateNutrition(-1));
                 weekCard.querySelector('.next').addEventListener('click', () => navigateNutrition(1));
+
+                // ====== START: Long-Click Logik für Kalorien-Reset (Nur Heute) ======
+                const calorieDisplays = weekCard.querySelectorAll('.nutrition-calories-display');
+                
+                calorieDisplays.forEach(display => {
+                    let pressTimer;
+                    const dayId = display.dataset.dayId;
+
+                    const startPress = (e) => {
+                        // 1. Prüfen, ob der anvisierte Tag das HEUTIGE Datum ist
+                        const t = new Date();
+                        const todayId = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+                        
+                        if (dayId !== todayId) return; // Sofortiger Abbruch, wenn es nicht heute ist
+
+                        // 2. Timer starten (800 Millisekunden = Langes Drücken)
+                        pressTimer = window.setTimeout(() => {
+                            
+                            // 3. Sicherheitsabfrage (Abbrechen | OK)
+                            if (confirm("Möchtest du die Makros und getrackten Mahlzeiten für HEUTE wirklich komplett zurücksetzen?")) {
+                                
+                                // Eingabefelder für diesen Tag finden
+                                const pInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="protein"]`);
+                                const cInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="carbs"]`);
+                                const fInput = weekCard.querySelector(`input[data-day-id="${dayId}"][data-macro="fat"]`);
+                                
+                                // Werte leeren (simuliert "nullen", der Platzhalter "-" erscheint wieder)
+                                if (pInput) pInput.value = '';
+                                if (cInput) cInput.value = '';
+                                if (fInput) fInput.value = '';
+
+                                // 4. Mahlzeiten-Historie (Pop-up Tags) für diesen Tag leeren
+                                consumedQuickTags[dayId] = {};
+
+                                // 5. Visuelles Update und Speicherung in Firebase anstoßen
+                                updateNutritionCalculations(weekCard);
+                                triggerDebouncedSave(dayId, weekCard);
+                            }
+                        }, 800);
+                    };
+
+                    const cancelPress = () => {
+                        // Bricht den Timer ab, wenn man zu früh loslässt oder wischt
+                        clearTimeout(pressTimer);
+                    };
+
+                    // Event-Listener für Desktop (Maus)
+                    display.addEventListener('mousedown', startPress);
+                    display.addEventListener('mouseup', cancelPress);
+                    display.addEventListener('mouseleave', cancelPress);
+
+                    // Event-Listener für Mobile (Touch)
+                    display.addEventListener('touchstart', startPress, { passive: true });
+                    display.addEventListener('touchend', cancelPress);
+                    
+                    // Verhindert das Standard-Kontextmenü am Handy (Rechtsklick/Bild speichern), beim langen Drücken
+                    display.addEventListener('contextmenu', e => e.preventDefault());
+                });
+                // ====== ENDE: Long-Click Logik für Kalorien-Reset ======
                 
                 loadFirebaseDataForWeek(weekCard, monday);
                 return weekCard;
