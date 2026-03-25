@@ -4059,31 +4059,34 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            // NEU: Elegantere Lösung mit MutationObserver
+            // KORRIGIERTE LÖSUNG mit MutationObserver
             // --------------------------------------------------
-            const overlays = document.querySelectorAll('.overlay'); // Alle Elemente mit der Klasse 'overlay' auswählen
+            const overlays = document.querySelectorAll('.overlay');
 
-            // Erstellt einen neuen Observer, der eine Funktion ausführt, wenn Änderungen passieren
             const observer = new MutationObserver((mutationsList) => {
                 for (const mutation of mutationsList) {
-                    // Wir interessieren uns nur für Änderungen am 'style'-Attribut
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         const overlayElement = mutation.target;
 
                         // Prüfen, ob das Overlay gerade sichtbar gemacht wurde
                         if (overlayElement.style.display === 'flex') {
-                            currentZIndex++; // Z-Index-Zähler erhöhen
-                            overlayElement.style.zIndex = currentZIndex; // Den neuen, höheren Z-Index zuweisen
+                            
+                            // NEU: Prüfen, ob der zIndex bereits höher ist als der Startwert.
+                            // Dies verhindert die Endlosschleife!
+                            if (parseInt(overlayElement.style.zIndex) <= 1000) {
+                                currentZIndex++; // Nur dann den Zähler erhöhen
+                                overlayElement.style.zIndex = currentZIndex; // Und nur dann den neuen Z-Index zuweisen
+                            }
                         }
                     }
                 }
             });
 
-            // Starte die Überwachung für jedes gefundene Overlay
             overlays.forEach(overlay => {
-                observer.observe(overlay, { attributes: true }); // Sage dem Observer, er soll auf Attribut-Änderungen achten
+                observer.observe(overlay, { attributes: true });
             });
             // --------------------------------------------------
+
 
 
 
