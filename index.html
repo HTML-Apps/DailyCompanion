@@ -2379,13 +2379,13 @@
             
                 <div class="quick-menu-grid">
                     <p style="padding: 0px; margin: 0px; font-family: Poppins; font-weight: bold;">Schnellzugriff</p>
-                    <button class="quick-menu-btn" data-target="sleepTimeLabel">😴 Schlafanalyse</button>
-                    <button class="quick-menu-btn" data-target="painMapBtn">🗺️ Schmerzkarte</button>
-                    <button class="quick-menu-btn" data-target="openFitnessTrackerBtn">🏋️ Workout-Plan</button>
-                    <button class="quick-menu-btn" data-target="openNutritionBtn">🥑 Kalorientracker</button>
-                    <button class="quick-menu-btn" data-target="biologika-countdown">🩸 Blutwerte</button>
-                    <button class="quick-menu-btn" data-target="openSearchBtn">🔍 Notizsuche</button>
-                    <button class="quick-menu-btn" data-target="statsBtn">📊 Statistiken</button>
+                    <button class="quick-menu-btn" data-target="sleepTimeLabel" data-overlay="sleepAnalysisOverlay">😴 Schlafanalyse</button>
+                    <button class="quick-menu-btn" data-target="painMapBtn" data-overlay="painMapOverlay">🗺️ Schmerzkarte</button>
+                    <button class="quick-menu-btn" data-target="openFitnessTrackerBtn" data-overlay="fitnessOverlay">🏋️ Workout-Plan</button>
+                    <button class="quick-menu-btn" data-target="openNutritionBtn" data-overlay="nutritionOverlay">🥑 Kalorientracker</button>
+                    <button class="quick-menu-btn" data-target="biologika-countdown" data-overlay="bloodValuesOverlay">🩸 Blutwerte</button>
+                    <button class="quick-menu-btn" data-target="openSearchBtn" data-overlay="searchOverlay">🔍 Notizsuche</button>
+                    <button class="quick-menu-btn" data-target="statsBtn" data-overlay="statsOverlay">📊 Statistiken</button>
                     <button class="quick-menu-btn" onclick="exportDailyEntries(); document.getElementById('quickMenuOverlay').style.display='none';">💾 Datenexport</button>
                 </div>
             </div>
@@ -5455,6 +5455,20 @@
                     btn.addEventListener('click', () => {
                         const targetId = btn.dataset.target;
                         const targetElement = document.getElementById(targetId);
+                        
+                        // NEU: Wenn das Overlay bereits offen ist, holen wir es manuell nach vorne!
+                        const overlayId = btn.dataset.overlay;
+                        if (overlayId) {
+                            const overlay = document.getElementById(overlayId);
+                            // Wenn es schon 'flex' oder 'block' ist, triggert der Observer nicht.
+                            // Deshalb machen wir das hier manuell:
+                            if (overlay && (overlay.style.display === 'flex' || overlay.style.display === 'block')) {
+                                if (overlay.style.zIndex !== String(currentZIndex)) {
+                                    currentZIndex++;
+                                    overlay.style.zIndex = currentZIndex;
+                                }
+                            }
+                        }
                         
                         if (targetElement) {
                             targetElement.click(); // Simuliert einen physischen Klick auf das Original
