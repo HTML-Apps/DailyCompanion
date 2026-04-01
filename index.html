@@ -2055,6 +2055,57 @@
         </div>
     </div>
 
+    <!-- Bearbeitungs-Popup für Übungen -->
+    <div class="overlay" id="editExerciseOverlay">
+        <div class="popup" id="editExercisePopup" style="width: 90%; max-width: 500px; min-height: auto;">
+            <span class="close-btn" id="closeEditExerciseBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">Übung bearbeiten</h2>
+            
+            <div class="popup-content" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Name der Übung</label>
+                        <input type="text" id="editExName" class="styled-input" placeholder="z.B. Bankdrücken" style="width: 93%;">
+                    </div>
+
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Sätze/Wiederholungen</label>
+                        <input type="text" id="editExSets" class="styled-input" placeholder="z.B. 3x8" style="width: 93%;">
+                    </div>
+
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Einheit</label>
+                        <select id="editExUnit" class="styled-input" style="width: 97%;">
+                            <option value="kg">kg (Gewicht)</option>
+                            <option value="cm">cm (Abstand)</option>
+                            <option value="°">° (Grad/Winkel)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Startwert</label>
+                        <input type="number" id="editExStartWeight" step="0.5" class="styled-input" placeholder="z.B. 60" style="width: 93%;">
+                    </div>
+
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Aktuelles Gewicht</label>
+                        <input type="number" id="editExWeight" step="0.5" class="styled-input" placeholder="z.B. 65" style="width: 93%;">
+                    </div>
+
+                    <div>
+                        <label style="color: #00f2fe; font-size: 0.9em;">Bestwert (wird automatisch gesetzt)</label>
+                        <input type="number" id="editExMaxWeight" step="0.5" class="styled-input" placeholder="z.B. 70" style="width: 93%;" disabled>
+                    </div>
+
+                    <button class="action-button btn-search" id="saveEditExerciseBtn" style="margin-top: 10px; padding: 15px; font-size: 1.1em; background: linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);">
+                        Änderungen speichern
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Fitness-Tracker -->
     <div class="overlay" id="fitnessOverlay">
         <div class="popup" id="fitnessPopup">
@@ -2577,6 +2628,7 @@
 
         // ====== START: Fitness-Tracker JS Logik ======
         let fitnessExercises = [];
+        let editingExerciseIndex = null; // Speichert den Index der Übung, die gerade bearbeitet wird
 
         const initialFitnessData = [
             { id: "1", cat: 'oberkoerper', name: 'Bankdrücken', sets: '3x8', startWeight: 60, weight: 60 },
@@ -2677,45 +2729,64 @@
                 `;
                 container.appendChild(div);
 
-                // ================= START: NEUER CODEBLOCK =================
-                // Fügt die Long-Press-Funktionalität nur für Physio-Übungen hinzu
-                if (containerId === 'physio-list') {
+                // ================= LONG-CLICK FÜR OK & UK (NEU) =================
+                // Prüfe, ob es sich um Oberkörper oder Unterkörper handelt
+                if (containerId === 'oberkoerper-list' || containerId === 'unterkoerper-list') {
                     let pressTimer;
 
                     const startPress = (e) => {
-                        // Verhindert, dass die Funktion auslöst, wenn man auf Buttons klickt
+                        // Verhindert Auslösung bei Klick auf Buttons oder Inputs
                         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
                         
-                        // Startet den Timer
                         pressTimer = window.setTimeout(() => {
-                            // Diese Aktion wird nach 800ms ausgeführt
-                            if (ex.link) {
-                                window.open(ex.link, '_blank');
-                            } else {
-                                // Optional: Feedback, wenn kein Link vorhanden ist
-                                alert("Für diese Übung ist kein Link hinterlegt.");
-                            }
+                            openEditExercisePopup(globalIndex);
                         }, 800); // 800ms = langes Drücken
                     };
 
                     const cancelPress = () => {
-                        // Bricht den Timer ab, wenn die Maustaste/der Finger losgelassen wird
                         clearTimeout(pressTimer);
                     };
 
-                    // Events für Desktop (Maus)
+                    // Desktop Events
                     div.addEventListener('mousedown', startPress);
                     div.addEventListener('mouseup', cancelPress);
-                    div.addEventListener('mouseleave', cancelPress); // Bricht ab, wenn man die Karte verlässt
+                    div.addEventListener('mouseleave', cancelPress);
 
-                    // Events für Mobilgeräte (Touch)
+                    // Mobile Events
                     div.addEventListener('touchstart', startPress);
                     div.addEventListener('touchend', cancelPress);
-
-                    // Verhindert das Kontextmenü bei langem Drücken auf Mobilgeräten
                     div.addEventListener('contextmenu', e => e.preventDefault());
                 }
-                // ================== ENDE: NEUER CODEBLOCK ==================
+                // ============== ENDE: LONG-CLICK FÜR OK & UK ==================
+
+                // ================= PHYSIO LONG-CLICK (BLEIBT UNVERÄNDERT) =================
+                if (containerId === 'physio-list') {
+                    let pressTimer;
+
+                    const startPress = (e) => {
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+                        
+                        pressTimer = window.setTimeout(() => {
+                            if (ex.link) {
+                                window.open(ex.link, '_blank');
+                            } else {
+                                alert("Für diese Übung ist kein Link hinterlegt.");
+                            }
+                        }, 800);
+                    };
+
+                    const cancelPress = () => {
+                        clearTimeout(pressTimer);
+                    };
+
+                    div.addEventListener('mousedown', startPress);
+                    div.addEventListener('mouseup', cancelPress);
+                    div.addEventListener('mouseleave', cancelPress);
+                    div.addEventListener('touchstart', startPress);
+                    div.addEventListener('touchend', cancelPress);
+                    div.addEventListener('contextmenu', e => e.preventDefault());
+                }
+                // ============== ENDE: PHYSIO LONG-CLICK ==================
             });
         }
 
@@ -2770,6 +2841,46 @@
                 renderFitnessPlan();
                 saveFitnessDataToFirebase();
             }
+        }
+
+        // Öffnet das Bearbeitungs-Popup und füllt es mit den aktuellen Werten
+        function openEditExercisePopup(index) {
+            editingExerciseIndex = index;
+            const ex = fitnessExercises[index];
+            
+            document.getElementById('editExName').value = ex.name || '';
+            document.getElementById('editExSets').value = ex.sets || '';
+            document.getElementById('editExUnit').value = ex.unit || 'kg';
+            document.getElementById('editExStartWeight').value = ex.startWeight || 0;
+            document.getElementById('editExWeight').value = ex.weight || 0;
+            document.getElementById('editExMaxWeight').value = ex.maxWeight || ex.startWeight || 0;
+            
+            document.getElementById('editExerciseOverlay').style.display = 'flex';
+        }
+
+        // Speichert die Änderungen aus dem Popup
+        function saveEditedExercise() {
+            if (editingExerciseIndex === null) return;
+            
+            const ex = fitnessExercises[editingExerciseIndex];
+            
+            ex.name = document.getElementById('editExName').value || ex.name;
+            ex.sets = document.getElementById('editExSets').value || ex.sets;
+            ex.unit = document.getElementById('editExUnit').value || 'kg';
+            ex.startWeight = parseFloat(document.getElementById('editExStartWeight').value) || ex.startWeight;
+            ex.weight = parseFloat(document.getElementById('editExWeight').value) || ex.weight;
+            
+            // Bestwert nur überschreiben, wenn der neue Wert sinnvoll ist
+            const newMax = parseFloat(document.getElementById('editExMaxWeight').value);
+            if (!isNaN(newMax)) {
+                ex.maxWeight = newMax;
+            }
+            
+            renderFitnessPlan();
+            saveFitnessDataToFirebase();
+            
+            document.getElementById('editExerciseOverlay').style.display = 'none';
+            editingExerciseIndex = null;
         }
 
         // Angepasst, um die neue Kategorie "physio" auswählen und einen Link hinzufügen zu können
@@ -4512,6 +4623,41 @@
                     }
                 });
             }
+
+
+
+
+            
+
+            // Event-Listener für das Bearbeitungs-Popup
+            const closeEditExerciseBtn = document.getElementById('closeEditExerciseBtn');
+            const editExerciseOverlay = document.getElementById('editExerciseOverlay');
+            const saveEditExerciseBtn = document.getElementById('saveEditExerciseBtn');
+
+            if (closeEditExerciseBtn && editExerciseOverlay) {
+                closeEditExerciseBtn.addEventListener('click', () => {
+                    editExerciseOverlay.style.display = 'none';
+                    editingExerciseIndex = null;
+                });
+                
+                editExerciseOverlay.addEventListener('click', (event) => {
+                    if (event.target.id === 'editExerciseOverlay') {
+                        editExerciseOverlay.style.display = 'none';
+                        editingExerciseIndex = null;
+                    }
+                });
+            }
+
+            if (saveEditExerciseBtn) {
+                saveEditExerciseBtn.addEventListener('click', saveEditedExercise);
+            }
+
+
+
+
+
+
+
 
             // ====== START: Such-Logik ======
             let searchEntriesCache = [];
