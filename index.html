@@ -2117,7 +2117,8 @@
                 <button onclick="document.getElementById('slide-unterkoerper').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-unterkoerper">UK</button>
                 <button onclick="document.getElementById('slide-physio').scrollIntoView({behavior: 'smooth', block: 'nearest'});" class="fitness-tab-btn" id="tab-physio">PH</button>
 
-                <button onclick="addFitnessExercise()" class="action-button btn-search" style="border-radius: 10px; margin-right: 40px; font-size: 0.7em; padding: 8px 15px; border: 1px solid #45456a;">+ Übung</button>
+                <button onclick="addFitnessExercise()" class="action-button btn-search" style="border-radius: 10px; margin-right: 40px; font-size: 0.7em; padding: 8px 15px; border: 1px solid #45456a;">+</button>
+                <button onclick="addFitnessDivider()" class="action-button btn-search" style="border-radius: 10px; font-size: 0.7em; padding: 8px 15px; border: 1px solid #45456a; background: #3a3a5a;">-</button>
             </div>
 
             <div class="popup-content" style="max-height: 88vh; overflow-y: auto; padding-right: 0px; padding-left: 1px;">
@@ -2703,6 +2704,37 @@
             filtered.forEach((ex) => {
                 const globalIndex = fitnessExercises.findIndex(e => e.id === ex.id);
                 
+                // ========== NEU: DIVIDER-RENDERING ==========
+                if (ex.isDivider) {
+                    const dividerDiv = document.createElement('div');
+                    dividerDiv.style.cssText = 'font-weight: bold; font-size: 0.9em; color: #fff; text-align: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.2); margin: 5px 0;';
+                    dividerDiv.textContent = ex.name;
+                    
+                    // Long-Click zum Löschen des Dividers
+                    let pressTimer;
+                    const startPress = () => {
+                        pressTimer = window.setTimeout(() => {
+                            if (confirm("Divider löschen?")) {
+                                fitnessExercises.splice(globalIndex, 1);
+                                renderFitnessPlan();
+                                saveFitnessDataToFirebase();
+                            }
+                        }, 800);
+                    };
+                    const cancelPress = () => clearTimeout(pressTimer);
+                    
+                    dividerDiv.addEventListener('mousedown', startPress);
+                    dividerDiv.addEventListener('mouseup', cancelPress);
+                    dividerDiv.addEventListener('mouseleave', cancelPress);
+                    dividerDiv.addEventListener('touchstart', startPress);
+                    dividerDiv.addEventListener('touchend', cancelPress);
+                    dividerDiv.addEventListener('contextmenu', e => e.preventDefault());
+                    
+                    container.appendChild(dividerDiv);
+                    return; // Beendet die Schleife für dieses Element
+                }
+                // ========== ENDE: DIVIDER-RENDERING ==========
+                
                 const unit = ex.unit || 'kg'; 
                 let currentBest = ex.maxWeight !== undefined ? ex.maxWeight : (ex.startWeight || 0);
 
@@ -2729,43 +2761,27 @@
                 `;
                 container.appendChild(div);
 
-                // ================= LONG-CLICK FÜR OK & UK (NEU) =================
-                // Prüfe, ob es sich um Oberkörper oder Unterkörper handelt
+                // Long-Click für OK & UK
                 if (containerId === 'oberkoerper-list' || containerId === 'unterkoerper-list') {
                     let pressTimer;
-
                     const startPress = (e) => {
-                        // Verhindert Auslösung bei Klick auf Buttons oder Inputs
                         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-                        
-                        pressTimer = window.setTimeout(() => {
-                            openEditExercisePopup(globalIndex);
-                        }, 800); // 800ms = langes Drücken
+                        pressTimer = window.setTimeout(() => openEditExercisePopup(globalIndex), 800);
                     };
-
-                    const cancelPress = () => {
-                        clearTimeout(pressTimer);
-                    };
-
-                    // Desktop Events
+                    const cancelPress = () => clearTimeout(pressTimer);
                     div.addEventListener('mousedown', startPress);
                     div.addEventListener('mouseup', cancelPress);
                     div.addEventListener('mouseleave', cancelPress);
-
-                    // Mobile Events
                     div.addEventListener('touchstart', startPress);
                     div.addEventListener('touchend', cancelPress);
                     div.addEventListener('contextmenu', e => e.preventDefault());
                 }
-                // ============== ENDE: LONG-CLICK FÜR OK & UK ==================
 
-                // ================= PHYSIO LONG-CLICK (BLEIBT UNVERÄNDERT) =================
+                // Long-Click für Physio (Link öffnen)
                 if (containerId === 'physio-list') {
                     let pressTimer;
-
                     const startPress = (e) => {
                         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-                        
                         pressTimer = window.setTimeout(() => {
                             if (ex.link) {
                                 window.open(ex.link, '_blank');
@@ -2774,11 +2790,7 @@
                             }
                         }, 800);
                     };
-
-                    const cancelPress = () => {
-                        clearTimeout(pressTimer);
-                    };
-
+                    const cancelPress = () => clearTimeout(pressTimer);
                     div.addEventListener('mousedown', startPress);
                     div.addEventListener('mouseup', cancelPress);
                     div.addEventListener('mouseleave', cancelPress);
@@ -2786,7 +2798,6 @@
                     div.addEventListener('touchend', cancelPress);
                     div.addEventListener('contextmenu', e => e.preventDefault());
                 }
-                // ============== ENDE: PHYSIO LONG-CLICK ==================
             });
         }
 
@@ -2922,6 +2933,31 @@
                 weight: valNum,
                 maxWeight: valNum,
                 link: link || null // NEU: Link zum Übungsobjekt hinzufügen
+            });
+            
+            renderFitnessPlan();
+            saveFitnessDataToFirebase();
+        }
+
+        function addFitnessDivider() {
+            const catChoice = prompt("In welche Kategorie soll der Divider?\n1 = Oberkörper\n2 = Unterkörper\n3 = Physio", "1");
+            let cat = 'oberkoerper';
+            
+            if (catChoice === "2") cat = 'unterkoerper';
+            if (catChoice === "3") cat = 'physio';
+            
+            const dividerText = prompt("Optionaler Text für den Divider (oder leer lassen):", "");
+            
+            fitnessExercises.push({
+                id: Date.now().toString(),
+                cat: cat,
+                name: dividerText || '---------------------------------------',
+                sets: '',
+                unit: '',
+                startWeight: 0,
+                weight: 0,
+                maxWeight: 0,
+                isDivider: true // Markiert dieses Element als Divider
             });
             
             renderFitnessPlan();
@@ -4627,7 +4663,7 @@
 
 
 
-            
+
 
             // Event-Listener für das Bearbeitungs-Popup
             const closeEditExerciseBtn = document.getElementById('closeEditExerciseBtn');
