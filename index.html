@@ -2707,7 +2707,7 @@
                 // ========== NEU: DIVIDER-RENDERING ==========
                 if (ex.isDivider) {
                     const dividerDiv = document.createElement('div');
-                    dividerDiv.style.cssText = 'font-weight: bold; font-size: 0.9em; color: #fff; text-align: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.2); margin: 5px 0;';
+                    dividerDiv.style.cssText = 'font-weight: bold; font-size: 0.9em; color: #fff; text-align: center; padding: 10px 0; border-bottom: 2px solid rgba(255,255,255,1); margin: 5px 0;';
                     dividerDiv.textContent = ex.name;
                     
                     // Long-Click zum Löschen des Dividers
@@ -2951,13 +2951,13 @@
             fitnessExercises.push({
                 id: Date.now().toString(),
                 cat: cat,
-                name: dividerText || '---------------------------------------',
+                name: dividerText || '',
                 sets: '',
                 unit: '',
                 startWeight: 0,
                 weight: 0,
                 maxWeight: 0,
-                isDivider: true // Markiert dieses Element als Divider
+                isDivider: true // Markiert dieses Element als Divider ---------------------------------------
             });
             
             renderFitnessPlan();
