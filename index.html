@@ -6430,7 +6430,10 @@
                 tbody.innerHTML = '';
                 
                 SHOPS.forEach(shop => {
-                    // Werte berechnen: DB Wert + was wir heute in der Session evtl. schon hinzugefügt haben
+                    // In der renderExpenseTable Funktion:
+                    // Statt (monthExpensesDb + todayExpenses) zu rechnen, 
+                    // nehmen wir einfach NUR die summierten Werte aus der DB-Abfrage, 
+                    // da loadExpensesFromFirebase auch den heutigen Tag bereits mit einrechnet.
                     const monthVal = (monthExpensesDb[shop] || 0);
                     const yearVal = (yearExpensesDb[shop] || 0);
 
