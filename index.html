@@ -6431,8 +6431,8 @@
                 
                 SHOPS.forEach(shop => {
                     // Werte berechnen: DB Wert + was wir heute in der Session evtl. schon hinzugefügt haben
-                    const monthVal = (monthExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
-                    const yearVal = (yearExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+                    const monthVal = (monthExpensesDb[shop] || 0);
+                    const yearVal = (yearExpensesDb[shop] || 0);
 
                     const tr = document.createElement('tr');
                     tr.dataset.shop = shop;
@@ -6550,7 +6550,6 @@
                 if (!user) return;
 
                 const now = new Date();
-                // Wir laden ab 1. Januar des aktuellen Jahres, um Jahr & Monat in einem Abwasch zu haben
                 const startOfYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
 
                 try {
@@ -6559,44 +6558,46 @@
                         .where("date", ">=", startOfYear)
                         .get();
 
+                    // 1. WICHTIG: Tabellen-Werte komplett nullen vor Neuberechnung
                     monthExpensesDb = {};
                     yearExpensesDb = {};
                     
-                    // Um zu prüfen, ob ein Eintrag aus DEMSELBEN Monat ist
                     const currentMonth = now.getMonth();
+                    const todayStr = now.toDateString(); // Zum Vergleich des Datums
 
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         if (data.expenses) {
                             const entryDate = data.date.toDate();
+                            
+                            // Prüfen ob Monat/Jahr passt
                             const isCurrentMonth = entryDate.getMonth() === currentMonth;
 
-                            // Iteriere über alle Läden in diesem Tages-Eintrag
                             for (const [shop, amount] of Object.entries(data.expenses)) {
                                 if (typeof amount === 'number') {
-                                    // Addiere zum Jahr
+                                    // Jahr summieren
                                     yearExpensesDb[shop] = (yearExpensesDb[shop] || 0) + amount;
                                     
-                                    // Wenn es dieser Monat ist, addiere zum Monat
+                                    // Monat summieren
                                     if (isCurrentMonth) {
                                         monthExpensesDb[shop] = (monthExpensesDb[shop] || 0) + amount;
                                     }
                                 }
                             }
 
-                            // WICHTIG: Wenn der Eintrag von *heute* ist, übernehmen wir ihn in unseren Live-State (todayExpenses)
-                            // Damit beim erneuten Klick heute der Wert korrekt hochzählt.
-                            if (entryDate.getDate() === now.getDate() && entryDate.getMonth() === now.getMonth()) {
+                            // 2. WICHTIG: todayExpenses NUR aus dem DB-Eintrag von HEUTE laden
+                            // und nicht zu monthExpensesDb addieren, um Dopplung im Render zu vermeiden
+                            if (entryDate.toDateString() === todayStr) {
                                 todayExpenses = { ...data.expenses };
                             }
                         }
                     });
 
-                    // UI mit den echten Werten updaten
+                    // 3. UI neu zeichnen
                     renderExpenseTable();
 
                 } catch (e) {
-                    console.error("Fehler beim Laden der Ausgaben-Historie:", e);
+                    console.error("Fehler beim Laden:", e);
                 }
             }
             // ====== ENDE: Ausgaben-Tracker Logik ======
