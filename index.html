@@ -2541,7 +2541,7 @@
                     <button class="quick-menu-btn" data-target="painMapBtn" data-overlay="painMapOverlay">🗺️ Schmerzkarte</button>
                     <button class="quick-menu-btn" data-target="openFitnessTrackerBtn" data-overlay="fitnessOverlay">🏋️ Workout-Plan</button>
                     <button class="quick-menu-btn" data-target="openNutritionBtn" data-overlay="nutritionOverlay">🥑 Kalorientracker</button>
-                    <button class="quick-menu-btn" data-target="openNutritionBtn" data-overlay="expenseOverlay">💶 Ausgabentracker</button>
+                    <button class="quick-menu-btn" id="openExpenseBtn" data-target="openExpenseBtn" data-overlay="expenseOverlay">💶 Ausgabentracker</button>
                     <button class="quick-menu-btn" data-target="biologika-countdown" data-overlay="bloodValuesOverlay">🩸 Blutwerte</button>
                     <button class="quick-menu-btn" data-target="openSearchBtn" data-overlay="searchOverlay">🔍 Notizsuche</button>
                     <button class="quick-menu-btn" data-target="statsBtn" data-overlay="statsOverlay">📊 Statistiken</button>
@@ -4766,11 +4766,6 @@
                 });
             }
 
-
-
-
-
-
             // Event-Listener für das Bearbeitungs-Popup
             const closeEditExerciseBtn = document.getElementById('closeEditExerciseBtn');
             const editExerciseOverlay = document.getElementById('editExerciseOverlay');
@@ -4793,13 +4788,6 @@
             if (saveEditExerciseBtn) {
                 saveEditExerciseBtn.addEventListener('click', saveEditedExercise);
             }
-
-
-
-
-
-
-
 
             // ====== START: Such-Logik ======
             let searchEntriesCache = [];
@@ -6244,26 +6232,6 @@
             });
             // ====== ENDE: Kalorientracker Logik ======
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             // ====== START: Quick-Tag Such-Logik ======
             const searchQuickTags = document.querySelectorAll('.search-quick-tag');
             // WICHTIG: Prüfe, ob die ID deines Such-Eingabefelds wirklich 'searchInput' ist!
@@ -6287,10 +6255,6 @@
                 });
             }
             // ====== ENDE: Quick-Tag Such-Logik ======
-
-
-
-
 
             // --- NEU: Popup für Mahlzeiten-Historie anzeigen ---
             let historyDayId = null; // Merkt sich, welcher Tag im Popup offen ist
@@ -6361,6 +6325,17 @@
                     overlay.style.display = 'none';
                 });
             });
+
+
+
+
+
+            // Button-Verknüpfung zur Sidebar für Ausgaben-Tracker
+            const quickExpenseBtn = document.querySelector('[data-target="openExpenseBtn"]');
+            if (quickExpenseBtn) {
+                quickExpenseBtn.addEventListener('click', openExpenseTracker);
+            }
+
 
 
 
