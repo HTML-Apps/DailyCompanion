@@ -6354,6 +6354,8 @@
             let todayExpenses = {}; // Was heute ausgegeben wurde: { 'Kaufland': 15, 'Aldi': 5 }
             let monthExpensesDb = {}; // Summen aus der DB für diesen Monat
             let yearExpensesDb = {};  // Summen aus der DB für dieses Jahr
+
+            document.getElementById('nutritionPopup h2').addEventListener('click', openPainMapPopup);
             
             // 1. Trigger: Klick auf Kalorien-Tracker Überschrift
             if (nutritionHeader && expenseOverlay) {
