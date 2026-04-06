@@ -1613,6 +1613,70 @@
             background: rgba(255, 255, 255, 0.05) !important;
         }
 
+        /* ====== START: Ausgaben-Tracker Styles ====== */
+        .expense-quick-tag {
+            background-color: #2a2a4a;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #45456a;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .expense-quick-tag:hover, .expense-quick-tag:active {
+            background-color: #00f2fe;
+            color: #19192d;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            transform: translateY(-2px);
+        }
+        .expense-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            color: #fff;
+            background: rgba(25, 25, 45, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #45456a;
+        }
+        .expense-table th, .expense-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .expense-table th {
+            color: #87879e;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            background: rgba(0,0,0,0.2);
+        }
+        .expense-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .expense-table tbody tr:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        .expense-table tbody tr.selected-shop {
+            background-color: rgba(0, 242, 254, 0.15);
+            border-left: 3px solid #00f2fe; /* Hervorhebung */
+        }
+        .expense-table tbody td:first-child {
+            font-weight: 500;
+        }
+        .expense-total-row td {
+            font-weight: 700;
+            color: #00f2fe;
+            font-size: 1.1em;
+            background: rgba(0,0,0,0.3);
+            border-top: 2px dashed rgba(0, 242, 254, 0.3);
+        }
+        /* ====== ENDE: Ausgaben-Tracker Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2207,6 +2271,47 @@
 
         </div>
     </template>
+
+    <!-- Ausgaben-Tracker 💪 ⚡ 🥑 🔥-->
+    <div class="overlay" id="expenseOverlay">
+        <div class="popup" id="expensePopup">
+            <span class="close-btn" id="closeExpenseBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">Ausgaben-Tracker</h2>
+            
+            <div class="popup-content" style="max-height: 85vh; overflow-y: auto; padding-right: 5px;">
+                
+                <div id="expenseTagsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 25px;">
+                    </div>
+
+                <div style="display: flex; justify-content: center; margin-bottom: 20px; gap: 10px;">
+                    <input type="number" id="manualExpenseInput" class="styled-input" placeholder="Eigener Betrag (€)" style="width: 150px; text-align: center;">
+                    <button id="addManualExpenseBtn" class="action-button btn-search">Hinzufügen</button>
+                </div>
+
+                <table class="expense-table" id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>Laden</th>
+                            <th id="expenseMonthHeader" style="text-align: right;">Monat</th>
+                            <th style="text-align: right;">Jahr (26)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody">
+                        </tbody>
+                    <tfoot>
+                        <tr class="expense-total-row">
+                            <td>Gesamt</td>
+                            <td id="totalMonthExpense" style="text-align: right;">0 €</td>
+                            <td id="totalYearExpense" style="text-align: right;">1143 €</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <p style="text-align: center; color: #aaa; margin-top: 20px; font-weight: 600;">Ø Monat: <span id="avgMonthExpense" style="color: #00f2fe;">292 €</span></p>
+                <p id="expense-save-status" style="text-align: center; color: #87879e; font-size: 0.8em; margin-top: 10px;">Auswählen, Betrag klicken. Speichert automatisch.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Macro-Quick-Tags-Popup -->
     <div class="overlay" id="tagHistoryOverlay" style="z-index: 3000; backdrop-filter: none;">
@@ -6255,6 +6360,252 @@
                     overlay.style.display = 'none';
                 });
             });
+
+
+
+
+
+
+            // ====== START: Ausgaben-Tracker Logik ======
+            const expenseOverlay = document.getElementById('expenseOverlay');
+            const closeExpenseBtn = document.getElementById('closeExpenseBtn');
+            const nutritionHeader = document.querySelector('#nutritionPopup h2');
+            
+            // Konfiguration
+            const INITIAL_YEAR_TOTAL = 1143;
+            const INITIAL_MONTH_AVG = 292;
+            const EXPENSE_TAGS = [1, 2, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80];
+            const SHOPS = ['Kaufland', 'Edeka', 'Edeka-Center', 'Aldi', 'Dm', 'Rossmann', 'Netto', 'Andere'];
+            
+            // State
+            let currentSelectedShop = null;
+            let todayExpenses = {}; // Was heute ausgegeben wurde: { 'Kaufland': 15, 'Aldi': 5 }
+            let monthExpensesDb = {}; // Summen aus der DB für diesen Monat
+            let yearExpensesDb = {};  // Summen aus der DB für dieses Jahr
+            
+            // 1. Trigger: Klick auf Kalorien-Tracker Überschrift
+            if (nutritionHeader && expenseOverlay) {
+                nutritionHeader.style.cursor = 'pointer';
+                nutritionHeader.title = "Klicke hier für den Ausgaben-Tracker";
+                nutritionHeader.addEventListener('click', () => {
+                    if (!auth.currentUser) return alert("Bitte anmelden.");
+                    expenseOverlay.style.display = 'flex';
+                    initExpenseTracker();
+                });
+            }
+
+            if (closeExpenseBtn) {
+                closeExpenseBtn.addEventListener('click', () => expenseOverlay.style.display = 'none');
+            }
+
+            // 2. Initialisierung (UI bauen & Daten laden)
+            async function initExpenseTracker() {
+                // Setze Monatsnamen im Header
+                const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+                const currentMonthName = monthNames[new Date().getMonth()];
+                document.getElementById('expenseMonthHeader').textContent = currentMonthName;
+
+                renderExpenseTags();
+                renderExpenseTable();
+                await loadExpensesFromFirebase();
+            }
+
+            // 3. Render Quick-Tags
+            function renderExpenseTags() {
+                const container = document.getElementById('expenseTagsContainer');
+                container.innerHTML = '';
+                EXPENSE_TAGS.forEach(amount => {
+                    const btn = document.createElement('button');
+                    btn.className = 'expense-quick-tag';
+                    btn.textContent = `${amount} €`;
+                    btn.addEventListener('click', () => addExpense(amount));
+                    container.appendChild(btn);
+                });
+            }
+
+            // 4. Render Shop Tabelle
+            function renderExpenseTable() {
+                const tbody = document.getElementById('expenseTableBody');
+                tbody.innerHTML = '';
+                
+                SHOPS.forEach(shop => {
+                    // Werte berechnen: DB Wert + was wir heute in der Session evtl. schon hinzugefügt haben
+                    const monthVal = (monthExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+                    const yearVal = (yearExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+
+                    const tr = document.createElement('tr');
+                    tr.dataset.shop = shop;
+                    
+                    if (shop === currentSelectedShop) tr.classList.add('selected-shop');
+
+                    tr.innerHTML = `
+                        <td>${shop}</td>
+                        <td style="text-align: right;">${monthVal.toFixed(2)} €</td>
+                        <td style="text-align: right;">${yearVal.toFixed(2)} €</td>
+                    `;
+                    
+                    tr.addEventListener('click', () => {
+                        currentSelectedShop = shop;
+                        renderExpenseTable(); // Neu rendern für die Markierung
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+
+                updateExpenseTotals();
+            }
+
+            // 5. Summen berechnen
+            function updateExpenseTotals() {
+                let monthSum = 0;
+                let yearSum = 0;
+
+                SHOPS.forEach(shop => {
+                    monthSum += (monthExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+                    yearSum += (yearExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+                });
+
+                document.getElementById('totalMonthExpense').textContent = `${monthSum.toFixed(2)} €`;
+                // Reale Jahressumme: Basiswert (1143) + berechnete Summe
+                const trueYearTotal = INITIAL_YEAR_TOTAL + yearSum;
+                document.getElementById('totalYearExpense').textContent = `${trueYearTotal.toFixed(2)} €`;
+            }
+
+            // 6. Ausgaben hinzufügen & Speichern
+            async function addExpense(amount) {
+                if (!currentSelectedShop) {
+                    alert("Bitte klicke zuerst auf einen Laden in der Tabelle.");
+                    return;
+                }
+
+                amount = parseFloat(amount);
+                if (isNaN(amount) || amount <= 0) return;
+
+                // 1. Lokalen Heute-State updaten
+                if (!todayExpenses[currentSelectedShop]) todayExpenses[currentSelectedShop] = 0;
+                todayExpenses[currentSelectedShop] += amount;
+
+                // 2. UI direkt updaten (Snappy Feeling)
+                renderExpenseTable();
+                
+                // Input Feld leeren, falls manuell genutzt
+                document.getElementById('manualExpenseInput').value = '';
+
+                // 3. Im Hintergrund an Firebase senden (Merge in den heutigen Tag)
+                const statusEl = document.getElementById('expense-save-status');
+                statusEl.textContent = "Speichere Ausgabe...";
+                statusEl.style.color = "#00f2fe";
+
+                try {
+                    // Wir checken, ob heute schon ein doc da ist (ähnlich Kalorien-Tracker)
+                    const now = new Date();
+                    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0,0);
+                    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
+                    
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", auth.currentUser.uid)
+                        .where("date", ">=", startOfDay)
+                        .where("date", "<=", endOfDay)
+                        .limit(1).get();
+
+                    let docIdToUse;
+                    // Die Struktur für die Datenbank:
+                    // expenses: { 'Kaufland': 15, 'Aldi': 5 }
+                    const updateData = { expenses: todayExpenses };
+
+                    if (!snapshot.empty) {
+                        docIdToUse = snapshot.docs[0].id;
+                        await db.collection("dailyEntries").doc(docIdToUse).set(updateData, { merge: true });
+                    } else {
+                        const docRef = await db.collection("dailyEntries").add({
+                            userId: auth.currentUser.uid,
+                            date: firebase.firestore.Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12,0,0)),
+                            ...updateData
+                        });
+                        docIdToUse = docRef.id;
+                        if (!currentEntryId) currentEntryId = docIdToUse; // Synchronisation mit dem Hauptformular
+                    }
+
+                    statusEl.textContent = "Gespeichert!";
+                    statusEl.style.color = "#2ecc71";
+                    setTimeout(() => statusEl.style.color = "#87879e", 2000);
+
+                } catch (error) {
+                    console.error("Fehler beim Speichern der Ausgabe:", error);
+                    statusEl.textContent = "Fehler beim Speichern!";
+                    statusEl.style.color = "#e74c3c";
+                }
+            }
+
+            // Event für manuellen Button
+            document.getElementById('addManualExpenseBtn').addEventListener('click', () => {
+                const val = document.getElementById('manualExpenseInput').value;
+                addExpense(val);
+            });
+
+            // 7. Daten aus Firebase laden (Monat & Jahr aggregieren)
+            async function loadExpensesFromFirebase() {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const now = new Date();
+                // Wir laden ab 1. Januar des aktuellen Jahres, um Jahr & Monat in einem Abwasch zu haben
+                const startOfYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+
+                try {
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .where("date", ">=", startOfYear)
+                        .get();
+
+                    monthExpensesDb = {};
+                    yearExpensesDb = {};
+                    
+                    // Um zu prüfen, ob ein Eintrag aus DEMSELBEN Monat ist
+                    const currentMonth = now.getMonth();
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.expenses) {
+                            const entryDate = data.date.toDate();
+                            const isCurrentMonth = entryDate.getMonth() === currentMonth;
+
+                            // Iteriere über alle Läden in diesem Tages-Eintrag
+                            for (const [shop, amount] of Object.entries(data.expenses)) {
+                                if (typeof amount === 'number') {
+                                    // Addiere zum Jahr
+                                    yearExpensesDb[shop] = (yearExpensesDb[shop] || 0) + amount;
+                                    
+                                    // Wenn es dieser Monat ist, addiere zum Monat
+                                    if (isCurrentMonth) {
+                                        monthExpensesDb[shop] = (monthExpensesDb[shop] || 0) + amount;
+                                    }
+                                }
+                            }
+
+                            // WICHTIG: Wenn der Eintrag von *heute* ist, übernehmen wir ihn in unseren Live-State (todayExpenses)
+                            // Damit beim erneuten Klick heute der Wert korrekt hochzählt.
+                            if (entryDate.getDate() === now.getDate() && entryDate.getMonth() === now.getMonth()) {
+                                todayExpenses = { ...data.expenses };
+                            }
+                        }
+                    });
+
+                    // UI mit den echten Werten updaten
+                    renderExpenseTable();
+
+                } catch (e) {
+                    console.error("Fehler beim Laden der Ausgaben-Historie:", e);
+                }
+            }
+            // ====== ENDE: Ausgaben-Tracker Logik ======
+
+
+
+
+
+
+
 
 
             auth.onAuthStateChanged(async (user) => {
