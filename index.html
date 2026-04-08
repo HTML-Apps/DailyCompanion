@@ -6328,18 +6328,6 @@
                 });
             });
 
-
-
-
-
-
-
-
-
-
-
-
-
             // ====== START: Ausgaben-Tracker Logik ======
             const expenseOverlay = document.getElementById('expenseOverlay');
             const closeExpenseBtn = document.getElementById('closeExpenseBtn');
@@ -6357,8 +6345,6 @@
             let monthExpensesDb = {}; // Summen aus der DB für diesen Monat
             let yearExpensesDb = {};  // Summen aus der DB für dieses Jahr
 
-            
-            
             // 1. Trigger: Klick auf Kalorien-Tracker Überschrift
             if (nutritionHeader && expenseOverlay) {
                 nutritionHeader.style.cursor = 'pointer';
@@ -6579,14 +6565,6 @@
                 }
             }
             // ====== ENDE: Ausgaben-Tracker Logik ======
-
-
-
-
-
-
-
-
 
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
