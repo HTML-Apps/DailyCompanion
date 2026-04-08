@@ -6393,7 +6393,7 @@
                 EXPENSE_TAGS.forEach(amount => {
                     const btn = document.createElement('button');
                     btn.className = 'expense-quick-tag';
-                    btn.textContent = `${amount} €`;
+                    btn.textContent = `${amount}`;
                     btn.addEventListener('click', () => addExpense(amount));
                     container.appendChild(btn);
                 });
