@@ -1677,6 +1677,14 @@
             background: rgba(0,0,0,0.3);
             border-top: 2px dashed rgba(0, 242, 254, 0.3);
         }
+
+        /* Spezielles Styling NUR für die 1 und die 2 */
+        .expense-quick-tag[data-amount="1"],
+        .expense-quick-tag[data-amount="2"] {
+            background-color: #535353; /* Rote Hintergrundfarbe als Beispiel */
+            border-radius: 50%;     /* Etwas dunklerer Rand */
+            width: 30px;
+        }
         /* ====== ENDE: Ausgaben-Tracker Styles ====== */
 
     </style>
@@ -6380,6 +6388,10 @@
                     const btn = document.createElement('button');
                     btn.className = 'expense-quick-tag';
                     btn.textContent = `${amount}`;
+
+                    // NEU: Fügt ein Attribut wie z.B. data-amount="1" zum Button hinzu
+                    btn.dataset.amount = amount;
+
                     btn.addEventListener('click', () => addExpense(amount));
                     container.appendChild(btn);
                 });
