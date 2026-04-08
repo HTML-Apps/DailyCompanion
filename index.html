@@ -6426,8 +6426,9 @@
                 let yearSum = 0;
 
                 SHOPS.forEach(shop => {
-                    monthSum += (monthExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
-                    yearSum += (yearExpensesDb[shop] || 0) + (todayExpenses[shop] || 0);
+                    // todayExpenses weglassen, da diese bereits in den DB-Werten enthalten sind!
+                    monthSum += (monthExpensesDb[shop] || 0);
+                    yearSum += (yearExpensesDb[shop] || 0);
                 });
 
                 document.getElementById('totalMonthExpense').textContent = `${monthSum.toFixed(2)} €`;
@@ -6449,6 +6450,13 @@
                 // 1. Lokalen Heute-State updaten
                 if (!todayExpenses[currentSelectedShop]) todayExpenses[currentSelectedShop] = 0;
                 todayExpenses[currentSelectedShop] += amount;
+
+                // NEU: Lokalen Monat/Jahr-State ebenfalls updaten für sofortige Anzeige in der Tabelle!
+                if (!monthExpensesDb[currentSelectedShop]) monthExpensesDb[currentSelectedShop] = 0;
+                monthExpensesDb[currentSelectedShop] += amount;
+
+                if (!yearExpensesDb[currentSelectedShop]) yearExpensesDb[currentSelectedShop] = 0;
+                yearExpensesDb[currentSelectedShop] += amount;
 
                 // 2. UI direkt updaten (Snappy Feeling)
                 renderExpenseTable();
