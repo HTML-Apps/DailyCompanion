@@ -1707,6 +1707,58 @@
         }
         /* ====== ENDE: Ausgaben-Tracker Styles ====== */
 
+        /* ====== START: Ausgaben-Historie Styles ====== */
+        .history-month-card {
+            background: rgba(25, 25, 45, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .history-month-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #00f2fe;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(0,242,254,0.2);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .history-shop-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.95em;
+        }
+        .history-shop-row:last-child { border-bottom: none; }
+        .history-shop-name { color: #ccc; }
+        .history-shop-amount { font-weight: 600; color: #fff; }
+        .history-bar-wrap {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border-radius: 6px;
+            margin-top: 5px;
+            height: 7px;
+            overflow: hidden;
+        }
+        .history-bar {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            transition: width 0.4s ease;
+        }
+        .history-month-total {
+            text-align: right;
+            font-weight: 700;
+            color: #00f2fe;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+        /* ====== ENDE: Ausgaben-Historie Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2316,7 +2368,7 @@
                 <div style="display: flex; justify-content: center; margin-bottom: 20px; gap: 10px;">
                     <input type="number" id="manualExpenseInput" class="styled-input" placeholder="Betrag (€)" style="text-align: center; padding: 2px; font-size: 0.9em;">
                     <button id="addManualExpenseBtn" class="action-button btn-search">Hinzufügen</button>
-                    <button id="addManualExpenseBtn" class="action-button btn-search">Historie</button>
+                    <button id="ausgabenHistorie" class="action-button btn-search">Historie</button>
                 </div>
 
                 <table class="expense-table" id="expenseTable">
@@ -2340,6 +2392,17 @@
                 
                 <p style="text-align: center; color: #aaa; margin-top: 20px; font-weight: 600;">Ø Monat: <span id="avgMonthExpense" style="color: #00f2fe;">292 €</span></p>
                 <p id="expense-save-status" style="text-align: center; color: #87879e; font-size: 0.8em; margin-top: 10px; position: absolute; bottom: 10px; width: 92%;">Auswählen, Betrag klicken. Speichert automatisch.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ausgaben-Historie Popup -->
+    <div class="overlay" id="expenseHistoryOverlay" style="z-index: 2000;">
+        <div class="popup" id="expenseHistoryPopup">
+            <span class="close-btn" id="closeExpenseHistoryBtn">&times;</span>
+            <h2 style="margin-top: 0px; color: white;">📊 Ausgaben-Historie</h2>
+            <div id="expenseHistoryContent" style="max-height: 85vh; overflow-y: auto; padding-right: 5px;">
+                <p style="text-align:center; color: #87879e;">Lädt...</p>
             </div>
         </div>
     </div>
@@ -6605,6 +6668,100 @@
                     console.error("Fehler beim Laden:", e);
                 }
             }
+
+
+            // ====== START: Ausgaben-Historie ======
+            document.getElementById('ausgabenHistorie').addEventListener('click', async () => {
+                const overlay = document.getElementById('expenseHistoryOverlay');
+                const content = document.getElementById('expenseHistoryContent');
+                overlay.style.display = 'flex';
+                content.innerHTML = '<p style="text-align:center; color: #87879e;">Lade Daten...</p>';
+
+                const user = auth.currentUser;
+                if (!user) { content.innerHTML = '<p style="color:#e74c3c;">Nicht angemeldet.</p>'; return; }
+
+                try {
+                    const now = new Date();
+                    // Lade die letzten 12 Monate
+                    const startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1, 0, 0, 0, 0);
+
+                    const snapshot = await db.collection("dailyEntries")
+                        .where("userId", "==", user.uid)
+                        .where("date", ">=", startDate)
+                        .get();
+
+                    // Aggregiere nach Monat → Laden
+                    const monthMap = {}; // key: "2025-03" → { Kaufland: 15, ALDI: 5, ... }
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!data.expenses || !data.date) return;
+                        const d = data.date.toDate();
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                        if (!monthMap[key]) monthMap[key] = {};
+                        for (const [shop, amount] of Object.entries(data.expenses)) {
+                            if (typeof amount === 'number') {
+                                monthMap[key][shop] = (monthMap[key][shop] || 0) + amount;
+                            }
+                        }
+                    });
+
+                    // Sortiere Monate absteigend (neuester zuerst)
+                    const sortedKeys = Object.keys(monthMap).sort().reverse();
+
+                    if (sortedKeys.length === 0) {
+                        content.innerHTML = '<p style="text-align:center; color: #87879e;">Keine Daten vorhanden.</p>';
+                        return;
+                    }
+
+                    const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
+                                        "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
+                    let html = '';
+                    for (const key of sortedKeys) {
+                        const [year, month] = key.split('-');
+                        const label = `${monthNames[parseInt(month) - 1]} ${year}`;
+                        const shops = monthMap[key];
+                        const monthTotal = Object.values(shops).reduce((a, b) => a + b, 0);
+                        const maxShopVal = Math.max(...Object.values(shops));
+
+                        // Laden nach Betrag sortieren (höchster zuerst)
+                        const sortedShops = Object.entries(shops).sort((a, b) => b[1] - a[1]);
+
+                        let shopRows = '';
+                        for (const [shop, amount] of sortedShops) {
+                            const pct = maxShopVal > 0 ? (amount / maxShopVal * 100).toFixed(1) : 0;
+                            shopRows += `
+                                <div class="history-shop-row">
+                                    <span class="history-shop-name">${shop}</span>
+                                    <span class="history-shop-amount">${amount.toFixed(2)} €</span>
+                                </div>
+                                <div class="history-bar-wrap">
+                                    <div class="history-bar" style="width: ${pct}%"></div>
+                                </div>`;
+                        }
+
+                        html += `
+                            <div class="history-month-card">
+                                <div class="history-month-title">
+                                    <span>${label}</span>
+                                    <span>${monthTotal.toFixed(2)} €</span>
+                                </div>
+                                ${shopRows}
+                            </div>`;
+                    }
+                    content.innerHTML = html;
+
+                } catch (e) {
+                    console.error("Fehler beim Laden der Historie:", e);
+                    content.innerHTML = '<p style="color:#e74c3c;">Fehler beim Laden.</p>';
+                }
+            });
+
+            document.getElementById('closeExpenseHistoryBtn').addEventListener('click', () => {
+                document.getElementById('expenseHistoryOverlay').style.display = 'none';
+            });
+            // ====== ENDE: Ausgaben-Historie ======
             // ====== ENDE: Ausgaben-Tracker Logik ======
 
             auth.onAuthStateChanged(async (user) => {
