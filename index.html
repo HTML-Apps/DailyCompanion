@@ -6642,6 +6642,19 @@
                         setTimeout(() => {
                             updateBiologikaCountdown();
                         }, 100);
+
+                        // Funktion zur Prüfung auf Monatsende
+                        function checkEndOfMonthAlert() {
+                            const today = new Date();
+                            // Wir prüfen, ob morgen der 1. Tag des neuen Monats ist
+                            const tomorrow = new Date(today);
+                            tomorrow.setDate(today.getDate() + 1);
+
+                            if (tomorrow.getDate() === 1) {
+                                // Es ist der letzte Tag des Monats
+                                alert("💶 Ausgabentracker überprüfen!");
+                            }
+                        }
                         
                     } catch (e) {
                         console.error("Fehler beim Laden des heutigen Eintrags:", e);
