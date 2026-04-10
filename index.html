@@ -1805,13 +1805,15 @@
         border-radius: 30px;
         cursor: pointer;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        display: block;
+        display: none;
     ">Mit Google anmelden</button>
+
     <div id="userInfo" style="
         text-align: center;
         margin-bottom: 5px;
         font-size: 0.8em;
         color: #aaaaaa;
+        display: none;
     ">Nicht angemeldet.</div>
     
     <div class="app-layout">
@@ -6870,11 +6872,13 @@
                         resetForm();
                     }
                 } else {
-                    if (userInfoDiv) {
-                        userInfoDiv.style.display = 'block'; // Zeigen, wenn abgemeldet
-                        userInfoDiv.textContent = 'Nicht angemeldet.';
-                    }
-                    if (signInButton) signInButton.style.display = 'block';
+                    setTimeout(() => {
+                        if (userInfoDiv) {
+                            userInfoDiv.style.display = 'block';
+                            userInfoDiv.textContent = 'Nicht angemeldet.';
+                        }
+                        if (signInButton) signInButton.style.display = 'block';
+                    }, 2000);
                     resetForm(); 
                 }
             });
