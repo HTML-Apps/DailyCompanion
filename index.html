@@ -1757,6 +1757,31 @@
             font-size: 1em;
             margin-top: 10px;
         }
+
+        #expense-toast-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 50, 0.95);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            color: #00f2fe;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95em;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        #expense-toast-banner.visible {
+            opacity: 1;
+        }
         /* ====== ENDE: Ausgaben-Historie Styles linear-gradient(90deg, #00f2fe, #4facfe); ====== */
 
     </style>
@@ -2406,6 +2431,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Ausgaben-Tracker Banner-->
+    <div id="expense-toast-banner">+ 0,00 €</div>
 
     <!-- Macro-Quick-Tags-Popup -->
     <div class="overlay" id="tagHistoryOverlay" style="z-index: 3000; backdrop-filter: none;">
@@ -6533,6 +6561,27 @@
                 document.getElementById('totalYearExpense').textContent = `${trueYearTotal.toFixed(2)} €`;
             }
 
+            // ====== Toast Banner für Ausgaben ======
+            let expenseToastTotal = 0;
+            let expenseToastTimer = null;
+
+            function showExpenseToast(amount) {
+                expenseToastTotal += amount;
+                
+                const banner = document.getElementById('expense-toast-banner');
+                banner.textContent = `+ ${expenseToastTotal.toFixed(2)} €`;
+                banner.classList.add('visible');
+
+                // Timer bei jedem neuen Klick zurücksetzen
+                if (expenseToastTimer) clearTimeout(expenseToastTimer);
+
+                expenseToastTimer = setTimeout(() => {
+                    banner.classList.remove('visible');
+                    expenseToastTotal = 0; // Reset für nächste Session
+                    expenseToastTimer = null;
+                }, 2000);
+            }
+
             // 6. Ausgaben hinzufügen & Speichern
             async function addExpense(amount) {
                 if (!currentSelectedShop) {
@@ -6556,6 +6605,7 @@
 
                 // 2. UI direkt updaten (Snappy Feeling)
                 renderExpenseTable();
+                showExpenseToast(amount);
                 
                 // Input Feld leeren, falls manuell genutzt
                 document.getElementById('manualExpenseInput').value = '';
