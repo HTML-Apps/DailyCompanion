@@ -6047,7 +6047,7 @@
 
             const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
             const avgProtein = daysWithData > 0 ? Math.round(weeklyTotalProtein / daysWithData) : 0;
-            weekCard.querySelector('.nutrition-week-totals').textContent = `Ø ${average} kcal  |  Ø ${avgProtein}g Protein`;
+            weekCard.querySelector('.nutrition-week-totals').textContent = `Ø ${average} kcal / ${avgProtein} g Protein pro Tag`;
         }
 
             async function loadFirebaseDataForWeek(weekCard, mondayDate) {
