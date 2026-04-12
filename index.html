@@ -2094,9 +2094,8 @@
                         <button type="button" class="notes-tag-button" data-tag="BWS-Rotation sitzend mit verschränktem Gesäß">BWS-Rotation</button>
                         <button type="button" class="notes-tag-button" data-tag="Wirbelkörperlockerung in L-Liegeposition mit Nugget">Nugget</button>
                         <button type="button" class="notes-tag-button" data-tag="Jefferson Weighted Stretch">Jefferson Curl</button>
-                        <button type="button" class="notes-tag-button" data-tag="Beikippung in L-Liegeposition">Beinkippung</button>
+                        <button type="button" class="notes-tag-button" data-tag="Beikippung in L-Liegeposition">Beinkippung liegend</button>
                         <button type="button" class="notes-tag-button" data-tag="Eulen-Drehung Kopf">Eulen-Drehung</button>
-                        <button type="button" class="notes-tag-button" data-tag="Aushängen an Querstange">Hanging</button>
                         <button type="button" class="notes-tag-button" data-tag="Vorbeuge Hände zum Boden">Vorbeuge</button>
                         <button type="button" class="notes-tag-button" data-tag="Nackenstretch Alongation">Nackenstretch</button>
                         <button type="button" class="notes-tag-button" data-tag="Beinrückenseite öffnen, Knie durchgestreckt, Rücken gerade">BRS öffnen</button>
@@ -5988,6 +5987,7 @@
 
         function updateNutritionCalculations(weekCard) {
             let weeklyTotalCalories = 0;
+            let weeklyTotalProtein = 0;
             let daysWithData = 0;
 
             const dayDisplays = weekCard.querySelectorAll('.nutrition-calories-display');
@@ -6009,6 +6009,7 @@
                 
                 display.textContent = roundedCalories;
                 weeklyTotalCalories += dailyCalories;
+                if (pInput.value) weeklyTotalProtein += p;
 
                 // --- NEU: Bedingte Formatierung (Farben) ---
 
@@ -6045,7 +6046,8 @@
             });
 
             const average = daysWithData > 0 ? Math.round(weeklyTotalCalories / daysWithData) : 0;
-            weekCard.querySelector('.nutrition-week-totals').textContent = `Ø Woche: ${average} kcal / Tag`;
+            const avgProtein = daysWithData > 0 ? Math.round(weeklyTotalProtein / daysWithData) : 0;
+            weekCard.querySelector('.nutrition-week-totals').textContent = `Ø ${average} kcal  |  Ø ${avgProtein}g Protein`;
         }
 
             async function loadFirebaseDataForWeek(weekCard, mondayDate) {
