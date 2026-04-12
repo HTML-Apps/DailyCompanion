@@ -3467,7 +3467,7 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            // NEU: Definieren Sie hier Ihre individuellen Toleranzschwellen pro Übung.  
+            // NEU: Definieren Sie hier Ihre individuellen Toleranzschwellen pro Übung. 
             // Der Schlüssel ist der "data-tag" des Buttons, der Wert ist die erlaubte Anzahl pro Woche.
             const physioTolerance = {
                 "Nackenstretch Alongation": 7,
@@ -3480,7 +3480,8 @@
                 "Beikippung in L-Liegeposition": 3,
                 "Eulen-Drehung Kopf": 4,
                 "Jefferson Weighted Stretch": 3,
-                "Wirbelkörperlockerung in L-Liegeposition mit Nugget": 2
+                "Wirbelkörperlockerung in L-Liegeposition mit Nugget": 2,
+                "Fullbodyweight Hangs" : 5
             };
             // Ein Standardwert für alle Übungen, die nicht in der Liste oben stehen.
             const defaultTolerance = 2;
