@@ -2452,6 +2452,17 @@
         </div>
     </div>
 
+    <!-- ====== START: Gericht-Popup für Nutrition ====== -->
+    <div id="gerichtOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:rgba(25,25,45,0.98); border-radius:20px; padding:25px; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.8); border:1px solid rgba(0,242,254,0.3); position:relative; animation: fadeInScale 0.3s ease-out forwards;">
+            <span onclick="document.getElementById('gerichtOverlay').style.display='none'" style="position:absolute; top:12px; right:18px; font-size:1.8em; color:#bbb; cursor:pointer;">✕</span>
+            <p id="gerichtPopupDate" style="font-size:0.8em; color:#87879e; margin:0 0 8px 0;"></p>
+            <h3 id="gerichtPopupName" style="margin:0 0 8px 0; color:#00f2fe; font-size:1.3em;"></h3>
+            <p id="gerichtPopupChef" style="margin:0; font-size:0.9em; color:#87879e;"></p>
+        </div>
+    </div>
+    <!-- ====== ENDE: Gericht-Popup für Nutrition ====== -->
+
     <!-- Kommentarsuche -->
     <div class="overlay" id="searchOverlay">
         <div class="popup" id="searchPopup">
@@ -2697,6 +2708,21 @@
         };
 
         const app = firebase.initializeApp(firebaseConfig);
+
+        // ====== START: Wochenplan Firebase Verbindung ======
+        const wochenplanConfig = {
+            apiKey: "AIzaSyCdK5VgOqwS2qZCcL0dzjEX6l21YxTkDM8",
+            authDomain: "wochenplan-957ec.firebaseapp.com",
+            projectId: "wochenplan-957ec",
+            storageBucket: "wochenplan-957ec.firebasestorage.app",
+            messagingSenderId: "662198750456",
+            appId: "1:662198750456:web:31d9a7f2f6e21efa7f7f0d"
+        };
+        const wochenplanApp = firebase.initializeApp(wochenplanConfig, "wochenplan");
+        const wochenplanDb = firebase.firestore(wochenplanApp);
+        // ====== ENDE: Wochenplan Firebase Verbindung ======
+
+
         const db = firebase.firestore();
         const auth = firebase.auth();
 
@@ -6108,6 +6134,74 @@
                     document.querySelectorAll(`.nutrition-week-grid input[data-day-id="${activeNutritionDayId}"]`).forEach(inp => inp.classList.add('active-day'));
                 }
             });
+
+            // ====== START: Gericht anzeigen beim Klick auf Tag-Label ======
+            const DAY_NAMES_FULL = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+            function getISOWeekNumber(date) {
+                const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                return {
+                    week: Math.ceil((((d - yearStart) / 86400000) + 1) / 7),
+                    year: d.getUTCFullYear()
+                };
+            }
+
+            nutritionSlider.addEventListener('click', async (e) => {
+                const label = e.target.closest('.nutrition-day-label');
+                if (!label) return;
+
+                const dayId = label.dataset.dayId; // z.B. "2026-04-14"
+                if (!dayId) return;
+
+                const [y, m, d] = dayId.split('-').map(Number);
+                const date = new Date(y, m - 1, d);
+                const { week, year } = getISOWeekNumber(date);
+                const wochentagName = DAY_NAMES_FULL[date.getDay()];
+                const wochenplanKey = `${year}-KW${week}-${wochentagName}`; // z.B. "2026-KW15-Montag"
+
+                // Popup anzeigen mit Ladezustand
+                const overlay = document.getElementById('gerichtOverlay');
+                const nameEl = document.getElementById('gerichtPopupName');
+                const dateEl = document.getElementById('gerichtPopupDate');
+                const chefEl = document.getElementById('gerichtPopupChef');
+
+                const dateLabel = date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+                dateEl.textContent = dateLabel;
+                nameEl.textContent = '⏳ Lade Gericht...';
+                chefEl.textContent = '';
+                overlay.style.display = 'flex';
+
+                try {
+                    const snap = await wochenplanDb.collection('planung').doc('wochenplan2026').get();
+                    if (!snap.exists) {
+                        nameEl.textContent = '🍽️ Kein Eintrag gefunden';
+                        return;
+                    }
+                    const data = snap.data();
+                    const entry = data[wochenplanKey];
+
+                    if (!entry || (!entry.meal && !entry.mealId)) {
+                        nameEl.textContent = '🍽️ Kein Gericht geplant';
+                        chefEl.textContent = '';
+                    } else {
+                        // Falls mealId vorhanden: Name aus Speisekammer laden
+                        if (entry.mealId) {
+                            const mealSnap = await wochenplanDb.collection('speisekammer').doc(entry.mealId).get();
+                            nameEl.textContent = mealSnap.exists ? `🍴 ${mealSnap.data().name}` : `🍴 ${entry.meal || 'Unbekannt'}`;
+                        } else {
+                            nameEl.textContent = `🍴 ${entry.meal}`;
+                        }
+                        const chefMap = { 'H': '👨‍🍳 Hendrik kocht', 'J': '👩‍🍳 Julia kocht' };
+                        chefEl.textContent = entry.chef ? (chefMap[entry.chef] || '') : '';
+                    }
+                } catch (err) {
+                    console.error('Fehler beim Laden des Gerichts:', err);
+                    nameEl.textContent = '⚠️ Fehler beim Laden';
+                }
+            });
+            // ====== ENDE: Gericht anzeigen beim Klick auf Tag-Label ======
 
             // --- NEU: Logik für die Quick-Tags ---
             // Prüft, ob Tag-Buttons vorhanden sind, und weist ihnen die Addier-Logik zu
