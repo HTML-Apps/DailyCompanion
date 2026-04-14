@@ -6188,7 +6188,7 @@
                         // Falls mealId vorhanden: Name aus Speisekammer laden
                         if (entry.mealId) {
                             const mealSnap = await wochenplanDb.collection('speisekammer').doc(entry.mealId).get();
-                            nameEl.textContent = mealSnap.exists ? `🍴 ${mealSnap.data().name}` : `🍴 ${entry.meal || 'Unbekannt'}`;
+                            nameEl.textContent = mealSnap.exists ? `${mealSnap.data().name}` : `🍴 ${entry.meal || 'Unbekannt'}`;
                         } else {
                             nameEl.textContent = `🍴 ${entry.meal}`;
                         }
