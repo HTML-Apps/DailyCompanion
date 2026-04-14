@@ -6148,7 +6148,7 @@
             }
 
             nutritionSlider.addEventListener('click', async (e) => {
-                const label = e.target.closest('.nutrition-day-label');
+                const label = e.target.closest('.nutrition-calories-display');
                 if (!label) return;
 
                 const dayId = label.dataset.dayId; // z.B. "2026-04-14"
