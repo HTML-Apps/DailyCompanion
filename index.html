@@ -2720,17 +2720,7 @@
         };
         const wochenplanApp = firebase.initializeApp(wochenplanConfig, "wochenplan");
         const wochenplanDb = firebase.firestore(wochenplanApp);
-        const wochenplanAuth = firebase.auth(wochenplanApp);
-
-        // User-Token von Hauptinstanz in Wochenplan-Instanz übertragen
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const token = await user.getIdToken();
-                await wochenplanAuth.signInWithCustomToken(token);
-            }
-        });
         // ====== ENDE: Wochenplan Firebase Verbindung ======
-
 
         const db = firebase.firestore();
         const auth = firebase.auth();
