@@ -5158,14 +5158,16 @@
 
                 // 1. Definiert alle zukünftigen Spritzentermine
                 const injectionDates = [];
+                // Spritzen 1–5: wöchentlich
                 const initialDates = [
                     '2026-03-02', '2026-03-09', '2026-03-16', '2026-03-23', '2026-03-30'
                 ];
                 initialDates.forEach(dateStr => injectionDates.push(new Date(dateStr + 'T00:00:00')));
-                let monthlyDate = new Date('2026-04-27T00:00:00');
+                // Ab Spritze 6 (20.04.2026): alle 2 Wochen montags
+                let biweeklyDate = new Date('2026-04-20T00:00:00');
                 for (let i = 0; i < 60; i++) {
-                    injectionDates.push(new Date(monthlyDate));
-                    monthlyDate.setMonth(monthlyDate.getMonth() + 1);
+                    injectionDates.push(new Date(biweeklyDate));
+                    biweeklyDate.setDate(biweeklyDate.getDate() + 14);
                 }
 
                 // 2. Holt das heutige Datum und das Notification-Dot-Element
