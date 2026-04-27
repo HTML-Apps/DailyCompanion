@@ -4668,7 +4668,8 @@
                 const user = auth.currentUser;
                 if (!user) { alert('🔓 Bitte melden Sie sich zuerst an, um Daten zu speichern.'); return; }
                 const YOUR_UID = "VgrOSS05xEPvvFUXQdybgQTCbX52";
-                if (user.uid !== YOUR_UID) { alert('❌ Sie sind nicht berechtigt, Daten zu speichern.'); return; }
+                const BOSCH_ID = "16043jOK8qdUYviqmoWi2NaBOPo1";
+                if (user.uid !== YOUR_UID || user.uid !== BOSCH_ID) { alert('❌ Sie sind nicht berechtigt, Daten zu speichern.'); return; }
 
                 let missingFields = [];
                 const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
