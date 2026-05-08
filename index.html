@@ -6659,15 +6659,20 @@
                 let yearSum = 0;
 
                 SHOPS.forEach(shop => {
-                    // todayExpenses weglassen, da diese bereits in den DB-Werten enthalten sind!
                     monthSum += (monthExpensesDb[shop] || 0);
-                    yearSum += (yearExpensesDb[shop] || 0);
+                    yearSum  += (yearExpensesDb[shop]  || 0);
                 });
 
                 document.getElementById('totalMonthExpense').textContent = `${monthSum.toFixed(2)} €`;
-                // Reale Jahressumme: Basiswert (1143) + berechnete Summe
+
                 const trueYearTotal = INITIAL_YEAR_TOTAL + yearSum;
                 document.getElementById('totalYearExpense').textContent = `${trueYearTotal.toFixed(2)} €`;
+
+                // ✅ Dynamischer Monatsdurchschnitt
+                const currentMonth = new Date().getMonth(); // 0 = Jan, also +1 für Anzahl vergangener Monate
+                const monthsElapsed = currentMonth + 1;
+                const dynamicAvg = monthsElapsed > 0 ? trueYearTotal / monthsElapsed : 0;
+                document.getElementById('avgMonthExpense').textContent = `${dynamicAvg.toFixed(2)} €`;
             }
 
             // ====== Toast Banner für Ausgaben ======
