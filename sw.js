@@ -14,17 +14,16 @@ const ASSETS_TO_CACHE = [
 
 // 1. Installieren: Dateien in den Cache laden
 self.addEventListener("install", (event) => {
-  // forceer das sofortige Übernehmen des neuen Workers
-  self.skipWaiting();
+  self.skipWaiting(); // Sofort aktivieren
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("[Service Worker] Caching neue Version:", CACHE_NAME);
+      console.log("[Service Worker] Caching Assets");
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
-// 2. Aktivieren: Alte Caches (v1, etc.) löschen
+// 2. Aktivieren: Alte Caches löschen
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
@@ -38,46 +37,55 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-  // Übernimmt sofort die Kontrolle über alle offenen Tabs
-  return self.clients.claim();
+  return self.clients.claim(); // Kontrolle über alle Tabs übernehmen
 });
 
-// 3. Fetch: Netzwerk-Priorität (Network First, Falling Back to Cache)
+// 3. Fetch: Intelligentes Caching (Kein träges Network-First für die App-Shell)
 self.addEventListener("fetch", (event) => {
-  if (event.request.url.includes("firestore") || event.request.url.includes("googleapis.com/google.firestore")) {
-    return; // Firebase live lassen
-  }
+  const url = event.request.url;
 
-  // Für Google Fonts und CDN-Assets: Cache First
-  const isCdnAsset = event.request.url.includes("cdn.jsdelivr") || 
-                     event.request.url.includes("unpkg.com") ||
-                     event.request.url.includes("npmcdn.com") ||
-                     event.request.url.includes("fonts.googleapis") ||
-                     event.request.url.includes("fonts.gstatic");
-
-  if (isCdnAsset) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        return cached || fetch(event.request).then(response => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
-        });
-      })
-    );
+  // Firebase/Firestore komplett ignorieren (Live-Daten)
+  if (url.includes("firestore") || url.includes("googleapis.com/google.firestore")) {
     return;
   }
 
-  // Für eigene Dateien: Network First (wie bisher)
+  // Nur GET-Anfragen verarbeiten
+  if (event.request.method !== "GET") return;
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, response.clone());
-          return response;
+    caches.match(event.request).then((cachedResponse) => {
+      // 1. Wenn es im Cache ist, gib es SOFORT zurück (Blitzschneller App-Start)
+      if (cachedResponse) {
+        
+        // Strategie für eigene Dateien (index.html etc.): Stale-While-Revalidate
+        // Holt die Datei aus dem Cache, prüft aber im Hintergrund lautlos, ob es ein Update gibt.
+        const isCdn = url.includes("cdn.jsdelivr") || url.includes("unpkg.com") || url.includes("npmcdn.com");
+        if (!isCnt) {
+          fetch(event.request).then((networkResponse) => {
+            if (networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+            }
+          }).catch(() => /* Offline oder Netzwerkfehler im Hintergrund ignorieren */ {});
+        }
+        
+        return cachedResponse;
+      }
+
+      // 2. Wenn nicht im Cache, normal aus dem Netzwerk laden und für das nächste Mal cachen
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200) {
+          return networkResponse;
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
-      })
-      .catch(() => caches.match(event.request))
+
+        return networkResponse;
+      }).catch(() => {
+        // Optional: Hier könntest du eine Offline-Fallback-Seite ausliefern
+      });
+    })
   );
 });
