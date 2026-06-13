@@ -2093,7 +2093,7 @@
                         <button type="button" class="notes-tag-button" data-tag="Ausfallschritt Rotation dynamisch">Ausfallschritt</button>
                         <button type="button" class="notes-tag-button" data-tag="World's Greatest Stretch">WGS</button>
                         <button type="button" class="notes-tag-button" data-tag="BWS-Rotation sitzend mit verschränktem Gesäß">BWS-Rotation</button>
-                        <button type="button" class="notes-tag-button" data-tag="Wirbelkörperlockerung in L-Liegeposition mit Nugget">Nugget</button>
+                        <button type="button" class="notes-tag-button" data-tag="Wirbelkörperlockerung in L-Liegeposition mit Nugget">Keil</button>
                         <button type="button" class="notes-tag-button" data-tag="Jefferson Weighted Stretch">Jefferson Curl</button>
                         <button type="button" class="notes-tag-button" data-tag="Beikippung in L-Liegeposition">Beinkippung</button>
                         <button type="button" class="notes-tag-button" data-tag="Eulen-Drehung Kopf">Eulen-Drehung</button>
@@ -3504,7 +3504,7 @@
                 "Beikippung in L-Liegeposition": 3,
                 "Eulen-Drehung Kopf": 4,
                 "Jefferson Weighted Stretch": 3,
-                "Wirbelkörperlockerung in L-Liegeposition mit Nugget": 2,
+                "Wirbelkörperlockerung in L-Liegeposition mit Nugget": 3,
                 "Fullbodyweight Hangs" : 5
             };
             // Ein Standardwert für alle Übungen, die nicht in der Liste oben stehen.
@@ -6058,14 +6058,14 @@
                 } 
 
                 // 3. Kalorien Check: Wenn Kalorien < 2900 und Daten vorhanden -> Rot
-                if ((pInput.value || cInput.value || fInput.value) && roundedCalories < 2900) {
+                if ((pInput.value || cInput.value || fInput.value) && roundedCalories < 3250) {
                     display.style.color = "#ff4d4d"; // Rot
                 } else {
                     display.style.color = ""; // Standardfarbe
                 }
 
                 // 4. Wenn Protein > 120g UND Kalorien > 2900, wird die Anzeige neongrün
-                if (p > 120 && dailyCalories > 2900) {
+                if (p > 120 && dailyCalories > 3250) {
                     display.style.color = '#1dfe00'; // neon-grün
                 } else {
                     // Zurücksetzen auf die Standardfarbe (dein hellblau), falls Werte sinken
