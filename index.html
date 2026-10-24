@@ -2940,6 +2940,7 @@
                         <select id="reminderRepeatInput" class="styled-input">
                             <option value="once">Einmalig</option>
                             <option value="daily">Täglich</option>
+                            <option value="ndays">Alle X Tage</option>
                             <option value="weekly">Wöchentlich</option>
                             <option value="nweeks">Alle X Wochen</option>
                             <option value="monthly">Monatlich (gleicher Tag)</option>
@@ -2947,7 +2948,7 @@
                         </select>
                     </div>
                     <div class="settings-field" id="reminderIntervalField" style="display: none;">
-                        <label for="reminderIntervalInput">Alle wie viele Wochen?</label>
+                        <label for="reminderIntervalInput" id="reminderIntervalLabel">Alle wie viele Wochen?</label>
                         <input type="number" id="reminderIntervalInput" class="styled-input" min="1" step="1" value="2">
                     </div>
                     <div class="reminder-form-actions">
@@ -7225,6 +7226,7 @@
             const REPEAT_LABELS = {
                 once: 'Einmalig',
                 daily: 'Täglich',
+                ndays: 'Alle X Tage',
                 weekly: 'Wöchentlich',
                 nweeks: 'Alle X Wochen',
                 monthly: 'Monatlich',
@@ -7267,6 +7269,7 @@
             }
             function repeatLabel(rem) {
                 if (rem.repeat === 'nweeks') return `Alle ${rem.interval || 2} Wochen`;
+                if (rem.repeat === 'ndays') return `Alle ${rem.interval || 2} Tage`;
                 return REPEAT_LABELS[rem.repeat] || 'Einmalig';
             }
 
@@ -7435,6 +7438,8 @@
                 do {
                     if (rem.repeat === 'daily') {
                         d.setDate(d.getDate() + 1);
+                    } else if (rem.repeat === 'ndays') {
+                        d.setDate(d.getDate() + (parseInt(rem.interval) || 2));
                     } else if (rem.repeat === 'weekly') {
                         d.setDate(d.getDate() + 7);
                     } else if (rem.repeat === 'nweeks') {
@@ -7541,8 +7546,10 @@
 
             // --- Formular ---
             function updateIntervalVisibility() {
-                const isN = document.getElementById('reminderRepeatInput').value === 'nweeks';
+                const repeat = document.getElementById('reminderRepeatInput').value;
+                const isN = repeat === 'nweeks' || repeat === 'ndays';
                 document.getElementById('reminderIntervalField').style.display = isN ? 'flex' : 'none';
+                document.getElementById('reminderIntervalLabel').textContent = repeat === 'ndays' ? 'Alle wie viele Tage?' : 'Alle wie viele Wochen?';
             }
             document.getElementById('reminderRepeatInput').addEventListener('change', updateIntervalVisibility);
 
@@ -7576,7 +7583,7 @@
                     title,
                     due,
                     repeat,
-                    interval: repeat === 'nweeks' ? interval : null,
+                    interval: (repeat === 'nweeks' || repeat === 'ndays') ? interval : null,
                     anchorDay: repeat === 'monthly' ? parseDue(due).getDate() : null,
                     done: false,
                     doneAt: null,
