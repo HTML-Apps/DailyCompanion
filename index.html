@@ -1787,6 +1787,193 @@
         }
         /* ====== ENDE: Ausgaben-Historie Styles linear-gradient(90deg, #00f2fe, #4facfe); ====== */
 
+        /* ====== START: Einstellungen & Erinnerungen Styles ====== */
+        #schnellzugriffHinweis { cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
+        #schnellzugriffHinweis:hover { border-color: #00f2fe; box-shadow: 0 0 14px rgba(0, 242, 254, 0.35); }
+
+        #settingsPopup {
+            width: 95%;
+            max-width: 480px;
+            min-height: auto;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 18px;
+        }
+        .settings-scroll {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 4px;
+        }
+        .settings-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .settings-head img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+        .settings-head h2 { margin: 0 !important; }
+        .settings-head span { font-size: 0.8em; color: #87879e; }
+        .settings-section-title {
+            color: #00f2fe;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+            padding-bottom: 4px;
+        }
+        .settings-field { display: flex; flex-direction: column; gap: 4px; }
+        .settings-field > label { color: #00f2fe; font-size: 0.85em; }
+        .settings-unit-input {
+            display: flex;
+            align-items: center;
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+            padding: 0 12px;
+            transition: all 0.2s ease;
+        }
+        .settings-unit-input:focus-within {
+            border-color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+        .settings-unit-input input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1em;
+            padding: 10px 0;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        .settings-unit-input input:disabled { color: #87879e; }
+        .settings-unit-input span { color: #87879e; font-size: 0.9em; font-weight: 600; }
+        .settings-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8em;
+            color: #aaaaaa;
+            cursor: pointer;
+        }
+        .settings-check input { width: 18px; height: 18px; accent-color: #00f2fe; flex-shrink: 0; }
+
+        .reminder-card {
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 8px;
+        }
+        .reminder-card.is-done { opacity: 0.55; }
+        .reminder-card.is-done .reminder-title { text-decoration: line-through; }
+        .reminder-card.is-overdue { border-color: #e74c3c; }
+        .reminder-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .reminder-title { font-weight: 700; font-size: 0.9em; overflow-wrap: anywhere; }
+        .reminder-meta { font-size: 0.75em; color: #aaaaaa; }
+        .reminder-meta .next { color: rgba(0, 242, 254, 0.8); }
+        .reminder-meta .late { color: #ff6b6b; }
+        .reminder-card .fitness-btn-icon { width: 32px; height: 32px; padding: 0; font-size: 13px; flex-shrink: 0; }
+
+        .reminder-form {
+            background: rgba(25, 25, 45, 0.9);
+            border: 3px solid rgb(135, 135, 158);
+            border-radius: 15px;
+            padding: 14px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .reminder-form-title { font-weight: 600; text-align: center; }
+        .reminder-form .styled-input { box-sizing: border-box; font-size: 1em; color-scheme: dark; }
+        .reminder-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .reminder-form-grid label, .reminder-form .settings-field > label { font-size: 0.75em; }
+        .reminder-form-actions { display: flex; gap: 8px; }
+        .reminder-form-actions button { flex: 1; padding: 12px; }
+        #reminderCancelEditBtn { background: #3a3a5a; display: none; }
+
+        #settingsSaveBtn { margin-top: 16px; flex-shrink: 0; }
+
+        /* Erinnerungs-Toast (Variante A) */
+        #reminderToast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: 92%;
+            max-width: 420px;
+            box-sizing: border-box;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease-out;
+            touch-action: pan-y;
+        }
+        #reminderToast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .reminder-toast-card {
+            background: #000000;
+            border: 1px solid #ffffff;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+        .reminder-toast-card.is-overdue { border-color: #e74c3c; }
+        .reminder-toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 242, 254, 0.12);
+            color: #00f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .reminder-toast-card.is-overdue .reminder-toast-icon { background: rgba(231, 76, 60, 0.15); color: #ff6b6b; }
+        .reminder-toast-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .reminder-toast-label { font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .reminder-toast-text { font-size: 1em; overflow-wrap: anywhere; }
+        .reminder-toast-meta { font-size: 0.75em; color: #aaaaaa; }
+        .reminder-toast-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .reminder-toast-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        #reminderDoneBtn { border: 1px solid #4facfe; background: #00f2fe; color: #0a0a1a; }
+        #reminderSnoozeBtn { border: 1px solid #45456a; background: #2a2a4a; color: #ffffff; font-weight: 600; }
+        .reminder-toast-more { display: block; margin-top: 6px; font-size: 0.75em; color: #87879e; text-align: center; }
+        /* ====== ENDE: Einstellungen & Erinnerungen Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2653,20 +2840,20 @@
 
             <div class="sidebar-header">
 
-                <img src="profil.png" alt="Profilbild" class="profile-pic" id="schnellzugriffHinweis">
-            
+                <img src="profil.png" alt="Profilbild – Einstellungen öffnen" title="Einstellungen" class="profile-pic" id="schnellzugriffHinweis">
+
                 <div class="user-stats">
                     <div class="stat-item">
                         <span class="stat-label">Gewicht</span>
-                        <span class="stat-value">81 kg</span>
+                        <span class="stat-value" id="sidebarWeight">-- kg</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">CRP-Wert</span>
-                        <span class="stat-value">1,1 mg/l</span>
+                        <span class="stat-value" id="sidebarCrp">-- mg/l</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Vitamin D3</span>
-                        <span class="stat-value">50 µg/l</span>
+                        <span class="stat-value" id="sidebarD3">-- µg/l</span>
                     </div>
                 </div>
             </div>
@@ -2688,6 +2875,113 @@
             </div>
 
         </div>
+    </div>
+
+    <!-- Einstellungen-Popup ⚙️ -->
+    <div class="overlay" id="settingsOverlay">
+        <div class="popup" id="settingsPopup">
+            <span class="close-btn" id="closeSettingsBtn">&times;</span>
+
+            <div class="settings-head">
+                <img src="profil.png" alt="Profilbild">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <h2>Einstellungen</h2>
+                    <span>Profilwerte &amp; Erinnerungen</span>
+                </div>
+            </div>
+
+            <div class="settings-scroll">
+                <div class="settings-section-title">Profilwerte</div>
+
+                <div class="settings-field">
+                    <label for="settingsWeight">Gewicht</label>
+                    <div class="settings-unit-input">
+                        <input type="number" id="settingsWeight" step="0.1" inputmode="decimal" placeholder="z.B. 81">
+                        <span>kg</span>
+                    </div>
+                </div>
+                <div class="settings-field">
+                    <label for="settingsCrp">CRP-Wert</label>
+                    <div class="settings-unit-input">
+                        <input type="number" id="settingsCrp" step="0.1" inputmode="decimal" placeholder="z.B. 1.1">
+                        <span>mg/l</span>
+                    </div>
+                </div>
+                <div class="settings-field">
+                    <label for="settingsD3">Vitamin D3</label>
+                    <div class="settings-unit-input">
+                        <input type="number" id="settingsD3" step="0.1" inputmode="decimal" placeholder="z.B. 50">
+                        <span>µg/l</span>
+                    </div>
+                </div>
+                <label class="settings-check">
+                    <input type="checkbox" id="settingsAutoBlood">
+                    CRP &amp; D3 automatisch aus letzter Blutwerte-Eingabe übernehmen
+                </label>
+
+                <div class="settings-section-title">Erinnerungen</div>
+                <div id="reminderList"></div>
+
+                <div class="reminder-form">
+                    <span class="reminder-form-title" id="reminderFormTitle">Neue Erinnerung</span>
+                    <input type="text" id="reminderTitleInput" class="styled-input" placeholder="Titel, z. B. Rezept abholen" aria-label="Titel der Erinnerung" maxlength="80">
+                    <div class="reminder-form-grid">
+                        <div class="settings-field">
+                            <label for="reminderDateInput">Start</label>
+                            <input type="date" id="reminderDateInput" class="styled-input">
+                        </div>
+                        <div class="settings-field">
+                            <label for="reminderTimeInput">Uhrzeit</label>
+                            <input type="time" id="reminderTimeInput" class="styled-input" value="20:00">
+                        </div>
+                    </div>
+                    <div class="settings-field">
+                        <label for="reminderRepeatInput">Wiederholung</label>
+                        <select id="reminderRepeatInput" class="styled-input">
+                            <option value="once">Einmalig</option>
+                            <option value="daily">Täglich</option>
+                            <option value="weekly">Wöchentlich</option>
+                            <option value="nweeks">Alle X Wochen</option>
+                            <option value="monthly">Monatlich (gleicher Tag)</option>
+                            <option value="monthEnd">Monatlich (letzter Tag)</option>
+                        </select>
+                    </div>
+                    <div class="settings-field" id="reminderIntervalField" style="display: none;">
+                        <label for="reminderIntervalInput">Alle wie viele Wochen?</label>
+                        <input type="number" id="reminderIntervalInput" class="styled-input" min="1" step="1" value="2">
+                    </div>
+                    <div class="reminder-form-actions">
+                        <button type="button" class="action-button" id="reminderCancelEditBtn">Abbrechen</button>
+                        <button type="button" class="action-button btn-search" id="reminderAddBtn">+ Hinzufügen</button>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.75em; color: #87879e; text-align: center; margin: 0;">
+                    Tipp: Überschrift doppelt klicken = Standardwerte ausfüllen · lange drücken = Standardwerte setzen
+                </p>
+            </div>
+
+            <button class="submit-button" id="settingsSaveBtn">Speichern</button>
+        </div>
+    </div>
+
+    <!-- Erinnerungs-Toast 🔔 -->
+    <div id="reminderToast" role="status" aria-live="polite">
+        <div class="reminder-toast-card" id="reminderToastCard">
+            <div class="reminder-toast-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10 21h4"></path></svg>
+            </div>
+            <div class="reminder-toast-body">
+                <span class="reminder-toast-label" id="reminderToastLabel">Erinnerung</span>
+                <span class="reminder-toast-text" id="reminderToastText"></span>
+                <span class="reminder-toast-meta" id="reminderToastMeta"></span>
+                <div class="reminder-toast-actions">
+                    <button type="button" id="reminderDoneBtn">Erledigt</button>
+                    <button type="button" id="reminderSnoozeBtn">In 1 Std.</button>
+                </div>
+            </div>
+        </div>
+        <span class="reminder-toast-more" id="reminderToastMore"></span>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -4500,9 +4794,10 @@
             const schnellzugriffTitle = document.getElementById('schnellzugriffHinweis');
 
                 if (schnellzugriffTitle) {
-                    // Zeigt den Hinweis beim einfachen Klick (oder Mouseover)
+                    // Klick aufs Profilbild öffnet das Einstellungen-Popup
+                    // (der frühere Hinweis steht jetzt unten im Popup)
                     schnellzugriffTitle.addEventListener('click', () => {
-                        alert("ℹ️ Hinweis:\n\nDoppeltes Klicken: Felder ausfüllen\nLanges Klicken: Standardwerte setzen");
+                        openSettingsPopup();
                     });
                 }
 
@@ -6924,6 +7219,488 @@
             // ====== ENDE: Ausgaben-Historie ======
             // ====== ENDE: Ausgaben-Tracker Logik ======
 
+            // ====== START: Einstellungen & Erinnerungen Logik ======
+            // Firestore: userSettings/{uid} = { weight, crp, d3, autoBlood, reminders: [...] }
+            // Erinnerung: { id, title, due: "YYYY-MM-DDTHH:MM", repeat, interval, anchorDay, done, doneAt, snoozeUntil }
+            const REPEAT_LABELS = {
+                once: 'Einmalig',
+                daily: 'Täglich',
+                weekly: 'Wöchentlich',
+                nweeks: 'Alle X Wochen',
+                monthly: 'Monatlich',
+                monthEnd: 'Monatlich · letzter Tag'
+            };
+
+            let userSettings = { weight: null, crp: null, d3: null, autoBlood: false, reminders: [] };
+            let editingReminderId = null;
+            let reminderCheckInterval = null;
+            let currentToastReminderId = null;
+
+            const settingsOverlay = document.getElementById('settingsOverlay');
+
+            function settingsDocRef() {
+                return db.collection('userSettings').doc(auth.currentUser.uid);
+            }
+
+            function escapeHtml(str) {
+                return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            }
+
+            const pad2 = (n) => String(n).padStart(2, '0');
+            function toDueString(d) {
+                return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+            }
+            function parseDue(str) {
+                const [datePart, timePart = '00:00'] = String(str).split('T');
+                const [y, m, d] = datePart.split('-').map(Number);
+                const [h, mi] = timePart.split(':').map(Number);
+                return new Date(y, m - 1, d, h || 0, mi || 0, 0, 0);
+            }
+            function formatDayMonth(d) {
+                return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.`;
+            }
+            function formatTime(d) {
+                return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+            }
+            function formatNumberDe(val) {
+                return (val === null || val === undefined || isNaN(val)) ? '--' : Number(val).toLocaleString('de-DE', { maximumFractionDigits: 1 });
+            }
+            function repeatLabel(rem) {
+                if (rem.repeat === 'nweeks') return `Alle ${rem.interval || 2} Wochen`;
+                return REPEAT_LABELS[rem.repeat] || 'Einmalig';
+            }
+
+            // --- Sidebar-Werte anzeigen ---
+            function updateSidebarStats() {
+                document.getElementById('sidebarWeight').textContent = `${formatNumberDe(userSettings.weight)} kg`;
+                document.getElementById('sidebarCrp').textContent = `${formatNumberDe(userSettings.crp)} mg/l`;
+                document.getElementById('sidebarD3').textContent = `${formatNumberDe(userSettings.d3)} µg/l`;
+            }
+
+            // --- Letzte Blutwerte aus der Tagesbilanz holen ---
+            async function fetchLatestBloodValues() {
+                const user = auth.currentUser;
+                if (!user) return { crp: null, d3: null };
+                const snapshot = await db.collection('dailyEntries').where('userId', '==', user.uid).get();
+                let crp = null, crpDate = null, d3 = null, d3Date = null;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.date) return;
+                    const date = data.date.toDate();
+                    if (data.crpValue !== undefined && data.crpValue !== null && (!crpDate || date > crpDate)) { crp = data.crpValue; crpDate = date; }
+                    if (data.d3Value !== undefined && data.d3Value !== null && (!d3Date || date > d3Date)) { d3 = data.d3Value; d3Date = date; }
+                });
+                return { crp, d3 };
+            }
+
+            async function applyAutoBloodValues() {
+                if (!userSettings.autoBlood) return;
+                try {
+                    const latest = await fetchLatestBloodValues();
+                    let changed = false;
+                    if (latest.crp !== null && latest.crp !== userSettings.crp) { userSettings.crp = latest.crp; changed = true; }
+                    if (latest.d3 !== null && latest.d3 !== userSettings.d3) { userSettings.d3 = latest.d3; changed = true; }
+                    if (changed) {
+                        updateSidebarStats();
+                        await settingsDocRef().set({ crp: userSettings.crp, d3: userSettings.d3 }, { merge: true });
+                    }
+                } catch (e) {
+                    console.error('Fehler beim Übernehmen der Blutwerte:', e);
+                }
+            }
+
+            // --- Laden & Speichern ---
+            async function loadUserSettings() {
+                if (!auth.currentUser) return;
+                try {
+                    const doc = await settingsDocRef().get();
+                    if (doc.exists) {
+                        userSettings = { ...userSettings, ...doc.data() };
+                        if (!Array.isArray(userSettings.reminders)) userSettings.reminders = [];
+                    } else {
+                        // Erstbefüllung mit den bisher fest eingetragenen Werten
+                        // + der Monatsende-Screenshot als normale Erinnerung
+                        const now = new Date();
+                        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 20, 0, 0, 0);
+                        userSettings = {
+                            weight: 81, crp: 1.1, d3: 50, autoBlood: false,
+                            reminders: [{
+                                id: Date.now().toString(),
+                                title: 'Screenshot Ausgabentracker',
+                                due: toDueString(lastDay),
+                                repeat: 'monthEnd', interval: null, anchorDay: null,
+                                done: false, doneAt: null, snoozeUntil: null
+                            }]
+                        };
+                        await settingsDocRef().set(userSettings);
+                    }
+                    updateSidebarStats();
+                    await applyAutoBloodValues();
+                    startReminderChecks();
+                } catch (e) {
+                    console.error('Fehler beim Laden der Einstellungen:', e);
+                }
+            }
+
+            async function saveReminders() {
+                try {
+                    await settingsDocRef().set({ reminders: userSettings.reminders }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Erinnerungen:', e);
+                    alert('❌ Erinnerungen konnten nicht gespeichert werden: ' + e.message);
+                }
+            }
+
+            // --- Popup öffnen/schließen ---
+            function openSettingsPopup() {
+                if (!auth.currentUser) {
+                    alert('🔓 Bitte melden Sie sich an, um die Einstellungen zu nutzen.');
+                    return;
+                }
+                document.getElementById('quickMenuOverlay').style.display = 'none';
+                document.getElementById('settingsWeight').value = userSettings.weight ?? '';
+                document.getElementById('settingsCrp').value = userSettings.crp ?? '';
+                document.getElementById('settingsD3').value = userSettings.d3 ?? '';
+                document.getElementById('settingsAutoBlood').checked = !!userSettings.autoBlood;
+                toggleBloodInputs();
+                resetReminderForm();
+                renderReminderList();
+                settingsOverlay.style.display = 'flex';
+            }
+
+            function closeSettingsPopup() {
+                settingsOverlay.style.display = 'none';
+            }
+
+            document.getElementById('closeSettingsBtn').addEventListener('click', closeSettingsPopup);
+            settingsOverlay.addEventListener('click', (e) => { if (e.target.id === 'settingsOverlay') closeSettingsPopup(); });
+
+            function toggleBloodInputs() {
+                const auto = document.getElementById('settingsAutoBlood').checked;
+                document.getElementById('settingsCrp').disabled = auto;
+                document.getElementById('settingsD3').disabled = auto;
+            }
+
+            document.getElementById('settingsAutoBlood').addEventListener('change', async () => {
+                toggleBloodInputs();
+                if (document.getElementById('settingsAutoBlood').checked) {
+                    try {
+                        const latest = await fetchLatestBloodValues();
+                        if (latest.crp !== null) document.getElementById('settingsCrp').value = latest.crp;
+                        if (latest.d3 !== null) document.getElementById('settingsD3').value = latest.d3;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            });
+
+            // Profilwerte speichern
+            document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
+                const readNum = (id) => {
+                    const v = parseFloat(String(document.getElementById(id).value).replace(',', '.'));
+                    return isNaN(v) ? null : v;
+                };
+                userSettings.weight = readNum('settingsWeight');
+                userSettings.crp = readNum('settingsCrp');
+                userSettings.d3 = readNum('settingsD3');
+                userSettings.autoBlood = document.getElementById('settingsAutoBlood').checked;
+
+                try {
+                    await settingsDocRef().set({
+                        weight: userSettings.weight,
+                        crp: userSettings.crp,
+                        d3: userSettings.d3,
+                        autoBlood: userSettings.autoBlood
+                    }, { merge: true });
+                    updateSidebarStats();
+                    closeSettingsPopup();
+                    showCustomAlert('Einstellungen gespeichert.', '💾');
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Einstellungen:', e);
+                    alert('❌ Fehler beim Speichern: ' + e.message);
+                }
+            });
+
+            // Nach dem Speichern neuer Blutwerte die Sidebar ggf. mitziehen
+            document.getElementById('saveBloodValuesBtn').addEventListener('click', () => {
+                setTimeout(applyAutoBloodValues, 1500);
+            });
+
+            // --- Wiederholungen berechnen ---
+            function nextOccurrence(rem) {
+                const now = new Date();
+                let d = parseDue(rem.due);
+                const anchorDay = rem.anchorDay || d.getDate();
+                let guard = 0;
+                do {
+                    if (rem.repeat === 'daily') {
+                        d.setDate(d.getDate() + 1);
+                    } else if (rem.repeat === 'weekly') {
+                        d.setDate(d.getDate() + 7);
+                    } else if (rem.repeat === 'nweeks') {
+                        d.setDate(d.getDate() + 7 * (parseInt(rem.interval) || 2));
+                    } else if (rem.repeat === 'monthly') {
+                        const y = d.getFullYear(), m = d.getMonth() + 1;
+                        const daysInMonth = new Date(y, m + 1, 0).getDate();
+                        d = new Date(y, m, Math.min(anchorDay, daysInMonth), d.getHours(), d.getMinutes());
+                    } else if (rem.repeat === 'monthEnd') {
+                        d = new Date(d.getFullYear(), d.getMonth() + 2, 0, d.getHours(), d.getMinutes());
+                    } else {
+                        return null;
+                    }
+                    guard++;
+                } while (d <= now && guard < 2000);
+                return d;
+            }
+
+            function isOverdue(rem) {
+                if (rem.done) return false;
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+                return parseDue(rem.due) < startOfToday;
+            }
+
+            function getDueReminders() {
+                const now = new Date();
+                return userSettings.reminders
+                    .filter(r => !r.done && parseDue(r.due) <= now && (!r.snoozeUntil || new Date(r.snoozeUntil) <= now))
+                    .sort((a, b) => parseDue(a.due) - parseDue(b.due));
+            }
+
+            // --- Liste im Popup ---
+            function renderReminderList() {
+                const list = document.getElementById('reminderList');
+                const sorted = [...userSettings.reminders].sort((a, b) => {
+                    if (a.done !== b.done) return a.done ? 1 : -1;
+                    return parseDue(a.due) - parseDue(b.due);
+                });
+
+                if (sorted.length === 0) {
+                    list.innerHTML = '<p style="color: #87879e; font-size: 0.85em; text-align: center; margin: 0;">Noch keine Erinnerungen angelegt.</p>';
+                    return;
+                }
+
+                list.innerHTML = sorted.map(rem => {
+                    const due = parseDue(rem.due);
+                    let meta;
+                    if (rem.done) {
+                        const doneAt = rem.doneAt ? new Date(rem.doneAt) : null;
+                        meta = `${repeatLabel(rem)} · erledigt${doneAt ? ' am ' + formatDayMonth(doneAt) : ''}`;
+                    } else if (isOverdue(rem)) {
+                        meta = `${repeatLabel(rem)} · ${formatTime(due)} · <span class="late">fällig seit ${formatDayMonth(due)}</span>`;
+                    } else {
+                        meta = `${repeatLabel(rem)} · ${formatTime(due)} · <span class="next">nächste: ${formatDayMonth(due)}</span>`;
+                    }
+                    const classes = ['reminder-card'];
+                    if (rem.done) classes.push('is-done');
+                    else if (isOverdue(rem)) classes.push('is-overdue');
+
+                    return `
+                        <div class="${classes.join(' ')}">
+                            <div class="reminder-info">
+                                <span class="reminder-title">${escapeHtml(rem.title)}</span>
+                                <span class="reminder-meta">${meta}</span>
+                            </div>
+                            ${rem.done ? '' : `<button type="button" class="fitness-btn-icon" data-reminder-edit="${rem.id}" aria-label="Bearbeiten">✎</button>`}
+                            <button type="button" class="fitness-btn-icon delete-btn" data-reminder-delete="${rem.id}" aria-label="Löschen">✕</button>
+                        </div>`;
+                }).join('');
+            }
+
+            document.getElementById('reminderList').addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('[data-reminder-edit]');
+                const deleteBtn = e.target.closest('[data-reminder-delete]');
+
+                if (editBtn) {
+                    const rem = userSettings.reminders.find(r => r.id === editBtn.dataset.reminderEdit);
+                    if (!rem) return;
+                    editingReminderId = rem.id;
+                    const due = parseDue(rem.due);
+                    document.getElementById('reminderTitleInput').value = rem.title;
+                    document.getElementById('reminderDateInput').value = rem.due.split('T')[0];
+                    document.getElementById('reminderTimeInput').value = formatTime(due);
+                    document.getElementById('reminderRepeatInput').value = rem.repeat || 'once';
+                    document.getElementById('reminderIntervalInput').value = rem.interval || 2;
+                    updateIntervalVisibility();
+                    document.getElementById('reminderFormTitle').textContent = 'Erinnerung bearbeiten';
+                    document.getElementById('reminderAddBtn').textContent = 'Aktualisieren';
+                    document.getElementById('reminderCancelEditBtn').style.display = 'block';
+                    document.getElementById('reminderTitleInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                if (deleteBtn) {
+                    const rem = userSettings.reminders.find(r => r.id === deleteBtn.dataset.reminderDelete);
+                    if (!rem || !confirm(`Erinnerung "${rem.title}" löschen?`)) return;
+                    userSettings.reminders = userSettings.reminders.filter(r => r.id !== rem.id);
+                    if (editingReminderId === rem.id) resetReminderForm();
+                    renderReminderList();
+                    refreshReminderToast();
+                    await saveReminders();
+                }
+            });
+
+            // --- Formular ---
+            function updateIntervalVisibility() {
+                const isN = document.getElementById('reminderRepeatInput').value === 'nweeks';
+                document.getElementById('reminderIntervalField').style.display = isN ? 'flex' : 'none';
+            }
+            document.getElementById('reminderRepeatInput').addEventListener('change', updateIntervalVisibility);
+
+            function resetReminderForm() {
+                editingReminderId = null;
+                const t = new Date();
+                document.getElementById('reminderTitleInput').value = '';
+                document.getElementById('reminderDateInput').value = `${t.getFullYear()}-${pad2(t.getMonth() + 1)}-${pad2(t.getDate())}`;
+                document.getElementById('reminderTimeInput').value = '20:00';
+                document.getElementById('reminderRepeatInput').value = 'once';
+                document.getElementById('reminderIntervalInput').value = 2;
+                updateIntervalVisibility();
+                document.getElementById('reminderFormTitle').textContent = 'Neue Erinnerung';
+                document.getElementById('reminderAddBtn').textContent = '+ Hinzufügen';
+                document.getElementById('reminderCancelEditBtn').style.display = 'none';
+            }
+            document.getElementById('reminderCancelEditBtn').addEventListener('click', resetReminderForm);
+
+            document.getElementById('reminderAddBtn').addEventListener('click', async () => {
+                const title = document.getElementById('reminderTitleInput').value.trim();
+                const date = document.getElementById('reminderDateInput').value;
+                const time = document.getElementById('reminderTimeInput').value || '00:00';
+                const repeat = document.getElementById('reminderRepeatInput').value;
+                const interval = Math.max(1, parseInt(document.getElementById('reminderIntervalInput').value) || 2);
+
+                if (!title) { alert('✒️ Bitte einen Titel eingeben.'); return; }
+                if (!date) { alert('✒️ Bitte ein Startdatum wählen.'); return; }
+
+                const due = `${date}T${time}`;
+                const fields = {
+                    title,
+                    due,
+                    repeat,
+                    interval: repeat === 'nweeks' ? interval : null,
+                    anchorDay: repeat === 'monthly' ? parseDue(due).getDate() : null,
+                    done: false,
+                    doneAt: null,
+                    snoozeUntil: null
+                };
+
+                if (editingReminderId) {
+                    const rem = userSettings.reminders.find(r => r.id === editingReminderId);
+                    if (rem) Object.assign(rem, fields);
+                } else {
+                    userSettings.reminders.push({ id: Date.now().toString(), ...fields });
+                }
+
+                resetReminderForm();
+                renderReminderList();
+                refreshReminderToast();
+                await saveReminders();
+            });
+
+            // --- Toast-Banner ---
+            const reminderToast = document.getElementById('reminderToast');
+
+            function refreshReminderToast() {
+                const due = getDueReminders();
+                if (due.length === 0) {
+                    reminderToast.classList.remove('visible');
+                    currentToastReminderId = null;
+                    return;
+                }
+
+                const rem = due[0];
+                currentToastReminderId = rem.id;
+                const dueDate = parseDue(rem.due);
+                const overdue = isOverdue(rem);
+
+                document.getElementById('reminderToastCard').classList.toggle('is-overdue', overdue);
+                document.getElementById('reminderToastLabel').textContent = overdue ? 'Überfällig' : 'Erinnerung';
+                document.getElementById('reminderToastText').textContent = rem.title;
+                document.getElementById('reminderToastMeta').textContent = overdue
+                    ? `Fällig seit ${formatDayMonth(dueDate)} · ${repeatLabel(rem)}`
+                    : `Fällig heute · ${formatTime(dueDate)} · ${repeatLabel(rem)}`;
+
+                const more = due.length - 1;
+                document.getElementById('reminderToastMore').textContent = more > 0
+                    ? `+${more} weitere fällig · zur Seite wischen = später`
+                    : 'zur Seite wischen = später';
+
+                reminderToast.style.transform = '';
+                reminderToast.style.opacity = '';
+                reminderToast.classList.add('visible');
+            }
+
+            async function markReminderDone(id) {
+                const rem = userSettings.reminders.find(r => r.id === id);
+                if (!rem) return;
+                if (rem.repeat === 'once' || !rem.repeat) {
+                    rem.done = true;
+                    rem.doneAt = new Date().toISOString();
+                } else {
+                    rem.due = toDueString(nextOccurrence(rem));
+                    rem.lastDoneAt = new Date().toISOString();
+                }
+                rem.snoozeUntil = null;
+                refreshReminderToast();
+                if (settingsOverlay.style.display === 'flex') renderReminderList();
+                await saveReminders();
+            }
+
+            async function snoozeReminder(id, minutes = 60) {
+                const rem = userSettings.reminders.find(r => r.id === id);
+                if (!rem) return;
+                rem.snoozeUntil = new Date(Date.now() + minutes * 60000).toISOString();
+                refreshReminderToast();
+                await saveReminders();
+            }
+
+            document.getElementById('reminderDoneBtn').addEventListener('click', () => {
+                if (currentToastReminderId) markReminderDone(currentToastReminderId);
+            });
+            document.getElementById('reminderSnoozeBtn').addEventListener('click', () => {
+                if (currentToastReminderId) snoozeReminder(currentToastReminderId, 60);
+            });
+
+            // Zur Seite wischen = 1 Std. später
+            let reminderSwipeStartX = 0, reminderSwipeX = 0, reminderSwiping = false;
+            reminderToast.addEventListener('touchstart', (e) => {
+                if (e.target.closest('button')) return;
+                reminderSwiping = true;
+                reminderSwipeStartX = e.touches[0].clientX;
+                reminderSwipeX = 0;
+                reminderToast.style.transition = 'none';
+            }, { passive: true });
+            reminderToast.addEventListener('touchmove', (e) => {
+                if (!reminderSwiping) return;
+                reminderSwipeX = e.touches[0].clientX - reminderSwipeStartX;
+                reminderToast.style.transform = `translateX(calc(-50% + ${reminderSwipeX}px))`;
+                reminderToast.style.opacity = String(Math.max(0, 1 - Math.abs(reminderSwipeX) / 300));
+            }, { passive: true });
+            reminderToast.addEventListener('touchend', () => {
+                if (!reminderSwiping) return;
+                reminderSwiping = false;
+                reminderToast.style.transition = '';
+                if (Math.abs(reminderSwipeX) > 100 && currentToastReminderId) {
+                    const side = reminderSwipeX > 0 ? '120vw' : '-120vw';
+                    reminderToast.style.transform = `translateX(${side})`;
+                    reminderToast.style.opacity = '0';
+                    const id = currentToastReminderId;
+                    setTimeout(() => snoozeReminder(id, 60), 300);
+                } else {
+                    reminderToast.style.transform = '';
+                    reminderToast.style.opacity = '';
+                }
+            });
+
+            function startReminderChecks() {
+                refreshReminderToast();
+                if (reminderCheckInterval) clearInterval(reminderCheckInterval);
+                reminderCheckInterval = setInterval(refreshReminderToast, 60000);
+            }
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && auth.currentUser) refreshReminderToast();
+            });
+            // ====== ENDE: Einstellungen & Erinnerungen Logik ======
+
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
@@ -6955,6 +7732,9 @@
 
                         // NEU: Tags nach Häufigkeit prüfen
                         await highlightFrequentPhysioTags();
+
+                        // NEU: Einstellungen (Sidebar-Werte) & Erinnerungen laden
+                        await loadUserSettings();
 
                         setTimeout(() => {
                             updateBiologikaCountdown();
