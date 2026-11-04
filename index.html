@@ -1974,6 +1974,85 @@
         .reminder-toast-more { display: block; margin-top: 6px; font-size: 0.75em; color: #87879e; text-align: center; }
         /* ====== ENDE: Einstellungen & Erinnerungen Styles ====== */
 
+        /* ====== START: Gewichtsverlauf Styles ====== */
+        #sidebarWeightItem { cursor: pointer; border-radius: 10px; transition: background 0.2s; padding: 4px 0; }
+        #sidebarWeightItem:hover { background: rgba(0, 242, 254, 0.08); }
+        #sidebarWeightItem .stat-label::after { content: ' 📈'; font-size: 0.85em; }
+
+        .weight-history-link {
+            background: none;
+            border: none;
+            color: #00f2fe;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8em;
+            padding: 4px 0;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        .weight-history-link:hover { color: #ffffff; }
+
+        #weightHistoryPopup {
+            width: 95%;
+            max-width: 560px;
+            min-height: auto;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 18px;
+        }
+        .weight-history-scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding-right: 4px; }
+        .weight-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .weight-kpi {
+            background: rgba(25, 25, 45, 0.9);
+            border: 3px solid rgb(135, 135, 158);
+            border-radius: 15px;
+            padding: 10px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .weight-kpi-label { font-size: 0.72em; color: #aaaaaa; }
+        .weight-kpi-value { font-size: 1.3em; font-weight: 700; color: #00f2fe; }
+        .weight-kpi-value.is-down { color: #2ecc71; }
+        .weight-kpi-value.is-up { color: #ff6b6b; }
+        .weight-kpi-sub { font-size: 0.68em; color: #87879e; }
+
+        .weight-range-pills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; background: #2a2a4a; border: 1px solid #45456a; border-radius: 12px; padding: 4px; }
+        .weight-range-pills button {
+            background: transparent;
+            color: #ffffff;
+            border: none;
+            border-radius: 9px;
+            padding: 8px 0;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .weight-range-pills button.active { background: #00f2fe; color: #0a0a1a; font-weight: 700; }
+        .weight-chart-box { position: relative; height: 240px; }
+        .weight-chart-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #87879e; font-size: 0.85em; text-align: center; }
+
+        .weight-add-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+        .weight-add-row .styled-input { box-sizing: border-box; color-scheme: dark; width: 100%; }
+        .weight-add-row button { padding: 12px 14px; }
+
+        .weight-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .weight-entry-date { flex: 1; font-size: 0.85em; color: #cccccc; }
+        .weight-entry-value { font-weight: 700; font-size: 0.95em; }
+        .weight-entry-delta { width: 64px; text-align: right; font-size: 0.75em; color: #87879e; }
+        .weight-entry-delta.is-down { color: #2ecc71; }
+        .weight-entry-delta.is-up { color: #ff6b6b; }
+        .weight-entry .fitness-btn-icon { width: 30px; height: 30px; padding: 0; font-size: 12px; flex-shrink: 0; }
+        /* ====== ENDE: Gewichtsverlauf Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2266,7 +2345,7 @@
                         <button type="button" class="notes-tag-button" data-tag="Haut offen">offen</button>
 
                         <div class="tag-category" style="text-align:center">Supplements | GD | Schlaf</div>
-                        <button type="button" class="notes-tag-button" data-tag="Regain">🖊️</button>
+                        <button type="button" class="notes-tag-button" data-tag="Gläschen">🧪</button>
                         <button type="button" class="notes-tag-button" data-tag="Magnesium">Mg</button>
                         <button type="button" class="notes-tag-button" data-tag="Vitamin D3">D3</button>
                         <button type="button" class="notes-tag-button" data-tag="Omega3">Ω3</button>
@@ -2843,7 +2922,7 @@
                 <img src="profil.png" alt="Profilbild – Einstellungen öffnen" title="Einstellungen" class="profile-pic" id="schnellzugriffHinweis">
 
                 <div class="user-stats">
-                    <div class="stat-item">
+                    <div class="stat-item" id="sidebarWeightItem" role="button" tabindex="0" title="Gewichtsverlauf anzeigen">
                         <span class="stat-label">Gewicht</span>
                         <span class="stat-value" id="sidebarWeight">-- kg</span>
                     </div>
@@ -2899,6 +2978,7 @@
                         <input type="number" id="settingsWeight" step="0.1" inputmode="decimal" placeholder="z.B. 81">
                         <span>kg</span>
                     </div>
+                    <button type="button" class="weight-history-link" id="openWeightHistoryBtn">📈 Gewichtsverlauf anzeigen</button>
                 </div>
                 <div class="settings-field">
                     <label for="settingsCrp">CRP-Wert</label>
@@ -2963,6 +3043,65 @@
             </div>
 
             <button class="submit-button" id="settingsSaveBtn">Speichern</button>
+        </div>
+    </div>
+
+    <!-- Gewichtsverlauf-Popup 📈 -->
+    <div class="overlay" id="weightHistoryOverlay">
+        <div class="popup" id="weightHistoryPopup">
+            <span class="close-btn" id="closeWeightHistoryBtn">&times;</span>
+            <h2 style="margin-top: 0;">Gewichtsverlauf</h2>
+
+            <div class="weight-history-scroll">
+                <div class="weight-kpis">
+                    <div class="weight-kpi">
+                        <span class="weight-kpi-label">Aktuell</span>
+                        <span class="weight-kpi-value" id="weightKpiCurrent">--</span>
+                        <span class="weight-kpi-sub" id="weightKpiCurrentDate">&nbsp;</span>
+                    </div>
+                    <div class="weight-kpi">
+                        <span class="weight-kpi-label">Veränderung</span>
+                        <span class="weight-kpi-value" id="weightKpiDelta">--</span>
+                        <span class="weight-kpi-sub" id="weightKpiDeltaSub">im Zeitraum</span>
+                    </div>
+                    <div class="weight-kpi">
+                        <span class="weight-kpi-label">Min / Max</span>
+                        <span class="weight-kpi-value" id="weightKpiMinMax" style="font-size: 1em;">--</span>
+                        <span class="weight-kpi-sub">im Zeitraum</span>
+                    </div>
+                </div>
+
+                <div class="weight-range-pills" id="weightRangePills">
+                    <button type="button" data-range="30">30 T</button>
+                    <button type="button" data-range="90" class="active">90 T</button>
+                    <button type="button" data-range="365">1 J</button>
+                    <button type="button" data-range="all">Alle</button>
+                </div>
+
+                <div class="weight-chart-box">
+                    <canvas id="weightHistoryChart"></canvas>
+                    <div class="weight-chart-empty" id="weightChartEmpty" style="display: none;">Noch keine Werte im Zeitraum.<br>Trage unten dein Gewicht ein.</div>
+                </div>
+
+                <div class="reminder-form">
+                    <span class="reminder-form-title">Wert eintragen</span>
+                    <div class="weight-add-row">
+                        <div class="settings-field">
+                            <label for="weightAddDate" style="font-size: 0.75em;">Datum</label>
+                            <input type="date" id="weightAddDate" class="styled-input">
+                        </div>
+                        <div class="settings-field">
+                            <label for="weightAddValue" style="font-size: 0.75em;">Gewicht (kg)</label>
+                            <input type="number" id="weightAddValue" class="styled-input" step="0.1" inputmode="decimal" placeholder="81,0">
+                        </div>
+                        <button type="button" class="action-button btn-search" id="weightAddBtn">+</button>
+                    </div>
+                    <span style="font-size: 0.72em; color: #87879e; text-align: center;">Pro Tag wird ein Wert gespeichert – ein neuer Wert am selben Tag ersetzt den alten.</span>
+                </div>
+
+                <div class="settings-section-title">Alle Einträge</div>
+                <div id="weightHistoryList"></div>
+            </div>
         </div>
     </div>
 
@@ -7233,7 +7372,7 @@
                 monthEnd: 'Monatlich · letzter Tag'
             };
 
-            let userSettings = { weight: null, crp: null, d3: null, autoBlood: false, reminders: [] };
+            let userSettings = { weight: null, crp: null, d3: null, autoBlood: false, reminders: [], weightHistory: [] };
             let editingReminderId = null;
             let reminderCheckInterval = null;
             let currentToastReminderId = null;
@@ -7320,6 +7459,12 @@
                     if (doc.exists) {
                         userSettings = { ...userSettings, ...doc.data() };
                         if (!Array.isArray(userSettings.reminders)) userSettings.reminders = [];
+                        if (!Array.isArray(userSettings.weightHistory)) userSettings.weightHistory = [];
+                        // Einmalig: bisherigen Wert als ersten Verlaufspunkt übernehmen
+                        if (userSettings.weightHistory.length === 0 && userSettings.weight !== null && userSettings.weight !== undefined) {
+                            userSettings.weightHistory = [{ date: todayIso(), weight: userSettings.weight }];
+                            await settingsDocRef().set({ weightHistory: userSettings.weightHistory }, { merge: true });
+                        }
                     } else {
                         // Erstbefüllung mit den bisher fest eingetragenen Werten
                         // + der Monatsende-Screenshot als normale Erinnerung
@@ -7327,6 +7472,7 @@
                         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 20, 0, 0, 0);
                         userSettings = {
                             weight: 81, crp: 1.1, d3: 50, autoBlood: false,
+                            weightHistory: [{ date: todayIso(), weight: 81 }],
                             reminders: [{
                                 id: Date.now().toString(),
                                 title: 'Screenshot Ausgabentracker',
@@ -7403,17 +7549,24 @@
                     const v = parseFloat(String(document.getElementById(id).value).replace(',', '.'));
                     return isNaN(v) ? null : v;
                 };
+                const previousWeight = userSettings.weight;
                 userSettings.weight = readNum('settingsWeight');
                 userSettings.crp = readNum('settingsCrp');
                 userSettings.d3 = readNum('settingsD3');
                 userSettings.autoBlood = document.getElementById('settingsAutoBlood').checked;
+
+                // Gewicht geändert → als heutigen Wert in den Verlauf schreiben
+                if (userSettings.weight !== null && userSettings.weight !== previousWeight) {
+                    upsertWeightEntry(todayIso(), userSettings.weight);
+                }
 
                 try {
                     await settingsDocRef().set({
                         weight: userSettings.weight,
                         crp: userSettings.crp,
                         d3: userSettings.d3,
-                        autoBlood: userSettings.autoBlood
+                        autoBlood: userSettings.autoBlood,
+                        weightHistory: userSettings.weightHistory
                     }, { merge: true });
                     updateSidebarStats();
                     closeSettingsPopup();
@@ -7423,6 +7576,258 @@
                     alert('❌ Fehler beim Speichern: ' + e.message);
                 }
             });
+
+            // ====== START: Gewichtsverlauf ======
+            // Gespeichert in userSettings/{uid}.weightHistory = [{ date: "YYYY-MM-DD", weight: 81.2 }, ...]
+            let weightChartInstance = null;
+            let weightRange = '90';
+
+            function todayIso() {
+                const t = new Date();
+                return `${t.getFullYear()}-${pad2(t.getMonth() + 1)}-${pad2(t.getDate())}`;
+            }
+            function isoToDate(iso) {
+                const [y, m, d] = iso.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            }
+            function formatDateDe(iso) {
+                const d = isoToDate(iso);
+                const wd = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()];
+                return `${wd}, ${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
+            }
+            function formatKg(val, signed = false) {
+                const s = Number(val).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                return signed && val > 0 ? `+${s}` : s;
+            }
+
+            function sortedWeightHistory() {
+                return [...(userSettings.weightHistory || [])].sort((a, b) => a.date.localeCompare(b.date));
+            }
+
+            // Ein Wert pro Tag: vorhandenen Eintrag ersetzen, sonst anhängen
+            function upsertWeightEntry(dateIso, weight) {
+                const list = userSettings.weightHistory || (userSettings.weightHistory = []);
+                const existing = list.find(e => e.date === dateIso);
+                if (existing) existing.weight = weight;
+                else list.push({ date: dateIso, weight });
+            }
+
+            // Aktuelles Gewicht = jüngster Verlaufseintrag
+            function syncCurrentWeightFromHistory() {
+                const sorted = sortedWeightHistory();
+                userSettings.weight = sorted.length ? sorted[sorted.length - 1].weight : null;
+                updateSidebarStats();
+                const settingsInput = document.getElementById('settingsWeight');
+                if (settingsInput && settingsOverlay.style.display === 'flex') settingsInput.value = userSettings.weight ?? '';
+            }
+
+            async function saveWeightHistory() {
+                try {
+                    await settingsDocRef().set({
+                        weightHistory: userSettings.weightHistory,
+                        weight: userSettings.weight
+                    }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern des Gewichtsverlaufs:', e);
+                    alert('❌ Gewichtsverlauf konnte nicht gespeichert werden: ' + e.message);
+                }
+            }
+
+            function getRangeEntries() {
+                const all = sortedWeightHistory();
+                if (weightRange === 'all') return all;
+                const from = new Date();
+                from.setHours(0, 0, 0, 0);
+                from.setDate(from.getDate() - parseInt(weightRange));
+                return all.filter(e => isoToDate(e.date) >= from);
+            }
+
+            function renderWeightKpis(entries) {
+                const all = sortedWeightHistory();
+                const cur = document.getElementById('weightKpiCurrent');
+                const curDate = document.getElementById('weightKpiCurrentDate');
+                const delta = document.getElementById('weightKpiDelta');
+                const deltaSub = document.getElementById('weightKpiDeltaSub');
+                const minMax = document.getElementById('weightKpiMinMax');
+
+                if (all.length) {
+                    const last = all[all.length - 1];
+                    cur.textContent = `${formatKg(last.weight)} kg`;
+                    curDate.textContent = formatDateDe(last.date).slice(4);
+                } else {
+                    cur.textContent = '--';
+                    curDate.innerHTML = '&nbsp;';
+                }
+
+                delta.classList.remove('is-up', 'is-down');
+                if (entries.length >= 2) {
+                    const diff = Math.round((entries[entries.length - 1].weight - entries[0].weight) * 10) / 10;
+                    delta.textContent = `${formatKg(diff, true)} kg`;
+                    if (diff < 0) delta.classList.add('is-down');
+                    if (diff > 0) delta.classList.add('is-up');
+                    deltaSub.textContent = `seit ${formatDateDe(entries[0].date).slice(4, 10)}`;
+                } else {
+                    delta.textContent = '--';
+                    deltaSub.textContent = 'im Zeitraum';
+                }
+
+                if (entries.length) {
+                    const vals = entries.map(e => e.weight);
+                    minMax.textContent = `${formatKg(Math.min(...vals))} / ${formatKg(Math.max(...vals))}`;
+                } else {
+                    minMax.textContent = '--';
+                }
+            }
+
+            function renderWeightChart(entries) {
+                const empty = document.getElementById('weightChartEmpty');
+                if (weightChartInstance) { weightChartInstance.destroy(); weightChartInstance = null; }
+                empty.style.display = entries.length ? 'none' : 'flex';
+                if (!entries.length) return;
+
+                const vals = entries.map(e => e.weight);
+                const pad = Math.max(1, (Math.max(...vals) - Math.min(...vals)) * 0.2);
+                const ctx = document.getElementById('weightHistoryChart').getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+                gradient.addColorStop(0, 'rgba(0, 242, 254, 0.25)');
+                gradient.addColorStop(1, 'rgba(0, 242, 254, 0)');
+
+                weightChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Gewicht (kg)',
+                            data: entries.map(e => ({ x: isoToDate(e.date), y: e.weight })),
+                            borderColor: '#00f2fe',
+                            backgroundColor: gradient,
+                            pointBackgroundColor: '#00f2fe',
+                            pointRadius: entries.length > 60 ? 0 : 3,
+                            pointHoverRadius: 5,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: weightRange === '365' || weightRange === 'all' ? 'month' : 'day', displayFormats: { day: 'dd.MM', month: 'MM.yy' }, tooltipFormat: 'dd.MM.yyyy' },
+                                ticks: { color: '#ccc', maxTicksLimit: 7 },
+                                grid: { color: 'rgba(255,255,255,0.05)' }
+                            },
+                            y: {
+                                suggestedMin: Math.floor(Math.min(...vals) - pad),
+                                suggestedMax: Math.ceil(Math.max(...vals) + pad),
+                                ticks: { color: '#ccc', callback: (v) => `${v} kg` },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (c) => ` ${formatKg(c.parsed.y)} kg` } }
+                        }
+                    }
+                });
+            }
+
+            function renderWeightList() {
+                const list = document.getElementById('weightHistoryList');
+                const sorted = sortedWeightHistory();
+                if (!sorted.length) {
+                    list.innerHTML = '<p style="color: #87879e; font-size: 0.85em; text-align: center; margin: 0;">Noch keine Einträge.</p>';
+                    return;
+                }
+                const rows = [];
+                for (let i = sorted.length - 1; i >= 0; i--) {
+                    const e = sorted[i];
+                    const prev = sorted[i - 1];
+                    let deltaHtml = '<span class="weight-entry-delta"></span>';
+                    if (prev) {
+                        const diff = Math.round((e.weight - prev.weight) * 10) / 10;
+                        const cls = diff < 0 ? 'is-down' : diff > 0 ? 'is-up' : '';
+                        deltaHtml = `<span class="weight-entry-delta ${cls}">${diff === 0 ? '±0,0' : formatKg(diff, true)}</span>`;
+                    }
+                    rows.push(`
+                        <div class="weight-entry">
+                            <span class="weight-entry-date">${formatDateDe(e.date)}</span>
+                            <span class="weight-entry-value">${formatKg(e.weight)} kg</span>
+                            ${deltaHtml}
+                            <button type="button" class="fitness-btn-icon delete-btn" data-weight-delete="${e.date}" aria-label="Eintrag vom ${formatDateDe(e.date)} löschen">✕</button>
+                        </div>`);
+                }
+                list.innerHTML = rows.join('');
+            }
+
+            function renderWeightHistory() {
+                const entries = getRangeEntries();
+                renderWeightKpis(entries);
+                renderWeightChart(entries);
+                renderWeightList();
+            }
+
+            function openWeightHistory() {
+                if (!auth.currentUser) {
+                    alert('🔓 Bitte melden Sie sich an, um den Gewichtsverlauf zu sehen.');
+                    return;
+                }
+                document.getElementById('quickMenuOverlay').style.display = 'none';
+                document.getElementById('weightAddDate').value = todayIso();
+                document.getElementById('weightAddValue').value = '';
+                document.getElementById('weightHistoryOverlay').style.display = 'flex';
+                renderWeightHistory();
+            }
+
+            function closeWeightHistory() {
+                document.getElementById('weightHistoryOverlay').style.display = 'none';
+            }
+
+            document.getElementById('openWeightHistoryBtn').addEventListener('click', openWeightHistory);
+            const sidebarWeightItem = document.getElementById('sidebarWeightItem');
+            sidebarWeightItem.addEventListener('click', openWeightHistory);
+            sidebarWeightItem.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWeightHistory(); }
+            });
+            document.getElementById('closeWeightHistoryBtn').addEventListener('click', closeWeightHistory);
+            document.getElementById('weightHistoryOverlay').addEventListener('click', (e) => {
+                if (e.target.id === 'weightHistoryOverlay') closeWeightHistory();
+            });
+
+            document.getElementById('weightRangePills').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-range]');
+                if (!btn) return;
+                weightRange = btn.dataset.range;
+                document.querySelectorAll('#weightRangePills button').forEach(b => b.classList.toggle('active', b === btn));
+                const entries = getRangeEntries();
+                renderWeightKpis(entries);
+                renderWeightChart(entries);
+            });
+
+            document.getElementById('weightAddBtn').addEventListener('click', async () => {
+                const dateIso = document.getElementById('weightAddDate').value;
+                const value = parseFloat(String(document.getElementById('weightAddValue').value).replace(',', '.'));
+                if (!dateIso) { alert('✒️ Bitte ein Datum wählen.'); return; }
+                if (isNaN(value) || value <= 0) { alert('✒️ Bitte ein gültiges Gewicht eingeben.'); return; }
+
+                upsertWeightEntry(dateIso, Math.round(value * 10) / 10);
+                syncCurrentWeightFromHistory();
+                document.getElementById('weightAddValue').value = '';
+                renderWeightHistory();
+                await saveWeightHistory();
+            });
+
+            document.getElementById('weightHistoryList').addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-weight-delete]');
+                if (!btn) return;
+                const dateIso = btn.dataset.weightDelete;
+                if (!confirm(`Gewichtseintrag vom ${formatDateDe(dateIso)} löschen?`)) return;
+                userSettings.weightHistory = userSettings.weightHistory.filter(x => x.date !== dateIso);
+                syncCurrentWeightFromHistory();
+                renderWeightHistory();
+                await saveWeightHistory();
+            });
+            // ====== ENDE: Gewichtsverlauf ======
 
             // Nach dem Speichern neuer Blutwerte die Sidebar ggf. mitziehen
             document.getElementById('saveBloodValuesBtn').addEventListener('click', () => {
