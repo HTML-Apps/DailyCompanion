@@ -2053,6 +2053,236 @@
         .weight-entry .fitness-btn-icon { width: 30px; height: 30px; padding: 0; font-size: 12px; flex-shrink: 0; }
         /* ====== ENDE: Gewichtsverlauf Styles ====== */
 
+        /* ====== START: Rheuma-Bericht Styles ====== */
+        #rheumaReportPopup {
+            width: 95%;
+            max-width: 480px;
+            min-height: auto;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 18px;
+        }
+        .rr-head-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(0, 242, 254, 0.12);
+            color: #00f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .rr-presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .rr-presets button {
+            background: #3a3a5a;
+            color: #ffffff;
+            border: 2px solid #5a5a7a;
+            border-radius: 50px;
+            padding: 8px 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .rr-presets button.active { background: #00f2fe; color: #0a0a1a; border-color: #4facfe; font-weight: 700; }
+        .rr-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .rr-dates .styled-input { box-sizing: border-box; width: 100%; color-scheme: dark; font-size: 0.95em; }
+        .rr-hint { font-size: 0.75em; color: #87879e; margin: -6px 0 0; }
+        .rr-coverage {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.35);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.78em;
+            color: #cfeedd;
+        }
+        .rr-coverage.is-empty { background: rgba(231, 76, 60, 0.1); border-color: rgba(231, 76, 60, 0.4); color: #f5c6c0; }
+        .rr-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; font-size: 0.82em; }
+        .rr-sections label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .rr-sections input { width: 18px; height: 18px; accent-color: #00f2fe; flex-shrink: 0; margin: 0; }
+        .rr-convert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.78em;
+            color: #aaaaaa;
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+        .rr-convert input { width: 18px; height: 18px; accent-color: #00f2fe; flex-shrink: 0; margin: 0; }
+        .rr-question {
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+        .rr-question span { flex: 1; overflow-wrap: anywhere; }
+        .rr-question .fitness-btn-icon { width: 30px; height: 30px; padding: 0; font-size: 12px; flex-shrink: 0; }
+        .rr-question-add { display: flex; gap: 6px; }
+        .rr-question-add .styled-input { flex: 1; min-width: 0; box-sizing: border-box; font-size: 0.9em; }
+        .rr-question-add button { width: 44px; padding: 0; font-size: 1.2em; }
+        .rr-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; flex-shrink: 0; }
+        .rr-actions .submit-button { margin: 0; }
+        .rr-actions-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .rr-actions-row button {
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px solid #45456a;
+            background: #3a3a5a;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .rr-actions-row button:hover { border-color: #00f2fe; }
+
+        /* Arzt-Modus */
+        #doctorModeOverlay { background: #0a0a1a; backdrop-filter: none; z-index: 1100; }
+        .dm-shell {
+            width: 100%;
+            max-width: 520px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #0a0a1a;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+        .dm-header {
+            background: #000000;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+        .dm-header button { width: 44px; height: 44px; background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .dm-title { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .dm-title b { font-size: 1.1em; }
+        .dm-title span { font-size: 0.75em; color: #aaaaaa; }
+        .dm-badge { font-size: 0.7em; color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); border-radius: 50px; padding: 4px 10px; white-space: nowrap; }
+        .dm-pages {
+            flex: 1;
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        .dm-pages::-webkit-scrollbar { display: none; }
+        .dm-page {
+            flex: 0 0 100%;
+            box-sizing: border-box;
+            scroll-snap-align: start;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .dm-card {
+            background: rgba(25, 25, 45, 0.9);
+            border: 3px solid rgb(135, 135, 158);
+            border-radius: 15px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .dm-label { font-size: 0.78em; color: #aaaaaa; }
+        .dm-big { font-size: 3em; font-weight: 700; line-height: 1; }
+        .dm-mid { font-size: 1.6em; font-weight: 700; }
+        .dm-unit { font-size: 0.5em; color: #87879e; font-weight: 500; }
+        .dm-sub { font-size: 0.72em; color: #87879e; }
+        .dm-good { color: #2ecc71 !important; }
+        .dm-bad { color: #ff6b6b !important; }
+        .dm-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .dm-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88em; padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+        .dm-row:last-child { border-bottom: none; }
+        .dm-row span:last-child { font-weight: 600; text-align: right; }
+        .dm-question { display: flex; align-items: center; gap: 10px; font-size: 0.88em; cursor: pointer; }
+        .dm-question input { width: 20px; height: 20px; accent-color: #00f2fe; flex-shrink: 0; }
+        .dm-question.is-done span { text-decoration: line-through; color: #87879e; }
+        .dm-footer { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+        .dm-dots { display: flex; justify-content: center; gap: 6px; }
+        .dm-dots span { width: 6px; height: 6px; border-radius: 3px; background: #45456a; transition: all 0.2s; }
+        .dm-dots span.active { width: 18px; background: #00f2fe; }
+        .dm-footer .submit-button { margin: 0; padding: 13px; font-size: 1em; }
+        .dm-finish { background: none; border: none; color: #00f2fe; font-family: 'Poppins', sans-serif; font-size: 0.8em; cursor: pointer; padding: 4px; }
+
+        #reminderReportBtn { border: 1px solid #45456a; background: #000ca1; color: #ffffff; font-weight: 600; display: none; }
+
+        /* Druck-/PDF-Bereich */
+        #rheumaPrintArea { display: none; }
+        @media print {
+            @page { size: A4; margin: 14mm 14mm 12mm; }
+            html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+            body > *:not(#rheumaPrintArea) { display: none !important; }
+            #rheumaPrintArea { display: block !important; }
+        }
+        #rheumaPrintArea, #rheumaPrintArea * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        #rheumaPrintArea { font-family: 'Poppins', sans-serif; color: #19192d; background: #ffffff; font-size: 11px; line-height: 1.45; }
+        .rp-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; border-bottom: 3px solid #19192d; padding-bottom: 10px; margin-bottom: 14px; }
+        .rp-kicker { font-size: 9px; font-weight: 600; color: #00838a; text-transform: uppercase; letter-spacing: 1.5px; }
+        .rp-header h1 { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.2; color: #19192d; }
+        .rp-header .rp-period { font-size: 12px; color: #45456a; }
+        .rp-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 10px; color: #45456a; text-align: right; }
+        .rp-meta b { font-size: 12px; color: #19192d; }
+        .rp-minihead { display: flex; justify-content: space-between; border-bottom: 1px solid #d6d6e2; padding-bottom: 6px; margin-bottom: 12px; font-size: 10px; color: #45456a; }
+        .rp-minihead b { color: #19192d; }
+        .rp-section { margin-bottom: 12px; break-inside: avoid; page-break-inside: avoid; }
+        .rp-section h2 { margin: 0 0 8px; font-size: 13.5px; font-weight: 700; color: #19192d; }
+        .rp-page-break { break-before: page; page-break-before: always; }
+        .rp-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+        .rp-kpi { border: 1.5px solid #d6d6e2; border-radius: 9px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; }
+        .rp-kpi-label { font-size: 9px; color: #5c5c78; }
+        .rp-kpi-value { font-size: 19px; font-weight: 700; }
+        .rp-kpi-value small { font-size: 11px; font-weight: 500; color: #5c5c78; }
+        .rp-kpi-sub { font-size: 9px; font-weight: 600; color: #5c5c78; }
+        .rp-good { color: #1e7e47 !important; }
+        .rp-bad { color: #b3261e !important; }
+        .rp-muted { color: #5c5c78; font-size: 10px; margin: 4px 0 0; }
+        .rp-list { margin: 0; padding-left: 16px; }
+        .rp-list li { margin-bottom: 2px; }
+        .rp-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+        .rp-table th { background: #f2f2f7; text-align: left; padding: 5px 8px; font-weight: 600; }
+        .rp-table td { padding: 4px 8px; border-bottom: 1px solid #ebebf2; }
+        .rp-table .num { text-align: right; }
+        .rp-legend { display: flex; gap: 14px; font-size: 9.5px; color: #45456a; margin-bottom: 4px; flex-wrap: wrap; }
+        .rp-legend span { display: inline-flex; align-items: center; gap: 5px; }
+        .rp-stiff-bar { display: flex; height: 24px; border-radius: 6px; overflow: hidden; font-size: 9.5px; font-weight: 600; }
+        .rp-stiff-bar div { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
+        .rp-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .rp-box { border: 1.5px solid #d6d6e2; border-radius: 9px; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; }
+        .rp-symptom { display: grid; grid-template-columns: 150px minmax(0, 1fr) 52px; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .rp-symptom-bar { height: 11px; background: #ebebf2; border-radius: 3px; overflow: hidden; }
+        .rp-symptom-bar div { height: 100%; background: #000ca1; border-radius: 3px; }
+        .rp-bodymaps { display: flex; gap: 18px; align-items: flex-start; }
+        .rp-body { position: relative; width: 96px; height: 210px; flex-shrink: 0; }
+        .rp-body img { width: 100%; height: 100%; display: block; opacity: 0.85; }
+        .rp-body-label { text-align: center; font-size: 9.5px; color: #5c5c78; margin-top: 2px; }
+        .rp-dot { position: absolute; border-radius: 50%; background: rgba(179, 38, 30, 0.35); transform: translate(-50%, -50%); }
+        .rp-day { display: grid; grid-template-columns: 78px 54px minmax(0, 1fr); gap: 8px; margin-bottom: 3px; }
+        .rp-questions { background: #f2f2f7; border-radius: 9px; padding: 10px 14px; }
+        .rp-q { margin-bottom: 10px; }
+        .rp-q-line { border-bottom: 1px solid #b9b9cc; height: 14px; }
+        .rp-footer { border-top: 1px solid #d6d6e2; padding-top: 6px; margin-top: 10px; font-size: 9px; color: #5c5c78; }
+        /* ====== ENDE: Rheuma-Bericht Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2947,6 +3177,7 @@
                     <button class="quick-menu-btn" data-target="openFitnessTrackerBtn" data-overlay="fitnessOverlay">🏋️ Workout-Plan</button>
                     <button class="quick-menu-btn" data-target="openNutritionBtn" data-overlay="nutritionOverlay">🥑 Kalorientracker</button>
                     <button class="quick-menu-btn" data-target="biologika-countdown" data-overlay="bloodValuesOverlay">🩸 Blutwerte</button>
+                    <button class="quick-menu-btn" id="openRheumaReportBtn">📋 Rheuma-Bericht</button>
                     <button class="quick-menu-btn" data-target="openSearchBtn" data-overlay="searchOverlay">🔍 Notizsuche</button>
                     <button class="quick-menu-btn" data-target="statsBtn" data-overlay="statsOverlay">📊 Statistiken</button>
                     <button class="quick-menu-btn" onclick="exportDailyEntries(); document.getElementById('quickMenuOverlay').style.display='none';">💾 Datenexport</button>
@@ -3105,6 +3336,90 @@
         </div>
     </div>
 
+    <!-- Rheuma-Bericht erstellen 📋 -->
+    <div class="overlay" id="rheumaReportOverlay">
+        <div class="popup" id="rheumaReportPopup">
+            <span class="close-btn" id="closeRheumaReportBtn">&times;</span>
+
+            <div class="settings-head">
+                <div class="rr-head-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 13h6M9 17h4"></path></svg>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <h2>Rheuma-Bericht</h2>
+                    <span>Für deinen Termin in der Rheumatologie</span>
+                </div>
+            </div>
+
+            <div class="settings-scroll">
+                <div class="settings-section-title">Zeitraum</div>
+                <div class="rr-presets" id="rrPresets">
+                    <button type="button" data-preset="lastVisit">Seit letztem Termin</button>
+                    <button type="button" data-preset="3m">Letzte 3 Monate</button>
+                    <button type="button" data-preset="6m">Letzte 6 Monate</button>
+                    <button type="button" data-preset="custom">Eigener Zeitraum</button>
+                </div>
+                <div class="rr-dates">
+                    <div class="settings-field">
+                        <label for="rrFrom">Von</label>
+                        <input type="date" id="rrFrom" class="styled-input">
+                    </div>
+                    <div class="settings-field">
+                        <label for="rrTo">Bis</label>
+                        <input type="date" id="rrTo" class="styled-input">
+                    </div>
+                </div>
+                <p class="rr-hint" id="rrPresetHint"></p>
+                <div class="rr-coverage" id="rrCoverage">Lade Daten …</div>
+
+                <div class="settings-section-title">Inhalt</div>
+                <div class="rr-sections" id="rrSections"></div>
+                <label class="rr-convert">
+                    <input type="checkbox" id="rrConvert" checked>
+                    <span>Schmerzen in Arzt-Skala umrechnen<br><span style="color: #87879e;">0 = schmerzfrei, 10 = stärkster Schmerz (statt deiner 10 = top)</span></span>
+                </label>
+
+                <div class="settings-section-title">Fragen an die Ärztin / den Arzt</div>
+                <div id="rrQuestionList"></div>
+                <div class="rr-question-add">
+                    <input type="text" id="rrQuestionInput" class="styled-input" placeholder="Frage notieren …" aria-label="Neue Frage" maxlength="200">
+                    <button type="button" class="action-button btn-search" id="rrQuestionAddBtn" aria-label="Frage hinzufügen">+</button>
+                </div>
+            </div>
+
+            <div class="rr-actions">
+                <button class="submit-button" id="rrPdfBtn">PDF erstellen</button>
+                <div class="rr-actions-row">
+                    <button type="button" id="rrDoctorBtn">Arzt-Modus</button>
+                    <button type="button" id="rrShareBtn">Teilen …</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Arzt-Modus 🩺 -->
+    <div class="overlay" id="doctorModeOverlay">
+        <div class="dm-shell">
+            <div class="dm-header">
+                <button type="button" id="dmBackBtn" aria-label="Zurück">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+                </button>
+                <div class="dm-title">
+                    <b>Arzt-Modus</b>
+                    <span id="dmPeriod"></span>
+                </div>
+                <span class="dm-badge" id="dmBadge">NRS 0–10</span>
+            </div>
+            <div class="dm-pages" id="dmPages"></div>
+            <div class="dm-footer">
+                <div class="dm-dots" id="dmDots" aria-hidden="true"><span class="active"></span><span></span><span></span><span></span></div>
+                <span class="dm-sub" style="text-align: center;">Wischen: Übersicht · Schmerz · Labor · Medikation</span>
+                <button class="submit-button" id="dmPdfBtn">PDF an Praxis senden</button>
+                <button type="button" class="dm-finish" id="dmFinishBtn">✓ Termin abschließen &amp; Notizen speichern</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Erinnerungs-Toast 🔔 -->
     <div id="reminderToast" role="status" aria-live="polite">
         <div class="reminder-toast-card" id="reminderToastCard">
@@ -3118,6 +3433,7 @@
                 <div class="reminder-toast-actions">
                     <button type="button" id="reminderDoneBtn">Erledigt</button>
                     <button type="button" id="reminderSnoozeBtn">In 1 Std.</button>
+                    <button type="button" id="reminderReportBtn">Bericht</button>
                 </div>
             </div>
         </div>
@@ -7829,6 +8145,1028 @@
             });
             // ====== ENDE: Gewichtsverlauf ======
 
+            // ====== START: Rheuma-Bericht ======
+            // Gespeichert in userSettings/{uid}:
+            //   doctorQuestions: [{ id, text, done }]
+            //   lastRheumaVisit: "YYYY-MM-DD"
+            //   rheumaVisits: [{ date, from, to, note, questions: [...] }]
+            //   reportPrefs: { sections: { key: bool }, convert: bool }
+            // Eigene Bewertungen: 10 = top, 1 = mies → Arzt-Skala (NRS) = 10 − Bewertung
+            const PAIN_REGIONS = [
+                { key: 'neckPainRating', label: 'Nacken' },
+                { key: 'shoulderPainRating', label: 'Schulter' },
+                { key: 'upperBodyPainRating', label: 'Oberkörper / Rücken' },
+                { key: 'lowerBodyPainRating', label: 'Unterkörper' },
+                { key: 'movementFlowPainRating', label: 'Bewegungsfluss' }
+            ];
+            const NSAR_MEDS = [
+                { key: 'Etoricoxib_60', label: 'Etoricoxib 60 mg' },
+                { key: 'Etoricoxib_120', label: 'Etoricoxib 120 mg' },
+                { key: 'IBU', label: 'Ibuprofen' },
+                { key: 'Diclo', label: 'Diclofenac' }
+            ];
+            // Normbereiche wie in den Blutwerte-Charts der App
+            const LAB_PARAMS = [
+                { key: 'crpValue', label: 'CRP (mg/l)', min: 0, max: 5, norm: '< 5', inflammation: true },
+                { key: 'bsgValue', label: 'BSG (mm/h)', min: 0, max: 15, norm: '< 15', inflammation: true },
+                { key: 'tzValue', label: 'Thrombozyten (/nl)', min: 138, max: 347, norm: '138–347' },
+                { key: 'lzValue', label: 'Leukozyten (/nl)', min: 4.06, max: 11.89, norm: '4,1–11,9' },
+                { key: 'npValue', label: 'Neutrophile (%)', min: 40.3, max: 74.8, norm: '40–75' },
+                { key: 'alatValue', label: 'ALAT / GPT (U/l)', min: 0, max: 50, norm: '< 50' },
+                { key: 'hbValue', label: 'Hämoglobin (g/dl)', min: 12.6, max: 17.4, norm: '12,6–17,4' },
+                { key: 'd3Value', label: 'Vitamin D3 (µg/l)', min: 20, max: 70, norm: '20–70' }
+            ];
+            const SYMPTOM_TAGS = ['Fatigue', 'Kopfweh', 'Kopfweh von Nackenenge', 'Brainfog'];
+            const INJECTION_TAG = 'Rötung Spritze / Schmerzen';
+            const REPORT_SECTIONS = [
+                { key: 'summary', label: 'Kurzfazit & Trend', def: true },
+                { key: 'pain', label: 'Schmerzverlauf', def: true },
+                { key: 'stiffness', label: 'Morgensteifigkeit', def: true },
+                { key: 'meds', label: 'Medikation', def: true },
+                { key: 'labs', label: 'Laborwerte', def: true },
+                { key: 'symptoms', label: 'Symptome', def: true },
+                { key: 'painmap', label: 'Schmerzkarte', def: true },
+                { key: 'activity', label: 'Bewegung & Gewicht', def: true },
+                { key: 'sleep', label: 'Schlaf', def: false },
+                { key: 'notes', label: 'Eigene Notizen', def: false }
+            ];
+
+            let rrPreset = 'lastVisit';
+            let rrEntries = null;          // alle Tageseinträge (Cache für die Popup-Sitzung)
+            let rrReport = null;           // zuletzt berechneter Bericht
+
+            // --- Hilfsfunktionen ---
+            function dateKey(d) {
+                return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            }
+            function addDaysIso(iso, n) {
+                const d = isoToDate(iso);
+                d.setDate(d.getDate() + n);
+                return dateKey(d);
+            }
+            function addMonthsIso(iso, n) {
+                const d = isoToDate(iso);
+                d.setMonth(d.getMonth() + n);
+                return dateKey(d);
+            }
+            function deShort(iso) {
+                const d = isoToDate(iso);
+                return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.`;
+            }
+            function deLong(iso) {
+                const d = isoToDate(iso);
+                return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
+            }
+            function fmt1(v) {
+                return (v === null || v === undefined || isNaN(v)) ? '–' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            }
+            function fmtLab(v) {
+                return (v === null || v === undefined || isNaN(v)) ? '—' : Number(v).toLocaleString('de-DE', { maximumFractionDigits: 2 });
+            }
+            function avgOf(arr) {
+                const a = arr.filter(v => v !== null && v !== undefined && !isNaN(v));
+                return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+            }
+            function isoWeek(d) {
+                const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                const day = t.getUTCDay() || 7;
+                t.setUTCDate(t.getUTCDate() + 4 - day);
+                const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+                return Math.ceil(((t - y0) / 86400000 + 1) / 7);
+            }
+            function mondayOf(d) {
+                const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+                return x;
+            }
+            const toNrs = (r) => 10 - r;
+            function ratingNrs(e, key) {
+                const v = parseInt(e[key]);
+                return (isNaN(v) || v <= 0) ? null : toNrs(v);
+            }
+            function dayPainNrs(e) {
+                return avgOf(PAIN_REGIONS.map(r => ratingNrs(e, r.key)));
+            }
+            function stiffMin(e) {
+                const v = parseInt(e.morningStiffness);
+                return isNaN(v) ? null : v;
+            }
+            function hasMed(e, k) {
+                return Array.isArray(e.selectedPainmeds) && e.selectedPainmeds.includes(k);
+            }
+            function hasTag(e, t) {
+                return Array.isArray(e.selectedNotesTags) && e.selectedNotesTags.includes(t);
+            }
+            const isNsarDay = (e) => NSAR_MEDS.some(m => hasMed(e, m.key));
+            function basicStats(entries) {
+                return {
+                    n: entries.length,
+                    pain: avgOf(entries.map(dayPainNrs)),
+                    stiff: avgOf(entries.map(stiffMin)),
+                    nsar: entries.filter(isNsarDay).length
+                };
+            }
+            // Trend über eine Zeitreihe: erste vs. zweite Hälfte
+            function trendOf(values) {
+                const v = values.filter(x => x !== null && x !== undefined);
+                if (v.length < 4) return null;
+                const half = Math.floor(v.length / 2);
+                const d = avgOf(v.slice(half)) - avgOf(v.slice(0, half));
+                return { diff: d, dir: d < -0.5 ? 'down' : d > 0.5 ? 'up' : 'stable' };
+            }
+            function sleepMinutes(e) {
+                if (!e.bedTime || !e.wakeUpTime) return null;
+                const [bh, bm] = e.bedTime.split(':').map(Number);
+                const [wh, wm] = e.wakeUpTime.split(':').map(Number);
+                if ([bh, bm, wh, wm].some(isNaN)) return null;
+                let diff = (wh * 60 + wm) - (bh * 60 + bm);
+                if (diff <= 0) diff += 1440;
+                return diff;
+            }
+            function minutesToHm(m) {
+                if (m === null || isNaN(m)) return '–';
+                m = Math.round(m);
+                return `${Math.floor(m / 60)}:${pad2(m % 60)} h`;
+            }
+            function clockFromMinutes(m) {
+                if (m === null || isNaN(m)) return '–';
+                m = Math.round(m) % 1440;
+                return `${pad2(Math.floor(m / 60))}:${pad2(m % 60)}`;
+            }
+
+            // --- Daten laden ---
+            async function loadReportEntries() {
+                const snapshot = await db.collection('dailyEntries').where('userId', '==', auth.currentUser.uid).get();
+                const byDay = new Map();
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    if (!d.date) return;
+                    const dt = d.date.toDate();
+                    byDay.set(dateKey(dt), { ...d, dateObj: dt, dayKey: dateKey(dt) });
+                });
+                return [...byDay.values()].sort((a, b) => a.dateObj - b.dateObj);
+            }
+
+            // --- Bericht berechnen ---
+            function buildReport(all, fromIso, toIso) {
+                const from = isoToDate(fromIso);
+                const to = isoToDate(toIso);
+                to.setHours(23, 59, 59, 999);
+                const days = Math.round((isoToDate(toIso) - isoToDate(fromIso)) / 86400000) + 1;
+                const entries = all.filter(e => e.dateObj >= from && e.dateObj <= to);
+
+                const prevFrom = isoToDate(addDaysIso(fromIso, -days));
+                const prev = all.filter(e => e.dateObj >= prevFrom && e.dateObj < from);
+                const cur = basicStats(entries);
+                const before = basicStats(prev);
+
+                // Wochen
+                const weekMap = new Map();
+                entries.forEach(e => {
+                    const m = mondayOf(e.dateObj);
+                    const k = dateKey(m);
+                    if (!weekMap.has(k)) weekMap.set(k, { key: k, monday: m, kw: isoWeek(m), entries: [] });
+                    weekMap.get(k).entries.push(e);
+                });
+                const weeks = [...weekMap.values()].sort((a, b) => a.monday - b.monday).map(w => ({
+                    ...w,
+                    pain: avgOf(w.entries.map(dayPainNrs)),
+                    neck: avgOf(w.entries.map(e => ratingNrs(e, 'neckPainRating'))),
+                    stiff: avgOf(w.entries.map(stiffMin))
+                }));
+
+                // Regionen
+                const regions = PAIN_REGIONS.map(r => {
+                    const vals = entries.map(e => ratingNrs(e, r.key));
+                    const v = vals.filter(x => x !== null);
+                    return {
+                        label: r.label,
+                        avg: avgOf(v),
+                        max: v.length ? Math.max(...v) : null,
+                        badDays: v.filter(x => x >= 6).length,
+                        trend: trendOf(vals)
+                    };
+                });
+
+                // Morgensteifigkeit
+                const stiffVals = entries.map(stiffMin).filter(v => v !== null);
+                const stiffBuckets = [
+                    { label: '0 Min', count: stiffVals.filter(v => v === 0).length, bg: '#dff3e8', fg: '#1e5a38' },
+                    { label: '15 Min', count: stiffVals.filter(v => v > 0 && v <= 15).length, bg: '#c3e8f0', fg: '#0b4a52' },
+                    { label: '30 Min', count: stiffVals.filter(v => v > 15 && v <= 30).length, bg: '#9fcfe0', fg: '#0b3a52' },
+                    { label: '45 Min', count: stiffVals.filter(v => v > 30 && v <= 45).length, bg: '#5f8fc9', fg: '#ffffff' },
+                    { label: '≥ 60 Min', count: stiffVals.filter(v => v > 45).length, bg: '#2c3e8a', fg: '#ffffff' }
+                ];
+
+                // Medikation
+                const bioDates = entries.filter(e => hasMed(e, 'Biologika')).map(e => e.dayKey);
+                const bioGaps = [];
+                for (let i = 1; i < bioDates.length; i++) {
+                    bioGaps.push(Math.round((isoToDate(bioDates[i]) - isoToDate(bioDates[i - 1])) / 86400000));
+                }
+                const meds = {
+                    bioDates,
+                    bioAvgGap: avgOf(bioGaps),
+                    bioMaxGap: bioGaps.length ? Math.max(...bioGaps) : null,
+                    effect: {
+                        stark: entries.filter(e => hasTag(e, 'Wirkung stark')).length,
+                        mittel: entries.filter(e => hasTag(e, 'Wirkung mittel')).length,
+                        schwach: entries.filter(e => hasTag(e, 'Wirkung schwach')).length
+                    },
+                    injectionSite: entries.filter(e => hasTag(e, INJECTION_TAG)).length,
+                    nsar: NSAR_MEDS.map(m => ({ label: m.label, days: entries.filter(e => hasMed(e, m.key)).length })),
+                    noneDays: entries.length - cur.nsar
+                };
+
+                // Labor
+                const labEntries = entries.filter(e => LAB_PARAMS.some(p => e[p.key] !== undefined && e[p.key] !== null && !isNaN(e[p.key])));
+                const labCols = labEntries.slice(-6);
+                const labs = LAB_PARAMS.map(p => {
+                    const series = labEntries.map(e => e[p.key]).filter(v => v !== undefined && v !== null && !isNaN(v));
+                    let trend = null;
+                    if (series.length >= 2) {
+                        const first = series[0], last = series[series.length - 1];
+                        const rel = first === 0 ? (last - first) : (last - first) / Math.abs(first);
+                        trend = rel > 0.1 ? 'up' : rel < -0.1 ? 'down' : 'stable';
+                    }
+                    const values = labCols.map(e => {
+                        const v = e[p.key];
+                        const has = v !== undefined && v !== null && !isNaN(v);
+                        return { v: has ? v : null, out: has && (v < p.min || v > p.max) };
+                    });
+                    return { ...p, values, trend, latest: series.length ? series[series.length - 1] : null, has: series.length > 0 };
+                }).filter(p => p.has);
+                const latestCrpEntry = [...labEntries].reverse().find(e => e.crpValue !== undefined && e.crpValue !== null && !isNaN(e.crpValue));
+                const crpVals = labEntries.filter(e => e.crpValue !== undefined && e.crpValue !== null && !isNaN(e.crpValue));
+                const crpPeak = crpVals.length ? crpVals.reduce((a, b) => (b.crpValue > a.crpValue ? b : a)) : null;
+
+                // Symptome & Befinden (eigene Skala)
+                const symptoms = SYMPTOM_TAGS.map(t => ({ label: t, days: entries.filter(e => hasTag(e, t)).length }));
+                const wellbeing = {
+                    mood: avgOf(entries.map(e => parseInt(e.moodRating) || null)),
+                    immune: avgOf(entries.map(e => parseInt(e.immunesystemRating) || null)),
+                    digestion: avgOf(entries.map(e => parseInt(e.digestionRating) || null))
+                };
+
+                // Schmerzkarte
+                const front = [], back = [];
+                let mapDays = 0;
+                entries.forEach(e => {
+                    const pm = e.painMap;
+                    if (!pm) return;
+                    const f = Array.isArray(pm.frontPoints) ? pm.frontPoints : [];
+                    const b = Array.isArray(pm.backPoints) ? pm.backPoints : [];
+                    if (f.length || b.length) mapDays++;
+                    front.push(...f);
+                    back.push(...b);
+                });
+
+                // Bewegung & Gewicht
+                const sportDays = entries.filter(e => Array.isArray(e.selectedSports) && e.selectedSports.length > 0 && !e.selectedSports.includes('Kein Sport')).length;
+                const stretchDays = entries.filter(e => e.stretchingStatus === 'Gemacht' || e.stretchingStatus === 'Physio').length;
+                const weightsInRange = sortedWeightHistory().filter(w => w.date >= fromIso && w.date <= toIso);
+                const weight = weightsInRange.length ? {
+                    last: weightsInRange[weightsInRange.length - 1].weight,
+                    diff: weightsInRange.length >= 2 ? weightsInRange[weightsInRange.length - 1].weight - weightsInRange[0].weight : null
+                } : null;
+
+                // Schlaf
+                const sleepVals = entries.map(sleepMinutes);
+                const bedVals = entries.map(e => {
+                    if (!e.bedTime) return null;
+                    const [h, m] = e.bedTime.split(':').map(Number);
+                    if (isNaN(h)) return null;
+                    let mins = h * 60 + (m || 0);
+                    if (mins < 12 * 60) mins += 1440;   // nach Mitternacht
+                    return mins;
+                });
+                const sleep = { avg: avgOf(sleepVals), bed: avgOf(bedVals), n: sleepVals.filter(v => v !== null).length };
+
+                // Auffällige Tage (nur strukturierte Daten – freie Notizen bleiben privat)
+                const notable = entries
+                    .map(e => ({ e, nrs: dayPainNrs(e) }))
+                    .filter(x => (x.nrs !== null && x.nrs >= 6) || hasTag(x.e, INJECTION_TAG))
+                    .sort((a, b) => (b.nrs ?? 0) - (a.nrs ?? 0))
+                    .slice(0, 6)
+                    .sort((a, b) => a.e.dateObj - b.e.dateObj)
+                    .map(({ e, nrs }) => {
+                        const parts = [];
+                        const st = stiffMin(e);
+                        if (st !== null && st >= 45) parts.push(`Morgensteifigkeit ${st} Min`);
+                        const medList = NSAR_MEDS.filter(m => hasMed(e, m.key)).map(m => m.label);
+                        if (hasMed(e, 'Biologika')) medList.push('Biologika-Gabe');
+                        if (medList.length) parts.push(medList.join(', '));
+                        const tags = SYMPTOM_TAGS.filter(t => hasTag(e, t));
+                        if (tags.length) parts.push(tags.join(', '));
+                        if (hasTag(e, INJECTION_TAG)) parts.push('Rötung / Schmerz an der Einstichstelle');
+                        let worst = null;
+                        PAIN_REGIONS.forEach(r => {
+                            const v = ratingNrs(e, r.key);
+                            if (v !== null && (!worst || v > worst.v)) worst = { v, label: r.label };
+                        });
+                        if (worst && worst.v >= 6) parts.unshift(`am stärksten: ${worst.label}`);
+                        return { dayKey: e.dayKey, date: e.dateObj, nrs, text: parts.join(' · ') || '—' };
+                    });
+
+                // Eigene Notizen (nur wenn ausdrücklich gewählt)
+                const notes = entries.filter(e => e.notes && String(e.notes).trim()).map(e => ({ dayKey: e.dayKey, date: e.dateObj, text: String(e.notes).trim() }));
+
+                // Kurzfazit-Sätze
+                const summary = [];
+                const wp = weeks.filter(w => w.pain !== null);
+                if (wp.length >= 2) {
+                    const half = Math.floor(wp.length / 2);
+                    const a = avgOf(wp.slice(0, half).map(w => w.pain));
+                    const b = avgOf(wp.slice(half).map(w => w.pain));
+                    const d = b - a;
+                    const word = d < -0.3 ? 'rückläufig' : d > 0.3 ? 'gestiegen' : 'weitgehend stabil';
+                    summary.push({ kind: 'trend', a, b, word });
+                }
+                if (wp.length) {
+                    const worst = wp.reduce((x, y) => (y.pain > x.pain ? y : x));
+                    summary.push({ kind: 'worst', week: worst });
+                }
+                const ranked = regions.filter(r => r.avg !== null).sort((a, b) => b.avg - a.avg);
+                if (ranked.length) summary.push({ kind: 'regions', ranked });
+                const outLabs = [];
+                labEntries.forEach(e => LAB_PARAMS.forEach(p => {
+                    const v = e[p.key];
+                    if (v !== undefined && v !== null && !isNaN(v) && (v < p.min || v > p.max)) outLabs.push({ p, v, dayKey: e.dayKey });
+                }));
+                if (outLabs.length) summary.push({ kind: 'labs', outLabs });
+
+                return {
+                    fromIso, toIso, days, entries, cur, before,
+                    // Vergleich nur, wenn der Vorzeitraum genug Einträge hat
+                    comparable: prev.length >= Math.max(7, entries.length * 0.5),
+                    weeks, regions, stiffBuckets, stiffN: stiffVals.length, meds,
+                    labCols: labCols.map(e => e.dayKey), labs, latestCrpEntry, crpPeak,
+                    symptoms, wellbeing, front, back, mapDays,
+                    sportDays, stretchDays, weight, sleep, notable, notes, summary,
+                    labCount: labEntries.length
+                };
+            }
+
+            // --- Darstellung Skala ---
+            function rrConvert() {
+                return document.getElementById('rrConvert').checked;
+            }
+            // NRS-Wert für die Anzeige (umgerechnet oder eigene Skala 10 = top)
+            const painShow = (nrs, conv) => (nrs === null || nrs === undefined) ? null : (conv ? nrs : 10 - nrs);
+            // Differenz in NRS → Anzeige-Differenz; "good" = Schmerz gesunken
+            function painDiffInfo(dNrs, conv) {
+                if (dNrs === null || isNaN(dNrs)) return null;
+                const shown = conv ? dNrs : -dNrs;
+                const good = dNrs < -0.05, bad = dNrs > 0.05;
+                const arrow = shown < -0.05 ? '▼' : shown > 0.05 ? '▲' : '●';
+                return { text: `${arrow} ${fmt1(Math.abs(shown))}`, good, bad };
+            }
+            function nsarCompare(r) {
+                if (!r.comparable || !r.cur.n || !r.before.n) return null;
+                const a = Math.round(r.before.nsar / r.before.n * 100);
+                const b = Math.round(r.cur.nsar / r.cur.n * 100);
+                return { text: `${b < a ? '▼' : b > a ? '▲' : '●'} ${a} % → ${b} % der Tage`, good: b < a, bad: b > a };
+            }
+            function scaleName(conv) {
+                return conv ? 'NRS 0–10' : '1–10, 10 = top';
+            }
+
+            // --- SVG-Diagramm Schmerzverlauf ---
+            function painChartSvg(r, conv, dark) {
+                const ws = r.weeks.filter(w => w.pain !== null);
+                if (!ws.length) return `<p class="${dark ? 'dm-sub' : 'rp-muted'}">Keine Schmerzbewertungen im Zeitraum.</p>`;
+                const W = 690, x0 = 40, x1 = 680, yTop = 10, yBot = 160;
+                const c = dark
+                    ? { grid: 'rgba(255,255,255,0.08)', text: '#aaaaaa', main: '#00f2fe', second: '#87879e', mark: '#ff6b6b', label: '#ffffff' }
+                    : { grid: '#ebebf2', text: '#5c5c78', main: '#000ca1', second: '#00838a', mark: '#b3261e', label: '#19192d' };
+                const n = ws.length;
+                const xs = (i) => n === 1 ? (x0 + x1) / 2 : x0 + i * (x1 - x0) / (n - 1);
+                const ys = (nrs) => yBot - painShow(nrs, conv) * (yBot - yTop) / 10;
+                let svg = `<svg width="100%" viewBox="0 0 ${W} 190" role="img" aria-label="Wochenmittel Schmerz im Zeitraum">`;
+                [0, 2.5, 5, 7.5, 10].forEach(v => {
+                    const y = yBot - v * (yBot - yTop) / 10;
+                    svg += `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${c.grid}" stroke-width="1"></line>`;
+                    svg += `<text x="${x0 - 8}" y="${y + 4}" font-size="10" fill="${c.text}" text-anchor="end" font-family="Poppins, sans-serif">${fmt1(v).replace(',0', '')}</text>`;
+                });
+                const neckPts = ws.map((w, i) => w.neck !== null ? `${xs(i).toFixed(1)},${ys(w.neck).toFixed(1)}` : null).filter(Boolean);
+                if (neckPts.length > 1) svg += `<polyline points="${neckPts.join(' ')}" fill="none" stroke="${c.second}" stroke-width="2" stroke-dasharray="5 4"></polyline>`;
+                const mainPts = ws.map((w, i) => `${xs(i).toFixed(1)},${ys(w.pain).toFixed(1)}`);
+                if (mainPts.length > 1) svg += `<polyline points="${mainPts.join(' ')}" fill="none" stroke="${c.main}" stroke-width="2.5" stroke-linejoin="round"></polyline>`;
+                ws.forEach((w, i) => { svg += `<circle cx="${xs(i).toFixed(1)}" cy="${ys(w.pain).toFixed(1)}" r="3" fill="${c.main}"></circle>`; });
+                // Spitze beschriften (schlechteste Woche)
+                const worstIdx = ws.reduce((bi, w, i) => (w.pain > ws[bi].pain ? i : bi), 0);
+                svg += `<text x="${xs(worstIdx).toFixed(1)}" y="${(ys(ws[worstIdx].pain) - 9).toFixed(1)}" font-size="10" font-weight="600" fill="${c.label}" text-anchor="middle" font-family="Poppins, sans-serif">${fmt1(painShow(ws[worstIdx].pain, conv))}</text>`;
+                // Biologika-Gaben
+                const weekIndex = new Map(ws.map((w, i) => [w.key, i]));
+                r.meds.bioDates.forEach(iso => {
+                    const idx = weekIndex.get(dateKey(mondayOf(isoToDate(iso))));
+                    if (idx !== undefined) svg += `<text x="${xs(idx).toFixed(1)}" y="176" font-size="10" fill="${c.mark}" text-anchor="middle">▲</text>`;
+                });
+                const step = Math.max(1, Math.ceil(n / 7));
+                ws.forEach((w, i) => {
+                    if (i % step === 0 || i === n - 1) svg += `<text x="${xs(i).toFixed(1)}" y="188" font-size="9.5" fill="${c.text}" text-anchor="middle" font-family="Poppins, sans-serif">KW ${w.kw}</text>`;
+                });
+                return svg + '</svg>';
+            }
+
+            function trendCell(t, conv) {
+                if (!t) return '<td style="color:#5c5c78;">–</td>';
+                if (t.dir === 'stable') return '<td style="color:#5c5c78;font-weight:600;">● stabil</td>';
+                const better = t.dir === 'down';   // NRS gesunken = besser
+                return `<td class="${better ? 'rp-good' : 'rp-bad'}" style="font-weight:600;">${better ? 'besser' : 'schlechter'}</td>`;
+            }
+
+            // --- PDF-HTML ---
+            function renderReportHtml(r, sections, conv) {
+                const name = (auth.currentUser && auth.currentUser.displayName) || 'Hendrik';
+                const created = deLong(todayIso());
+                const coverage = r.days ? Math.round(r.entries.length / r.days * 100) : 0;
+                const S = (k) => sections[k];
+                let h = '';
+
+                h += `<div class="rp-header">
+                    <div>
+                        <div class="rp-kicker">Daily Companion · Selbstaufzeichnung</div>
+                        <h1>Verlaufsbericht Rheumatologie</h1>
+                        <div class="rp-period">Zeitraum ${deLong(r.fromIso)} – ${deLong(r.toIso)} · ${r.days} Tage</div>
+                    </div>
+                    <div class="rp-meta">
+                        <b>${escapeHtml(name)}</b>
+                        <span>Erstellt am ${created}</span>
+                        <span>Datenbasis: ${r.entries.length} von ${r.days} Tagen (${coverage} %)</span>
+                        <span>Schmerzskala: ${conv ? 'NRS 0–10 (0 = schmerzfrei)' : '1–10 (10 = beschwerdefrei)'}</span>
+                    </div>
+                </div>`;
+
+                let num = 0;
+                const head = (t) => `<h2>${++num} · ${t}</h2>`;
+
+                if (S('summary')) {
+                    const d = (a, b) => (a !== null && b !== null && r.comparable) ? a - b : null;
+                    const pd = painDiffInfo(d(r.cur.pain, r.before.pain), conv);
+                    const sd = d(r.cur.stiff, r.before.stiff);
+                    const nc = nsarCompare(r);
+                    const crp = r.latestCrpEntry;
+                    h += `<div class="rp-section">${head('Kurzfazit')}
+                        <div class="rp-kpis">
+                            <div class="rp-kpi"><span class="rp-kpi-label">Ø Schmerz (${scaleName(conv)})</span>
+                                <span class="rp-kpi-value">${fmt1(painShow(r.cur.pain, conv))}</span>
+                                <span class="rp-kpi-sub ${pd ? (pd.good ? 'rp-good' : pd.bad ? 'rp-bad' : '') : ''}">${pd ? pd.text + ' ggü. Vorzeitraum' : 'kein Vorzeitraum'}</span></div>
+                            <div class="rp-kpi"><span class="rp-kpi-label">Ø Morgensteifigkeit</span>
+                                <span class="rp-kpi-value">${r.cur.stiff !== null ? Math.round(r.cur.stiff) : '–'} <small>Min</small></span>
+                                <span class="rp-kpi-sub ${sd !== null ? (sd < -0.5 ? 'rp-good' : sd > 0.5 ? 'rp-bad' : '') : ''}">${sd !== null ? `${sd < 0 ? '▼' : sd > 0 ? '▲' : '●'} ${Math.abs(Math.round(sd))} Min` : 'kein Vorzeitraum'}</span></div>
+                            <div class="rp-kpi"><span class="rp-kpi-label">Tage mit NSAR</span>
+                                <span class="rp-kpi-value">${r.cur.nsar} <small>/ ${r.entries.length}</small></span>
+                                <span class="rp-kpi-sub ${nc ? (nc.good ? 'rp-good' : nc.bad ? 'rp-bad' : '') : ''}">${nc ? nc.text : 'kein Vorzeitraum'}</span></div>
+                            <div class="rp-kpi"><span class="rp-kpi-label">CRP zuletzt${crp ? ` (${deShort(crp.dayKey)})` : ''}</span>
+                                <span class="rp-kpi-value">${crp ? fmtLab(crp.crpValue) : '–'} <small>mg/l</small></span>
+                                <span class="rp-kpi-sub ${crp && crp.crpValue > 5 ? 'rp-bad' : ''}">${crp ? (crp.crpValue > 5 ? 'Norm < 5 · erhöht' : 'Norm < 5 · im Bereich') : 'kein Wert im Zeitraum'}</span></div>
+                        </div>`;
+                    const items = r.summary.map(s => {
+                        if (s.kind === 'trend') return `<li>Schmerz im Zeitraum ${s.word} (Ø erste Hälfte ${fmt1(painShow(s.a, conv))} → zweite Hälfte ${fmt1(painShow(s.b, conv))}).</li>`;
+                        if (s.kind === 'worst') return `<li>Schlechteste Woche: KW ${s.week.kw} (Ø ${fmt1(painShow(s.week.pain, conv))}${s.week.stiff !== null ? `, Morgensteifigkeit Ø ${Math.round(s.week.stiff)} Min` : ''}).</li>`;
+                        if (s.kind === 'regions') return `<li>Am stärksten betroffen: ${escapeHtml(s.ranked[0].label)} (Ø ${fmt1(painShow(s.ranked[0].avg, conv))})${s.ranked[1] ? `, gefolgt von ${escapeHtml(s.ranked[1].label)} (Ø ${fmt1(painShow(s.ranked[1].avg, conv))})` : ''}.</li>`;
+                        if (s.kind === 'labs') return `<li>Laborwerte außerhalb der Norm: ${s.outLabs.slice(0, 4).map(o => `${o.p.label.split(' (')[0]} ${fmtLab(o.v)} am ${deShort(o.dayKey)}`).join(', ')}.</li>`;
+                        return '';
+                    }).join('');
+                    if (items) h += `<ul class="rp-list">${items}</ul>`;
+                    h += `</div>`;
+                }
+
+                if (S('pain')) {
+                    h += `<div class="rp-section">${head(`Schmerzverlauf (Wochenmittel, ${scaleName(conv)})`)}
+                        <div class="rp-legend">
+                            <span><span style="width:14px;height:3px;background:#000ca1;display:inline-block;"></span>Gesamt</span>
+                            <span><span style="width:14px;border-top:2px dashed #00838a;display:inline-block;"></span>Nacken</span>
+                            <span><span style="color:#b3261e;">▲</span>Biologika-Gabe</span>
+                        </div>
+                        ${painChartSvg(r, conv, false)}
+                        <table class="rp-table" style="margin-top:6px;">
+                            <thead><tr><th>Region</th><th class="num">Ø</th><th class="num">${conv ? 'Max' : 'Min'}</th><th class="num">${conv ? 'Tage NRS ≥ 6' : 'Tage ≤ 4'}</th><th>Trend</th></tr></thead>
+                            <tbody>${r.regions.map(g => `<tr><td>${escapeHtml(g.label)}</td><td class="num">${fmt1(painShow(g.avg, conv))}</td><td class="num">${g.max !== null ? painShow(g.max, conv) : '–'}</td><td class="num">${g.avg !== null ? g.badDays : '–'}</td>${trendCell(g.trend, conv)}</tr>`).join('')}</tbody>
+                        </table>
+                    </div>`;
+                }
+
+                if (S('stiffness')) {
+                    const n = r.stiffN;
+                    h += `<div class="rp-section">${head('Morgensteifigkeit')}`;
+                    if (n) {
+                        h += `<div class="rp-stiff-bar">${r.stiffBuckets.filter(b => b.count).map(b => {
+                            const pct = b.count / n * 100;
+                            return `<div style="width:${pct}%;background:${b.bg};color:${b.fg};">${pct >= 9 ? `${b.label} · ${b.count}` : (pct >= 4 ? b.count : '')}</div>`;
+                        }).join('')}</div>`;
+                        const over30 = r.stiffBuckets[3].count + r.stiffBuckets[4].count;
+                        h += `<p class="rp-muted">Tage pro Kategorie (n = ${n}): ${r.stiffBuckets.map(b => `${b.label}: ${b.count}`).join(' · ')}. Länger als 30 Min an ${over30} Tagen.</p>`;
+                    } else {
+                        h += `<p class="rp-muted">Keine Angaben im Zeitraum.</p>`;
+                    }
+                    h += `</div>`;
+                }
+
+                if (S('meds')) {
+                    const m = r.meds;
+                    const total = r.entries.length || 1;
+                    h += `<div class="rp-section">${head('Medikation')}
+                        <div class="rp-two">
+                            <div class="rp-box">
+                                <b>Biologika / JAK</b>
+                                <span>${m.bioDates.length} Gabe${m.bioDates.length === 1 ? '' : 'n'}${m.bioAvgGap !== null ? ` · Ø Abstand ${Math.round(m.bioAvgGap)} Tage · längster Abstand ${m.bioMaxGap} Tage` : ''}</span>
+                                ${m.bioDates.length ? `<span style="color:#45456a;">${m.bioDates.map(deShort).join(' · ')}</span>` : ''}
+                                <span>Wirkung (eigene Einschätzung): stark ${m.effect.stark}× · mittel ${m.effect.mittel}× · schwach ${m.effect.schwach}×</span>
+                                <span>Rötung / Schmerz an der Einstichstelle: ${m.injectionSite}×</span>
+                            </div>
+                            <table class="rp-table" style="align-self:start;">
+                                <thead><tr><th>Schmerzmittel</th><th class="num">Tage</th><th class="num">Anteil</th></tr></thead>
+                                <tbody>
+                                    ${m.nsar.map(x => `<tr><td>${x.label}</td><td class="num">${x.days}</td><td class="num">${Math.round(x.days / total * 100)} %</td></tr>`).join('')}
+                                    <tr><td><b>Ohne Schmerzmittel</b></td><td class="num"><b>${m.noneDays}</b></td><td class="num"><b>${Math.round(m.noneDays / total * 100)} %</b></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                }
+
+                // Seite 2
+                const page2 = ['labs', 'symptoms', 'painmap', 'activity', 'sleep', 'notes'].some(S) || r.notable.length || (userSettings.doctorQuestions || []).some(q => !q.done);
+                if (page2) {
+                    h += `<div class="rp-page-break"></div>
+                        <div class="rp-minihead"><b>Verlaufsbericht Rheumatologie · ${escapeHtml(name)}</b><span>${deLong(r.fromIso)} – ${deLong(r.toIso)}</span></div>`;
+                }
+
+                if (S('labs')) {
+                    h += `<div class="rp-section">${head('Laborwerte')}`;
+                    if (r.labs.length) {
+                        h += `<table class="rp-table"><thead><tr><th>Parameter</th><th>Norm</th>${r.labCols.map(k => `<th class="num">${deShort(k)}</th>`).join('')}<th>Tendenz</th></tr></thead><tbody>`;
+                        r.labs.forEach(p => {
+                            let tCls = '', tTxt = '–';
+                            if (p.trend === 'up') { tTxt = '▲ steigend'; tCls = p.inflammation ? 'rp-bad' : ''; }
+                            if (p.trend === 'down') { tTxt = '▼ fallend'; tCls = p.inflammation ? 'rp-good' : ''; }
+                            if (p.trend === 'stable') tTxt = '● stabil';
+                            h += `<tr><td>${p.label}</td><td style="color:#5c5c78;">${p.norm}</td>${p.values.map(v => `<td class="num ${v.out ? 'rp-bad' : ''}" style="${v.out ? 'font-weight:700;' : ''}">${fmtLab(v.v)}${v.out ? (v.v > p.max ? ' ↑' : ' ↓') : ''}</td>`).join('')}<td class="${tCls}" style="font-weight:600;${tCls ? '' : 'color:#5c5c78;'}">${tTxt}</td></tr>`;
+                        });
+                        h += `</tbody></table><p class="rp-muted">Normbereiche wie in der App hinterlegt – bitte mit dem Laborbefund abgleichen. Werte außerhalb der Norm sind rot markiert${r.labCount > 6 ? `; gezeigt werden die letzten 6 von ${r.labCount} Messungen` : ''}.</p>`;
+                    } else {
+                        h += `<p class="rp-muted">Keine Blutwerte im Zeitraum eingetragen.</p>`;
+                    }
+                    h += `</div>`;
+                }
+
+                if (S('symptoms') || S('painmap')) {
+                    h += `<div style="display:grid;grid-template-columns:${S('symptoms') && S('painmap') ? 'minmax(0,1fr) 220px' : '1fr'};gap:22px;">`;
+                    if (S('symptoms')) {
+                        const maxDays = Math.max(1, ...r.symptoms.map(s => s.days));
+                        h += `<div class="rp-section">${head('Symptome & Begleitbeschwerden')}
+                            ${r.symptoms.map(s => `<div class="rp-symptom"><span>${escapeHtml(s.label)}</span><div class="rp-symptom-bar"><div style="width:${s.days / maxDays * 100}%;"></div></div><span style="text-align:right;">${s.days} Tage</span></div>`).join('')}
+                            <p class="rp-muted">Ø Stimmung ${fmt1(r.wellbeing.mood)} · Immunsystem ${fmt1(r.wellbeing.immune)} · Verdauung ${fmt1(r.wellbeing.digestion)} (eigene Skala 1–10, 10 = top)</p>
+                        </div>`;
+                    }
+                    if (S('painmap')) {
+                        const dot = (p) => {
+                            const size = p.size === 'large' ? 18 : p.size === 'medium' ? 12 : 8;
+                            return `<span class="rp-dot" style="left:${(p.x * 100).toFixed(1)}%;top:${(p.y * 100).toFixed(1)}%;width:${size}px;height:${size}px;"></span>`;
+                        };
+                        h += `<div class="rp-section">${head('Schmerzkarte')}`;
+                        if (r.front.length || r.back.length) {
+                            h += `<div class="rp-bodymaps">
+                                <div><div class="rp-body"><img src="body_front.png" alt="Vorderseite">${r.front.map(dot).join('')}</div><div class="rp-body-label">Vorne · ${r.front.length}</div></div>
+                                <div><div class="rp-body"><img src="body_back.png" alt="Rückseite">${r.back.map(dot).join('')}</div><div class="rp-body-label">Hinten · ${r.back.length}</div></div>
+                            </div>
+                            <p class="rp-muted">Alle Markierungen von ${r.mapDays} Tagen übereinander – je dunkler, desto häufiger.</p>`;
+                        } else {
+                            h += `<p class="rp-muted">Keine Markierungen im Zeitraum.</p>`;
+                        }
+                        h += `</div>`;
+                    }
+                    h += `</div>`;
+                }
+
+                if (S('activity')) {
+                    const weeksCount = r.days / 7;
+                    h += `<div class="rp-section">${head('Bewegung & Gewicht')}
+                        <div class="rp-kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                            <div class="rp-kpi"><span class="rp-kpi-label">Sporttage</span><span class="rp-kpi-value">${r.sportDays}</span><span class="rp-kpi-sub">Ø ${fmt1(r.sportDays / weeksCount)} / Woche</span></div>
+                            <div class="rp-kpi"><span class="rp-kpi-label">Dehnung / Physio</span><span class="rp-kpi-value">${r.stretchDays} <small>/ ${r.entries.length}</small></span><span class="rp-kpi-sub">${r.entries.length ? Math.round(r.stretchDays / r.entries.length * 100) : 0} % der Tage</span></div>
+                            <div class="rp-kpi"><span class="rp-kpi-label">Gewicht</span><span class="rp-kpi-value">${r.weight ? fmt1(r.weight.last) + ' <small>kg</small>' : '–'}</span><span class="rp-kpi-sub">${r.weight && r.weight.diff !== null ? `${r.weight.diff > 0 ? '+' : r.weight.diff < 0 ? '−' : '±'}${fmt1(Math.abs(r.weight.diff))} kg im Zeitraum` : 'kein Verlauf im Zeitraum'}</span></div>
+                        </div>
+                    </div>`;
+                }
+
+                if (S('sleep')) {
+                    h += `<div class="rp-section">${head('Schlaf')}
+                        <p style="margin:0;">Ø Schlafdauer ${minutesToHm(r.sleep.avg)} · Ø Zubettgehen ${clockFromMinutes(r.sleep.bed)} Uhr (n = ${r.sleep.n})</p>
+                    </div>`;
+                }
+
+                if (r.notable.length) {
+                    h += `<div class="rp-section">${head('Auffällige Tage')}
+                        ${r.notable.map(x => `<div class="rp-day"><b>${formatDateDe(x.dayKey).slice(0, 10)}</b><span class="${x.nrs !== null && x.nrs >= 6 ? 'rp-bad' : ''}" style="font-weight:600;">${x.nrs !== null ? (conv ? 'NRS ' : '') + fmt1(painShow(x.nrs, conv)) : '—'}</span><span>${escapeHtml(x.text)}</span></div>`).join('')}
+                        <p class="rp-muted">Automatisch ausgewählt: Tage mit ${conv ? 'Schmerz NRS ≥ 6' : 'Bewertung ≤ 4'} oder mit dem Tag „${INJECTION_TAG}“. Eigene Notizen sind ${S('notes') ? 'separat aufgeführt' : 'nicht enthalten'}.</p>
+                    </div>`;
+                }
+
+                if (S('notes')) {
+                    h += `<div class="rp-section">${head('Eigene Notizen')}
+                        ${r.notes.length ? r.notes.map(n => `<div class="rp-day" style="grid-template-columns:78px minmax(0,1fr);"><b>${formatDateDe(n.dayKey).slice(0, 10)}</b><span>${escapeHtml(n.text)}</span></div>`).join('') : '<p class="rp-muted">Keine Notizen im Zeitraum.</p>'}
+                    </div>`;
+                }
+
+                const openQs = (userSettings.doctorQuestions || []).filter(q => !q.done);
+                if (openQs.length) {
+                    h += `<div class="rp-section rp-questions">${head('Fragen für das Gespräch')}
+                        ${openQs.map(q => `<div class="rp-q">☐ ${escapeHtml(q.text)}<div class="rp-q-line"></div></div>`).join('')}
+                    </div>`;
+                }
+
+                h += `<div class="rp-footer">Selbst erfasste Daten – ersetzt keine ärztliche Untersuchung.${conv ? ' Schmerz umgerechnet: NRS = 10 − eigene Bewertung (eigene Skala: 10 = top, 1 = mies).' : ''} Erstellt mit Daily Companion am ${created}.</div>`;
+                return h;
+            }
+
+            // --- Popup: Einstellungen des Berichts ---
+            function reportPrefs() {
+                const p = userSettings.reportPrefs || {};
+                const sections = {};
+                REPORT_SECTIONS.forEach(s => { sections[s.key] = p.sections && typeof p.sections[s.key] === 'boolean' ? p.sections[s.key] : s.def; });
+                return { sections, convert: typeof p.convert === 'boolean' ? p.convert : true };
+            }
+            function readSections() {
+                const sections = {};
+                document.querySelectorAll('#rrSections input').forEach(cb => { sections[cb.dataset.section] = cb.checked; });
+                return sections;
+            }
+            async function saveReportPrefs() {
+                userSettings.reportPrefs = { sections: readSections(), convert: rrConvert() };
+                try {
+                    await settingsDocRef().set({ reportPrefs: userSettings.reportPrefs }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Bericht-Einstellungen:', e);
+                }
+            }
+
+            function applyPreset(preset) {
+                rrPreset = preset;
+                document.querySelectorAll('#rrPresets button').forEach(b => b.classList.toggle('active', b.dataset.preset === preset));
+                const today = todayIso();
+                const hint = document.getElementById('rrPresetHint');
+                hint.textContent = '';
+                if (preset === 'lastVisit') {
+                    if (userSettings.lastRheumaVisit) {
+                        document.getElementById('rrFrom').value = userSettings.lastRheumaVisit;
+                        hint.textContent = `Letzter Termin: ${deLong(userSettings.lastRheumaVisit)}`;
+                    } else {
+                        document.getElementById('rrFrom').value = addMonthsIso(today, -3);
+                        hint.textContent = 'Noch kein Termin gespeichert – nach dem Termin im Arzt-Modus „Termin abschließen“ tippen. Bis dahin: letzte 3 Monate.';
+                    }
+                    document.getElementById('rrTo').value = today;
+                } else if (preset === '3m' || preset === '6m') {
+                    document.getElementById('rrFrom').value = addMonthsIso(today, preset === '3m' ? -3 : -6);
+                    document.getElementById('rrTo').value = today;
+                }
+                updateCoverage();
+            }
+
+            function currentRange() {
+                let from = document.getElementById('rrFrom').value;
+                let to = document.getElementById('rrTo').value;
+                if (!from || !to) return null;
+                if (from > to) [from, to] = [to, from];
+                return { from, to };
+            }
+
+            function updateCoverage() {
+                const box = document.getElementById('rrCoverage');
+                if (!rrEntries) { box.textContent = 'Lade Daten …'; box.classList.remove('is-empty'); return; }
+                const range = currentRange();
+                if (!range) { box.textContent = 'Bitte Zeitraum wählen.'; box.classList.add('is-empty'); return; }
+                const from = isoToDate(range.from), to = isoToDate(range.to);
+                to.setHours(23, 59, 59, 999);
+                const days = Math.round((isoToDate(range.to) - isoToDate(range.from)) / 86400000) + 1;
+                const inRange = rrEntries.filter(e => e.dateObj >= from && e.dateObj <= to);
+                const labs = inRange.filter(e => LAB_PARAMS.some(p => e[p.key] !== undefined && e[p.key] !== null && !isNaN(e[p.key]))).length;
+                const pct = Math.round(inRange.length / days * 100);
+                box.classList.toggle('is-empty', inRange.length === 0);
+                box.innerHTML = inRange.length
+                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>${days} Tage · ${inRange.length} Tageseinträge (${pct} %) · ${labs} Blutwerte`
+                    : `Keine Tageseinträge in diesem Zeitraum.`;
+            }
+
+            function renderSectionToggles() {
+                const prefs = reportPrefs();
+                document.getElementById('rrSections').innerHTML = REPORT_SECTIONS.map(s =>
+                    `<label><input type="checkbox" data-section="${s.key}" ${prefs.sections[s.key] ? 'checked' : ''}>${escapeHtml(s.label)}</label>`
+                ).join('');
+                document.getElementById('rrConvert').checked = prefs.convert;
+            }
+
+            // --- Fragen ---
+            function renderQuestions() {
+                const list = document.getElementById('rrQuestionList');
+                const qs = (userSettings.doctorQuestions || []).filter(q => !q.done);
+                list.innerHTML = qs.length
+                    ? qs.map(q => `<div class="rr-question"><span>${escapeHtml(q.text)}</span><button type="button" class="fitness-btn-icon delete-btn" data-question-delete="${q.id}" aria-label="Frage löschen">✕</button></div>`).join('')
+                    : '<p style="color: #87879e; font-size: 0.82em; margin: 0 0 6px;">Noch keine Fragen notiert – am besten direkt aufschreiben, wenn sie dir einfallen.</p>';
+            }
+            async function saveQuestions() {
+                try {
+                    await settingsDocRef().set({ doctorQuestions: userSettings.doctorQuestions || [] }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Fragen:', e);
+                    alert('❌ Fragen konnten nicht gespeichert werden: ' + e.message);
+                }
+            }
+            async function addQuestion() {
+                const input = document.getElementById('rrQuestionInput');
+                const text = input.value.trim();
+                if (!text) return;
+                if (!Array.isArray(userSettings.doctorQuestions)) userSettings.doctorQuestions = [];
+                userSettings.doctorQuestions.push({ id: Date.now().toString(), text, done: false });
+                input.value = '';
+                renderQuestions();
+                await saveQuestions();
+            }
+            document.getElementById('rrQuestionAddBtn').addEventListener('click', addQuestion);
+            document.getElementById('rrQuestionInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addQuestion(); } });
+            document.getElementById('rrQuestionList').addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-question-delete]');
+                if (!btn) return;
+                userSettings.doctorQuestions = (userSettings.doctorQuestions || []).filter(q => q.id !== btn.dataset.questionDelete);
+                renderQuestions();
+                await saveQuestions();
+            });
+
+            // --- Popup öffnen/schließen ---
+            async function openRheumaReport() {
+                if (!auth.currentUser) {
+                    alert('🔓 Bitte melden Sie sich an, um einen Bericht zu erstellen.');
+                    return;
+                }
+                document.getElementById('quickMenuOverlay').style.display = 'none';
+                renderSectionToggles();
+                renderQuestions();
+                rrEntries = null;
+                applyPreset('lastVisit');
+                document.getElementById('rheumaReportOverlay').style.display = 'flex';
+                try {
+                    rrEntries = await loadReportEntries();
+                } catch (e) {
+                    console.error('Fehler beim Laden der Tageseinträge:', e);
+                    document.getElementById('rrCoverage').textContent = '❌ Daten konnten nicht geladen werden.';
+                    return;
+                }
+                updateCoverage();
+            }
+            function closeRheumaReport() {
+                document.getElementById('rheumaReportOverlay').style.display = 'none';
+            }
+
+            document.getElementById('openRheumaReportBtn').addEventListener('click', openRheumaReport);
+            document.getElementById('closeRheumaReportBtn').addEventListener('click', closeRheumaReport);
+            document.getElementById('rheumaReportOverlay').addEventListener('click', (e) => { if (e.target.id === 'rheumaReportOverlay') closeRheumaReport(); });
+            document.getElementById('rrPresets').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-preset]');
+                if (btn) applyPreset(btn.dataset.preset);
+            });
+            ['rrFrom', 'rrTo'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+                rrPreset = 'custom';
+                document.querySelectorAll('#rrPresets button').forEach(b => b.classList.toggle('active', b.dataset.preset === 'custom'));
+                document.getElementById('rrPresetHint').textContent = '';
+                updateCoverage();
+            }));
+            document.getElementById('rrSections').addEventListener('change', saveReportPrefs);
+            document.getElementById('rrConvert').addEventListener('change', saveReportPrefs);
+
+            document.getElementById('reminderReportBtn').addEventListener('click', () => {
+                if (currentToastReminderId) snoozeReminder(currentToastReminderId, 60);
+                openRheumaReport();
+            });
+
+            function prepareReport() {
+                if (!rrEntries) { alert('⏳ Daten werden noch geladen – bitte kurz warten.'); return null; }
+                const range = currentRange();
+                if (!range) { alert('✒️ Bitte einen Zeitraum wählen.'); return null; }
+                rrReport = buildReport(rrEntries, range.from, range.to);
+                if (!rrReport.entries.length) { alert('ℹ️ Im gewählten Zeitraum gibt es keine Tageseinträge.'); return null; }
+                return rrReport;
+            }
+
+            // --- PDF (über den Druckdialog: „Als PDF speichern“) ---
+            function printReport(r, sections, conv) {
+                const area = document.getElementById('rheumaPrintArea');
+                area.innerHTML = renderReportHtml(r, sections, conv);
+                const imgs = [...area.querySelectorAll('img')];
+                Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })))
+                    .then(() => {
+                        const oldTitle = document.title;
+                        document.title = `Rheuma-Bericht ${deLong(r.fromIso)} - ${deLong(r.toIso)}`;
+                        const restore = () => { document.title = oldTitle; window.removeEventListener('afterprint', restore); };
+                        window.addEventListener('afterprint', restore);
+                        window.print();
+                        setTimeout(restore, 3000);
+                    });
+            }
+
+            document.getElementById('rrPdfBtn').addEventListener('click', () => {
+                const r = prepareReport();
+                if (r) printReport(r, readSections(), rrConvert());
+            });
+
+            // --- Teilen (Kurzfassung als Text) ---
+            function summaryText(r, conv) {
+                const lines = [`Rheuma-Verlauf ${deLong(r.fromIso)} – ${deLong(r.toIso)} (${r.entries.length} von ${r.days} Tagen erfasst)`];
+                lines.push(`Ø Schmerz (${scaleName(conv)}): ${fmt1(painShow(r.cur.pain, conv))}`);
+                if (r.cur.stiff !== null) lines.push(`Ø Morgensteifigkeit: ${Math.round(r.cur.stiff)} Min`);
+                lines.push(`Tage mit NSAR: ${r.cur.nsar} / ${r.entries.length}`);
+                lines.push(`Biologika-Gaben: ${r.meds.bioDates.length}`);
+                if (r.latestCrpEntry) lines.push(`CRP zuletzt: ${fmtLab(r.latestCrpEntry.crpValue)} mg/l (${deShort(r.latestCrpEntry.dayKey)})`);
+                const ranked = r.regions.filter(x => x.avg !== null).sort((a, b) => b.avg - a.avg);
+                if (ranked.length) lines.push(`Am stärksten betroffen: ${ranked[0].label}`);
+                const qs = (userSettings.doctorQuestions || []).filter(q => !q.done);
+                if (qs.length) lines.push('', 'Fragen:', ...qs.map(q => `• ${q.text}`));
+                return lines.join('\n');
+            }
+            document.getElementById('rrShareBtn').addEventListener('click', async () => {
+                const r = prepareReport();
+                if (!r) return;
+                const text = summaryText(r, rrConvert());
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: 'Rheuma-Bericht', text });
+                    } else {
+                        await navigator.clipboard.writeText(text);
+                        showCustomAlert('Kurzfassung in die Zwischenablage kopiert.', '📋');
+                    }
+                } catch (e) {
+                    if (e.name !== 'AbortError') console.error('Teilen fehlgeschlagen:', e);
+                }
+            });
+
+            // --- Arzt-Modus ---
+            function renderDoctorMode(r, conv) {
+                document.getElementById('dmPeriod').textContent = `${deShort(r.fromIso)} – ${deLong(r.toIso)} · ${r.days} Tage`;
+                document.getElementById('dmBadge').textContent = scaleName(conv);
+
+                const d = (a, b) => (a !== null && b !== null && r.comparable) ? a - b : null;
+                const pd = painDiffInfo(d(r.cur.pain, r.before.pain), conv);
+                const sd = d(r.cur.stiff, r.before.stiff);
+                const nc = nsarCompare(r);
+                const ranked = r.regions.filter(x => x.avg !== null).sort((a, b) => b.avg - a.avg);
+                const worst = r.summary.find(s => s.kind === 'worst');
+                const crp = r.latestCrpEntry;
+                const qs = (userSettings.doctorQuestions || []).filter(q => !q.done || q.checkedInVisit);
+
+                const page1 = `
+                    <div class="dm-card">
+                        <span class="dm-label">Ø Schmerz</span>
+                        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+                            <span class="dm-big">${fmt1(painShow(r.cur.pain, conv))}</span>
+                            <span style="font-size:0.88em;font-weight:600;" class="${pd ? (pd.good ? 'dm-good' : pd.bad ? 'dm-bad' : '') : 'dm-sub'}">${pd ? pd.text + ' ggü. Vorzeitraum' : 'kein Vorzeitraum'}</span>
+                        </div>
+                        ${painChartSvg(r, conv, true)}
+                        <span class="dm-sub">${worst ? `Spitze KW ${worst.week.kw}` : ''}${ranked.length ? ` · am stärksten: ${escapeHtml(ranked[0].label)}` : ''}</span>
+                    </div>
+                    <div class="dm-tiles">
+                        <div class="dm-card"><span class="dm-label">Morgensteifigkeit</span><span class="dm-mid">${r.cur.stiff !== null ? Math.round(r.cur.stiff) : '–'} <span class="dm-unit">Min</span></span><span class="dm-sub ${sd !== null ? (sd < -0.5 ? 'dm-good' : sd > 0.5 ? 'dm-bad' : '') : ''}">${sd !== null ? `${sd < 0 ? '▼' : sd > 0 ? '▲' : '●'} ${Math.abs(Math.round(sd))} Min` : 'kein Vorzeitraum'}</span></div>
+                        <div class="dm-card"><span class="dm-label">Tage mit NSAR</span><span class="dm-mid">${r.cur.nsar} <span class="dm-unit">/ ${r.entries.length}</span></span><span class="dm-sub ${nc ? (nc.good ? 'dm-good' : nc.bad ? 'dm-bad' : '') : ''}">${nc ? nc.text : 'kein Vorzeitraum'}</span></div>
+                        <div class="dm-card"><span class="dm-label">Biologika</span><span class="dm-mid">${r.meds.bioDates.length} <span class="dm-unit">Gaben</span></span><span class="dm-sub">${r.meds.bioAvgGap !== null ? `Ø alle ${Math.round(r.meds.bioAvgGap)} Tage` : '–'}</span></div>
+                        <div class="dm-card"><span class="dm-label">CRP zuletzt</span><span class="dm-mid ${crp && crp.crpValue > 5 ? 'dm-bad' : ''}">${crp ? fmtLab(crp.crpValue) : '–'} <span class="dm-unit">mg/l</span></span><span class="dm-sub">${r.crpPeak && crp && r.crpPeak !== crp ? `Spitze ${fmtLab(r.crpPeak.crpValue)} am ${deShort(r.crpPeak.dayKey)}` : (crp ? deShort(crp.dayKey) : 'kein Wert')}</span></div>
+                    </div>
+                    <div class="dm-card" style="gap:8px;">
+                        <b style="font-weight:600;">Meine Fragen</b>
+                        ${qs.length ? qs.map(q => `<label class="dm-question ${q.checkedInVisit ? 'is-done' : ''}"><input type="checkbox" data-dm-question="${q.id}" ${q.checkedInVisit ? 'checked' : ''}><span>${escapeHtml(q.text)}</span></label>`).join('') : '<span class="dm-sub">Keine offenen Fragen.</span>'}
+                        <label for="dmNote" style="font-size:0.75em;color:#00f2fe;margin-top:2px;">Antwort / Notiz vom Termin</label>
+                        <textarea id="dmNote" class="styled-input" rows="3" placeholder="z. B. Dosis angepasst, nächster Termin …" style="box-sizing:border-box;resize:vertical;font-family:'Poppins',sans-serif;">${escapeHtml(userSettings.rheumaVisitDraft || '')}</textarea>
+                    </div>`;
+
+                const page2 = `
+                    <div class="dm-card">
+                        <span class="dm-label">Schmerz je Region (${scaleName(conv)})</span>
+                        ${r.regions.map(g => {
+                            const t = g.trend;
+                            const tTxt = !t ? '' : t.dir === 'stable' ? ' · stabil' : (t.dir === 'down' ? ' · besser' : ' · schlechter');
+                            const tCls = !t || t.dir === 'stable' ? '' : (t.dir === 'down' ? 'dm-good' : 'dm-bad');
+                            return `<div class="dm-row"><span>${escapeHtml(g.label)}</span><span class="${tCls}">Ø ${fmt1(painShow(g.avg, conv))}${tTxt}</span></div>`;
+                        }).join('')}
+                    </div>
+                    <div class="dm-card">
+                        <span class="dm-label">Morgensteifigkeit (Tage)</span>
+                        ${r.stiffBuckets.map(b => `<div class="dm-row"><span>${b.label}</span><span>${b.count}</span></div>`).join('')}
+                    </div>
+                    <div class="dm-card">
+                        <span class="dm-label">Symptome (Tage)</span>
+                        ${r.symptoms.map(s => `<div class="dm-row"><span>${escapeHtml(s.label)}</span><span>${s.days}</span></div>`).join('')}
+                    </div>`;
+
+                const page3 = `
+                    <div class="dm-card">
+                        <span class="dm-label">Laborwerte – letzte Messung</span>
+                        ${r.labs.length ? r.labs.map(p => {
+                            const out = p.latest !== null && (p.latest < p.min || p.latest > p.max);
+                            return `<div class="dm-row"><span>${p.label}<br><span class="dm-sub">Norm ${p.norm}</span></span><span class="${out ? 'dm-bad' : ''}">${fmtLab(p.latest)}${out ? (p.latest > p.max ? ' ↑' : ' ↓') : ''}${p.trend ? `<br><span class="dm-sub">${p.trend === 'up' ? '▲ steigend' : p.trend === 'down' ? '▼ fallend' : '● stabil'}</span>` : ''}</span></div>`;
+                        }).join('') : '<span class="dm-sub">Keine Blutwerte im Zeitraum.</span>'}
+                    </div>`;
+
+                const page4 = `
+                    <div class="dm-card">
+                        <span class="dm-label">Biologika / JAK</span>
+                        <div class="dm-row"><span>Gaben</span><span>${r.meds.bioDates.length}</span></div>
+                        ${r.meds.bioAvgGap !== null ? `<div class="dm-row"><span>Ø / längster Abstand</span><span>${Math.round(r.meds.bioAvgGap)} / ${r.meds.bioMaxGap} Tage</span></div>` : ''}
+                        ${r.meds.bioDates.length ? `<span class="dm-sub">${r.meds.bioDates.map(deShort).join(' · ')}</span>` : ''}
+                        <div class="dm-row"><span>Wirkung stark / mittel / schwach</span><span>${r.meds.effect.stark} / ${r.meds.effect.mittel} / ${r.meds.effect.schwach}</span></div>
+                        <div class="dm-row"><span>Rötung Einstichstelle</span><span>${r.meds.injectionSite}×</span></div>
+                    </div>
+                    <div class="dm-card">
+                        <span class="dm-label">Schmerzmittel (Tage von ${r.entries.length})</span>
+                        ${r.meds.nsar.map(x => `<div class="dm-row"><span>${x.label}</span><span>${x.days}</span></div>`).join('')}
+                        <div class="dm-row"><span>Ohne Schmerzmittel</span><span>${r.meds.noneDays}</span></div>
+                    </div>`;
+
+                document.getElementById('dmPages').innerHTML = [page1, page2, page3, page4].map(p => `<div class="dm-page">${p}</div>`).join('');
+                document.getElementById('dmPages').scrollLeft = 0;
+                updateDmDots();
+            }
+
+            function updateDmDots() {
+                const pages = document.getElementById('dmPages');
+                const idx = Math.round(pages.scrollLeft / Math.max(1, pages.clientWidth));
+                document.querySelectorAll('#dmDots span').forEach((s, i) => s.classList.toggle('active', i === idx));
+            }
+            document.getElementById('dmPages').addEventListener('scroll', updateDmDots, { passive: true });
+
+            document.getElementById('rrDoctorBtn').addEventListener('click', () => {
+                const r = prepareReport();
+                if (!r) return;
+                renderDoctorMode(r, rrConvert());
+                document.getElementById('doctorModeOverlay').style.display = 'flex';
+            });
+
+            async function saveDoctorDraft() {
+                const note = document.getElementById('dmNote');
+                if (!note) return;
+                userSettings.rheumaVisitDraft = note.value;
+                try {
+                    await settingsDocRef().set({ rheumaVisitDraft: userSettings.rheumaVisitDraft, doctorQuestions: userSettings.doctorQuestions || [] }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Termin-Notiz:', e);
+                }
+            }
+
+            document.getElementById('dmPages').addEventListener('change', (e) => {
+                const cb = e.target.closest('[data-dm-question]');
+                if (!cb) return;
+                const q = (userSettings.doctorQuestions || []).find(x => x.id === cb.dataset.dmQuestion);
+                if (q) q.checkedInVisit = cb.checked;
+                cb.closest('.dm-question').classList.toggle('is-done', cb.checked);
+                saveDoctorDraft();
+            });
+            document.getElementById('dmPages').addEventListener('focusout', (e) => {
+                if (e.target.id === 'dmNote') saveDoctorDraft();
+            });
+
+            document.getElementById('dmBackBtn').addEventListener('click', async () => {
+                await saveDoctorDraft();
+                document.getElementById('doctorModeOverlay').style.display = 'none';
+                renderQuestions();
+            });
+
+            document.getElementById('dmPdfBtn').addEventListener('click', () => {
+                if (rrReport) printReport(rrReport, readSections(), rrConvert());
+            });
+
+            // Termin abschließen: Notiz + Fragen archivieren, Datum als „letzter Termin“ merken
+            document.getElementById('dmFinishBtn').addEventListener('click', async () => {
+                if (!rrReport) return;
+                if (!confirm('Termin heute abschließen?\n\nDie Notiz und die abgehakten Fragen werden gespeichert, und der nächste Bericht startet ab heute.')) return;
+                const note = (document.getElementById('dmNote') || {}).value || '';
+                const qs = userSettings.doctorQuestions || [];
+                const visit = {
+                    date: todayIso(),
+                    from: rrReport.fromIso,
+                    to: rrReport.toIso,
+                    note: note.trim(),
+                    questions: qs.filter(q => q.checkedInVisit).map(q => q.text)
+                };
+                userSettings.rheumaVisits = [...(userSettings.rheumaVisits || []), visit];
+                userSettings.lastRheumaVisit = visit.date;
+                userSettings.doctorQuestions = qs.filter(q => !q.checkedInVisit).map(q => ({ id: q.id, text: q.text, done: false }));
+                userSettings.rheumaVisitDraft = '';
+                try {
+                    await settingsDocRef().set({
+                        rheumaVisits: userSettings.rheumaVisits,
+                        lastRheumaVisit: userSettings.lastRheumaVisit,
+                        doctorQuestions: userSettings.doctorQuestions,
+                        rheumaVisitDraft: ''
+                    }, { merge: true });
+                    document.getElementById('doctorModeOverlay').style.display = 'none';
+                    renderQuestions();
+                    applyPreset('lastVisit');
+                    showCustomAlert('Termin gespeichert.', '🩺');
+                } catch (e) {
+                    console.error('Fehler beim Abschließen des Termins:', e);
+                    alert('❌ Termin konnte nicht gespeichert werden: ' + e.message);
+                }
+            });
+            // ====== ENDE: Rheuma-Bericht ======
+
             // Nach dem Speichern neuer Blutwerte die Sidebar ggf. mitziehen
             document.getElementById('saveBloodValuesBtn').addEventListener('click', () => {
                 setTimeout(applyAutoBloodValues, 1500);
@@ -8036,6 +9374,9 @@
                     ? `+${more} weitere fällig · zur Seite wischen = später`
                     : 'zur Seite wischen = später';
 
+                // Rheuma-Termin-Erinnerung → Knopf „Bericht“ anbieten
+                document.getElementById('reminderReportBtn').style.display = /rheuma/i.test(rem.title) ? 'block' : 'none';
+
                 reminderToast.style.transform = '';
                 reminderToast.style.opacity = '';
                 reminderToast.classList.add('visible');
@@ -8182,5 +9523,8 @@
             });
         });
     </script>
+
+    <!-- Druckbereich für den Rheuma-Bericht (nur beim PDF-Erstellen sichtbar) -->
+    <div id="rheumaPrintArea"></div>
 </body>
-</html>
+</html>
