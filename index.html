@@ -1622,6 +1622,10 @@
             flex-direction: column;
             box-sizing: border-box;
             overflow-y: auto;               /* nur Notfall bei extrem kleinen Displays */
+            /* Fade oben: Schwarz (Statusleiste) → Sidebar-Hintergrund */
+            background:
+                linear-gradient(to bottom, #000000 0px, rgba(0, 0, 0, 0.55) 13px, rgba(0, 0, 0, 0) 28px) no-repeat,
+                rgba(25, 25, 45, 0.98);
         }
         #quickMenuPopup .sidebar-header {
             flex-shrink: 0;
