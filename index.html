@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#000000">
     <title>Daily Companion</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -1611,6 +1612,56 @@
         /* Leichter Hover-Effekt, damit man merkt, wo man drüberfährt */
         #quickMenuPopup .sidebar-menu button:hover {
             background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* =========================================
+        SIDEBAR: passt sich der Bildschirmhöhe an (z. B. Galaxy S10e ohne Scrollen)
+        ========================================= */
+        #quickMenuPopup {
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto;               /* nur Notfall bei extrem kleinen Displays */
+        }
+        #quickMenuPopup .sidebar-header {
+            flex-shrink: 0;
+            padding-bottom: clamp(10px, 2.5vh, 20px);
+        }
+        #quickMenuPopup .profile-pic {
+            width: clamp(80px, 16vh, 130px);
+            height: clamp(80px, 16vh, 130px);
+            margin-bottom: clamp(8px, 2vh, 20px);
+        }
+        #quickMenuPopup .sidebar-menu {
+            flex: 1;
+            min-height: 0;
+            padding: clamp(4px, 1.2vh, 10px) 0 0;
+        }
+        #quickMenuPopup .quick-menu-grid {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;  /* Buttons verteilen sich auf die freie Höhe */
+            gap: 2px;
+            margin-top: clamp(4px, 1vh, 10px);
+        }
+        #quickMenuPopup .sidebar-menu button {
+            padding: 4px 7px;
+            min-height: 32px;
+            flex-shrink: 0;
+        }
+
+        /* Fade unter der schwarzen Kopfleiste → läuft in den jeweiligen Hintergrund aus */
+        .header-fixed { box-shadow: none; }
+        .header-fixed::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            height: 28px;
+            background: linear-gradient(to bottom, #000000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0) 100%);
+            pointer-events: none;
         }
 
         /* ====== START: Ausgaben-Tracker Styles #00000047  ====== */
