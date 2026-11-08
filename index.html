@@ -1624,7 +1624,7 @@
             overflow-y: auto;               /* nur Notfall bei extrem kleinen Displays */
             /* Fade oben: Schwarz (Statusleiste) → Sidebar-Hintergrund */
             background:
-                linear-gradient(to bottom, #000000 0px, rgba(0, 0, 0, 0.55) 13px, rgba(0, 0, 0, 0) 28px) no-repeat,
+                linear-gradient(to bottom, #000000 0px, rgba(0, 0, 0, 0.55) 39px, rgba(0, 0, 0, 0) 84px) no-repeat,
                 rgba(25, 25, 45, 0.98);
         }
         #quickMenuPopup .sidebar-header {
@@ -1655,18 +1655,6 @@
             flex-shrink: 0;
         }
 
-        /* Fade unter der schwarzen Kopfleiste → läuft in den jeweiligen Hintergrund aus */
-        .header-fixed { box-shadow: none; }
-        .header-fixed::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
-            height: 28px;
-            background: linear-gradient(to bottom, #000000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0) 100%);
-            pointer-events: none;
-        }
 
         /* ====== START: Ausgaben-Tracker Styles #00000047  ====== */
         .expense-quick-tag {
