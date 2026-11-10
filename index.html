@@ -2411,40 +2411,43 @@
         }
         #miniToast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* Auto-Save-Anzeige im Header (Variante C: Wolke + Linie) */
-        .autosave-indicator {
+        /* Auto-Save-Anzeige im Header: Punkt hinter der Überschrift + Laufleiste */
+        .autosave-dot {
+            display: none;
             position: absolute;
-            right: 2px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 36px;
-            height: 44px;
+            top: 28px;              /* Punktmitte auf Höhe des Hinweispunkts (notification-dot) */
+            width: 28px;            /* große Tippfläche, sichtbar ist nur der 8-px-Punkt */
+            height: 28px;
+            margin-left: -8px;
             padding: 0;
-            background: none;
+            background: transparent;
             border: none;
             cursor: pointer;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1px;
-            color: #5c5c78;
-            transition: color 0.3s ease;
-            z-index: 101;
+            z-index: 103;
+            -webkit-tap-highlight-color: transparent;
         }
-        .header-fixed.as-idle .autosave-indicator,
-        .header-fixed.as-saving .autosave-indicator,
-        .header-fixed.as-saved .autosave-indicator,
-        .header-fixed.as-warn .autosave-indicator { display: flex; }
-        .header-fixed.as-saving .autosave-indicator { color: #00f2fe; }
-        .header-fixed.as-saved .autosave-indicator { color: #2ecc71; }
-        .header-fixed.as-warn .autosave-indicator { color: #ff6b6b; }
-        .autosave-indicator .as-glyph { display: none; }
-        .header-fixed.as-saving .as-glyph-saving,
-        .header-fixed.as-saved .as-glyph-saved,
-        .header-fixed.as-warn .as-glyph-warn { display: inline; }
-        .autosave-time { font-family: 'Poppins', sans-serif; font-size: 9px; line-height: 1; display: none; }
-        .header-fixed.as-saved .autosave-time { display: block; }
+        .autosave-dot::after {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+            transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+        }
+        .header-fixed.as-idle .autosave-dot,
+        .header-fixed.as-saving .autosave-dot,
+        .header-fixed.as-saved .autosave-dot,
+        .header-fixed.as-warn .autosave-dot { display: inline-block; }  /* inline-block: sitzt wie der Hinweispunkt direkt hinter dem Text */
+        .header-fixed.as-idle .autosave-dot::after { opacity: 0.55; box-shadow: none; }
+        .header-fixed.as-saving .autosave-dot::after { animation: as-pulse 0.9s ease-in-out infinite; }
+        .header-fixed.as-warn .autosave-dot::after { background: #ff4d4d; box-shadow: 0 0 8px rgba(255, 77, 77, 0.8); }
+        @keyframes as-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+        /* Ist der Biologika-Hinweispunkt sichtbar, rückt der Auto-Save-Punkt daneben */
+        .notification-dot[style*="block"] ~ .autosave-dot { margin-left: 4px; }
 
         .autosave-line {
             position: absolute;
@@ -2474,11 +2477,6 @@
         }
         .header-fixed.as-warn .autosave-line-bar { width: 100%; background: #ff6b6b; }
         @keyframes as-run { 0% { width: 0; } 100% { width: 100%; } }
-        /* Schmale Displays (z. B. S10e): Titel minimal kleiner, solange die Wolke sichtbar ist */
-        @media (max-width: 380px) {
-            .header-fixed.as-idle h1, .header-fixed.as-saving h1,
-            .header-fixed.as-saved h1, .header-fixed.as-warn h1 { font-size: 1.8em; }
-        }
         @keyframes as-fade { 0%, 45% { opacity: 0.8; } 100% { opacity: 0; } }
         /* ====== ENDE: Standardprofile & Auto-Speichern Styles ====== */
 
@@ -2487,16 +2485,7 @@
 <body>
     <div class="header-fixed">
         <button id="quickMenuBtn" class="menu-toggle-btn">☰</button>
-        <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>  
-        <button type="button" class="autosave-indicator" id="autoSaveIndicator" aria-label="Auto-Save">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M7 18h10a4 4 0 00.5-7.97A6 6 0 006.1 9.2 4.5 4.5 0 007 18z"></path>
-                <path class="as-glyph as-glyph-saving" d="M12 15.5v-4M10.2 13.2L12 11.4l1.8 1.8"></path>
-                <path class="as-glyph as-glyph-saved" d="M9.6 13.6l1.7 1.7 3.2-3.2"></path>
-                <path class="as-glyph as-glyph-warn" d="M12 11v2.6M12 15.6v.1"></path>
-            </svg>
-            <span class="autosave-time" id="autoSaveTime"></span>
-        </button>
+        <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span><button type="button" id="autoSaveDot" class="autosave-dot" aria-label="Auto-Save"></button></h1>  
         <div class="autosave-line" aria-hidden="true"><div class="autosave-line-bar"></div></div>
     </div>
 
@@ -4673,13 +4662,12 @@
         function setAutoSaveState(state, info) {
             autoSaveState = state;
             const header = document.querySelector('.header-fixed');
-            const btn = document.getElementById('autoSaveIndicator');
+            const btn = document.getElementById('autoSaveDot');
             if (!header || !btn) return;
             header.classList.remove('as-idle', 'as-saving', 'as-saved', 'as-warn');
             if (state !== 'off') header.classList.add('as-' + state);
             if (state === 'saved') {
                 autoSaveLastTime = info || clockNow();
-                document.getElementById('autoSaveTime').textContent = autoSaveLastTime;
                 // Linie bei jedem Speichern neu einblenden
                 const bar = header.querySelector('.autosave-line-bar');
                 bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
@@ -4756,7 +4744,13 @@
             autoSaveTimer = null;
             runAutoSave();
         }
-        document.getElementById('autoSaveIndicator').addEventListener('click', () => {
+        // Punkt antippen = Details. Ereignisse nicht an die Überschrift weiterreichen,
+        // sonst würden Doppelklick (Profil ausfüllen) bzw. langes Drücken ausgelöst.
+        const autoSaveDotEl = document.getElementById('autoSaveDot');
+        ['mousedown', 'mouseup', 'touchstart', 'touchend'].forEach(evt =>
+            autoSaveDotEl.addEventListener(evt, (e) => e.stopPropagation(), { passive: true }));
+        autoSaveDotEl.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (autoSaveState === 'warn') {
                 alert(autoSaveMissing.length
                     ? `⚠ Nicht gespeichert – bitte noch ausfüllen:\n\n- ${autoSaveMissing.join('\n- ')}`
