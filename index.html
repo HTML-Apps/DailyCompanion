@@ -2411,16 +2411,75 @@
         }
         #miniToast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        .autosave-status {
-            text-align: center;
-            font-size: 0.8em;
-            color: #87879e;
-            min-height: 1.3em;
-            margin-top: 8px;
-            transition: color 0.2s;
+        /* Auto-Save-Anzeige im Header (Variante C: Wolke + Linie) */
+        .autosave-indicator {
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 44px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            color: #5c5c78;
+            transition: color 0.3s ease;
+            z-index: 101;
         }
-        .autosave-status.is-ok { color: #2ecc71; }
-        .autosave-status.is-warn { color: #ff6b6b; }
+        .header-fixed.as-idle .autosave-indicator,
+        .header-fixed.as-saving .autosave-indicator,
+        .header-fixed.as-saved .autosave-indicator,
+        .header-fixed.as-warn .autosave-indicator { display: flex; }
+        .header-fixed.as-saving .autosave-indicator { color: #00f2fe; }
+        .header-fixed.as-saved .autosave-indicator { color: #2ecc71; }
+        .header-fixed.as-warn .autosave-indicator { color: #ff6b6b; }
+        .autosave-indicator .as-glyph { display: none; }
+        .header-fixed.as-saving .as-glyph-saving,
+        .header-fixed.as-saved .as-glyph-saved,
+        .header-fixed.as-warn .as-glyph-warn { display: inline; }
+        .autosave-time { font-family: 'Poppins', sans-serif; font-size: 9px; line-height: 1; display: none; }
+        .header-fixed.as-saved .autosave-time { display: block; }
+
+        .autosave-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            display: none;
+            pointer-events: none;
+        }
+        .header-fixed.as-idle .autosave-line,
+        .header-fixed.as-saving .autosave-line,
+        .header-fixed.as-saved .autosave-line,
+        .header-fixed.as-warn .autosave-line { display: block; }
+        .autosave-line-bar { height: 100%; width: 0; }
+        .header-fixed.as-saving .autosave-line-bar {
+            background: #00f2fe;
+            box-shadow: 0 0 8px #00f2fe;
+            animation: as-run 1s ease-in-out infinite;
+        }
+        .header-fixed.as-saved .autosave-line-bar {
+            width: 100%;
+            background: #2ecc71;
+            animation: as-fade 1.8s ease forwards;
+        }
+        .header-fixed.as-warn .autosave-line-bar { width: 100%; background: #ff6b6b; }
+        @keyframes as-run { 0% { width: 0; } 100% { width: 100%; } }
+        /* Schmale Displays (z. B. S10e): Titel minimal kleiner, solange die Wolke sichtbar ist */
+        @media (max-width: 380px) {
+            .header-fixed.as-idle h1, .header-fixed.as-saving h1,
+            .header-fixed.as-saved h1, .header-fixed.as-warn h1 { font-size: 1.8em; }
+        }
+        @keyframes as-fade { 0%, 45% { opacity: 0.8; } 100% { opacity: 0; } }
         /* ====== ENDE: Standardprofile & Auto-Speichern Styles ====== */
 
     </style>
@@ -2429,6 +2488,16 @@
     <div class="header-fixed">
         <button id="quickMenuBtn" class="menu-toggle-btn">☰</button>
         <h1>Daily Companion<span id="notificationDot" class="notification-dot"></span></h1>  
+        <button type="button" class="autosave-indicator" id="autoSaveIndicator" aria-label="Auto-Save">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 18h10a4 4 0 00.5-7.97A6 6 0 006.1 9.2 4.5 4.5 0 007 18z"></path>
+                <path class="as-glyph as-glyph-saving" d="M12 15.5v-4M10.2 13.2L12 11.4l1.8 1.8"></path>
+                <path class="as-glyph as-glyph-saved" d="M9.6 13.6l1.7 1.7 3.2-3.2"></path>
+                <path class="as-glyph as-glyph-warn" d="M12 11v2.6M12 15.6v.1"></path>
+            </svg>
+            <span class="autosave-time" id="autoSaveTime"></span>
+        </button>
+        <div class="autosave-line" aria-hidden="true"><div class="autosave-line-bar"></div></div>
     </div>
 
     <button id="signInButton" style="
@@ -2771,7 +2840,6 @@
                 </div>
 
                 <button class="submit-button" id="submitBtn">Speichern</button>
-                <div class="autosave-status" id="autoSaveStatus" aria-live="polite"></div>
             </div>
 
         </div> </div> <div class="overlay" id="popupOverlay">
@@ -4598,11 +4666,34 @@
             const { userId, ...rest } = data;
             return JSON.stringify(rest);
         }
-        function setAutoSaveStatus(text, kind) {
-            const el = document.getElementById('autoSaveStatus');
-            if (!el) return;
-            el.textContent = text || '';
-            el.className = 'autosave-status' + (kind ? ' is-' + kind : '');
+        // Zustände der Header-Anzeige: off | idle | saving | saved | warn
+        let autoSaveState = 'off';
+        let autoSaveLastTime = null;
+        let autoSaveMissing = [];
+        function setAutoSaveState(state, info) {
+            autoSaveState = state;
+            const header = document.querySelector('.header-fixed');
+            const btn = document.getElementById('autoSaveIndicator');
+            if (!header || !btn) return;
+            header.classList.remove('as-idle', 'as-saving', 'as-saved', 'as-warn');
+            if (state !== 'off') header.classList.add('as-' + state);
+            if (state === 'saved') {
+                autoSaveLastTime = info || clockNow();
+                document.getElementById('autoSaveTime').textContent = autoSaveLastTime;
+                // Linie bei jedem Speichern neu einblenden
+                const bar = header.querySelector('.autosave-line-bar');
+                bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
+            }
+            if (state === 'warn') autoSaveMissing = Array.isArray(info) ? info : [];
+            const labels = {
+                off: 'Auto-Save',
+                idle: 'Auto-Save aktiv',
+                saving: 'Speichert …',
+                saved: `Gespeichert um ${autoSaveLastTime}`,
+                warn: autoSaveMissing.length ? `Nicht gespeichert – fehlt: ${autoSaveMissing.join(', ')}` : 'Speichern fehlgeschlagen'
+            };
+            btn.setAttribute('aria-label', labels[state]);
+            btn.title = labels[state];
         }
         function clockNow() {
             const d = new Date();
@@ -4610,21 +4701,21 @@
         }
 
         // Aktiviert das fortlaufende Speichern, wenn der geöffnete Eintrag vollständig ist
-        function armAutoSave(statusText) {
+        function armAutoSave(justSaved) {
             const user = auth.currentUser;
             if (!isEntryWriter(user) || !currentEntryId) { disarmAutoSave(); return; }
             const { dataToSave, missingFields } = buildEntryData(user);
             if (missingFields.length) { disarmAutoSave(); return; }
             autoSaveArmed = true;
             lastSavedSnapshot = entrySnapshot(dataToSave);
-            setAutoSaveStatus(statusText || '✓ Automatisches Speichern aktiv', 'ok');
+            if (justSaved) setAutoSaveState('saved', clockNow()); else setAutoSaveState('idle');
         }
         function disarmAutoSave() {
             autoSaveArmed = false;
             clearTimeout(autoSaveTimer);
             autoSaveTimer = null;
             lastSavedSnapshot = null;
-            setAutoSaveStatus('', null);
+            setAutoSaveState('off');
         }
         function scheduleAutoSave() {
             if (!autoSaveArmed) return;
@@ -4638,23 +4729,24 @@
             // Daten sofort (synchron) einsammeln – auch wenn danach das Datum gewechselt wird
             const { dataToSave, missingFields } = buildEntryData(user);
             if (missingFields.length) {
-                setAutoSaveStatus(`⚠ Nicht gespeichert – fehlt: ${missingFields.join(', ')}`, 'warn');
+                setAutoSaveState('warn', missingFields);
                 return;
             }
             const snap = entrySnapshot(dataToSave);
             if (snap === lastSavedSnapshot) {
-                if (document.getElementById('autoSaveStatus').classList.contains('is-warn')) setAutoSaveStatus(`✓ Gespeichert ${clockNow()}`, 'ok');
+                if (autoSaveState === 'warn') setAutoSaveState(autoSaveLastTime ? 'saved' : 'idle', autoSaveLastTime);
                 return;
             }
+            setAutoSaveState('saving');
             try {
                 await db.collection("dailyEntries").doc(entryId).set(dataToSave, { merge: true });
                 if (entryId === currentEntryId) {
                     lastSavedSnapshot = snap;
-                    setAutoSaveStatus(`✓ Gespeichert ${clockNow()}`, 'ok');
+                    setAutoSaveState('saved', clockNow());
                 }
             } catch (error) {
                 console.error("Fehler beim automatischen Speichern: ", error);
-                setAutoSaveStatus('⚠ Speichern fehlgeschlagen – bitte „Speichern“ drücken', 'warn');
+                setAutoSaveState('warn', []);
             }
         }
         // Ausstehende Änderung sofort speichern (vor Datumswechsel / beim Schließen)
@@ -4664,6 +4756,19 @@
             autoSaveTimer = null;
             runAutoSave();
         }
+        document.getElementById('autoSaveIndicator').addEventListener('click', () => {
+            if (autoSaveState === 'warn') {
+                alert(autoSaveMissing.length
+                    ? `⚠ Nicht gespeichert – bitte noch ausfüllen:\n\n- ${autoSaveMissing.join('\n- ')}`
+                    : '⚠ Das automatische Speichern ist fehlgeschlagen. Bitte unten auf „Speichern“ drücken.');
+            } else if (autoSaveState === 'saved') {
+                showMiniToast(`💾 Zuletzt gespeichert um ${autoSaveLastTime}`);
+            } else if (autoSaveState === 'saving') {
+                showMiniToast('💾 Speichert …');
+            } else {
+                showMiniToast('☁️ Auto-Save aktiv – Änderungen werden automatisch gespeichert');
+            }
+        });
         document.addEventListener('visibilitychange', () => { if (document.hidden) flushAutoSave(); });
         window.addEventListener('pagehide', flushAutoSave);
         // ====== ENDE: Fortlaufendes Speichern ======
@@ -6072,7 +6177,7 @@
                         // Das ist sicherer und fasst die neuen Daten sauber mit den Makros zusammen, ohne sie zu löschen.
                         await db.collection("dailyEntries").doc(currentEntryId).set(dataToSave, { merge: true });
                         alert("💾 Eintrag erfolgreich aktualisiert!");
-                        armAutoSave(`✓ Gespeichert ${clockNow()}`);
+                        armAutoSave(true);
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
@@ -6087,7 +6192,7 @@
                         const submitBtn = document.getElementById('submitBtn');
                         submitBtn.textContent = "Eintrag aktualisieren";
                         submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
-                        armAutoSave(`✓ Gespeichert ${clockNow()}`);
+                        armAutoSave(true);
                     }
 
                     // Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
