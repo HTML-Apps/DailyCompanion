@@ -2326,6 +2326,103 @@
         .rp-footer { border-top: 1px solid #d6d6e2; padding-top: 6px; margin-top: 10px; font-size: 9px; color: #5c5c78; }
         /* ====== ENDE: Rheuma-Bericht Styles ====== */
 
+        /* ====== START: Standardprofile & Auto-Speichern Styles ====== */
+        #profileSavePopup {
+            width: 95%;
+            max-width: 440px;
+            min-height: auto;
+            max-height: 95vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 22px 18px;
+        }
+        #profileSavePopup h2 { margin: 0 !important; }
+        .profile-sub { margin: -6px 0 0; font-size: 0.8em; color: #87879e; }
+        .profile-choice-list { display: flex; flex-direction: column; gap: 6px; }
+        .profile-choice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .profile-choice.is-selected { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+        .profile-choice input { width: 18px; height: 18px; accent-color: #00f2fe; margin: 0; flex-shrink: 0; }
+        .profile-choice-name { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow-wrap: break-word; }
+        .profile-choice-days { flex: 0 1 auto; max-width: 55%; font-size: 0.78em; color: #aaaaaa; text-align: right; }
+        .profile-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+        .profile-day {
+            min-height: 40px;
+            border-radius: 10px;
+            border: 1px solid #45456a;
+            background: #3a3a5a;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+        .profile-day.is-active { background: #00f2fe; border-color: #4facfe; color: #0a0a1a; font-weight: 700; }
+        .profile-day.is-other { color: #87879e; border-style: dashed; }
+        .profile-hint { margin: 0; font-size: 0.75em; color: #87879e; min-height: 1em; }
+        .profile-card {
+            background: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .profile-card-head { display: flex; align-items: center; gap: 8px; }
+        .profile-card-head .profile-name { flex: 1; font-weight: 700; font-size: 0.9em; overflow-wrap: anywhere; }
+        .profile-badge { font-size: 0.68em; color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); border-radius: 50px; padding: 2px 8px; }
+        .profile-card .fitness-btn-icon { width: 32px; height: 32px; padding: 0; font-size: 13px; flex-shrink: 0; }
+        .profile-card .profile-day { min-height: 34px; font-size: 0.75em; }
+
+        #miniToast {
+            position: fixed;
+            top: 76px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            max-width: 90%;
+            box-sizing: border-box;
+            background: #000000;
+            border: 1px solid #ffffff;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.88em;
+            color: #ffffff;
+            z-index: 3100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            text-align: center;
+        }
+        #miniToast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .autosave-status {
+            text-align: center;
+            font-size: 0.8em;
+            color: #87879e;
+            min-height: 1.3em;
+            margin-top: 8px;
+            transition: color 0.2s;
+        }
+        .autosave-status.is-ok { color: #2ecc71; }
+        .autosave-status.is-warn { color: #ff6b6b; }
+        /* ====== ENDE: Standardprofile & Auto-Speichern Styles ====== */
+
     </style>
 </head>
 <body>
@@ -2674,6 +2771,7 @@
                 </div>
 
                 <button class="submit-button" id="submitBtn">Speichern</button>
+                <div class="autosave-status" id="autoSaveStatus" aria-live="polite"></div>
             </div>
 
         </div> </div> <div class="overlay" id="popupOverlay">
@@ -3311,8 +3409,11 @@
                     </div>
                 </div>
 
+                <div class="settings-section-title">Standardprofile</div>
+                <div id="profileManageList"></div>
+
                 <p style="font-size: 0.75em; color: #87879e; text-align: center; margin: 0;">
-                    Tipp: Überschrift doppelt klicken = Standardwerte ausfüllen · lange drücken = Standardwerte setzen
+                    Tipp: Überschrift doppelt klicken = Profil des Wochentags ausfüllen · lange drücken = als Profil speichern
                 </p>
             </div>
 
@@ -3462,6 +3563,30 @@
             </div>
         </div>
     </div>
+
+    <!-- Als Profil speichern 📋 -->
+    <div class="overlay" id="profileSaveOverlay">
+        <div class="popup" id="profileSavePopup">
+            <span class="close-btn" id="closeProfileSaveBtn">&times;</span>
+            <h2>Als Profil speichern</h2>
+            <p class="profile-sub" id="profileSaveSub"></p>
+
+            <div class="settings-section-title">Profil</div>
+            <div class="profile-choice-list" id="profileSaveList"></div>
+            <div class="settings-field" id="profileNewNameField" style="display: none;">
+                <label for="profileNewName">Name des neuen Profils</label>
+                <input type="text" id="profileNewName" class="styled-input" placeholder="z. B. Arbeitstag" maxlength="30" style="box-sizing: border-box;">
+            </div>
+
+            <div class="settings-section-title" id="profileSaveDaysTitle">Wochentage</div>
+            <div class="profile-days" id="profileSaveDays"></div>
+            <p class="profile-hint" id="profileSaveHint"></p>
+
+            <button class="submit-button" id="profileSaveConfirmBtn" style="margin-top: 4px;">Profil speichern</button>
+        </div>
+    </div>
+
+    <div id="miniToast" role="status" aria-live="polite"></div>
 
     <!-- Erinnerungs-Toast 🔔 -->
     <div id="reminderToast" role="status" aria-live="polite">
@@ -4077,22 +4202,14 @@
                 alert("🔓 Bitte melden Sie sich an, um Ihre Standardwerte zu speichern.");
                 return;
             }
-
-            const defaultData = getCurrentFormData();
-
-            // Kurze Bestätigung für den Nutzer
-            if (!confirm("Sollen die aktuellen Eingaben als neuer Standard für den Doppelklick gespeichert werden?")) {
+            try {
+                await loadDefaultProfiles(true);
+            } catch (error) {
+                console.error("Fehler beim Laden der Profile: ", error);
+                alert("❌ Die Standardprofile konnten nicht geladen werden.");
                 return;
             }
-
-            try {
-                // Wir verwenden .doc(user.uid).set(), um für jeden User ein eigenes Dokument anzulegen/zu überschreiben.
-                await db.collection("userDefaults").doc(user.uid).set(defaultData);
-                alert("💾 Ihre Standardwerte wurden erfolgreich gespeichert!");
-            } catch (error) {
-                console.error("Fehler beim Speichern der Standardwerte: ", error);
-                alert("❌ Ein Fehler ist aufgetreten. Die Standardwerte konnten nicht gespeichert werden.");
-            }
+            openProfileSaveSheet();
         }
 
         /**
@@ -4103,35 +4220,23 @@
             const user = auth.currentUser;
             if (!user) return; // Funktion wird nur für angemeldete User ausgeführt
 
-            let defaultValues = {};
-
+            let profile;
             try {
-                const doc = await db.collection("userDefaults").doc(user.uid).get();
-                if (doc.exists) {
-                    console.log("Gespeicherte Standardwerte aus Firebase geladen.");
-                    defaultValues = doc.data();
-                } else {
-                    // --- FALLBACK-WERTE, falls noch nichts gespeichert wurde ---
-                    console.log("Keine Standardwerte in Firebase gefunden. Nutze Fallback.");
-                    defaultValues = {
-                        bedTime: '22:10', wakeUpTime: '06:00', sportId: 'sportGym',
-                        stretchingId: 'stretchingNotDone', glutenId: 'glutenNo', milkId: 'milkNo',
-                        painmedId: 'painmedEto60',
-                        ratings: { moodRating: 8, neckPainRating: 7, shoulderPainRating: 8, upperBodyPainRating: 8, lowerBodyPainRating: 8, movementFlowPainRating: 5, immunesystemRating: 9, digestionRating: 8 },
-                        morningStiffness: '45',
-                        noteTags: ['Zeh links', 'Zeh rechts', 'Haut offen', 'Omega3', 'Mouthtape']
-                    };
-                }
+                await loadDefaultProfiles(true);
+                profile = profileForDate(currentEditingDate);
             } catch (error) {
                 console.error("Fehler beim Laden der Standardwerte: ", error);
                 alert("ℹ️ Standardwerte konnten nicht geladen werden.");
                 return;
             }
-            
+            const defaultValues = profile.data || {};
+
             // --- Formular mit den geladenen oder Fallback-Werten befüllen ---
 
-            console.log('Fülle Formular mit Standardwerten...');
-            resetForm(); // Formular vor dem Befüllen leeren
+            console.log(`Fülle Formular mit Profil "${profile.name}"...`);
+            // Nur die Felder leeren, die ein Profil enthält – Notizen, Blutwerte,
+            // Schmerzkarte und das bearbeitete Datum bleiben erhalten.
+            clearProfileFields();
 
             // 1. Zeiten
             if (defaultValues.bedTime) document.getElementById('bedTime').value = defaultValues.bedTime;
@@ -4175,8 +4280,483 @@
             // Berechnungen am Ende aktualisieren
             calculateSleepDuration();
             calculateOverallAverage();
+
+            const wdLong = currentEditingDate.toLocaleDateString('de-DE', { weekday: 'long' });
+            showMiniToast(`📋 Profil „${profile.name}“ ausgefüllt · ${wdLong}`);
+            scheduleAutoSave();
         }
         // ====== ENDE: NEUER CODE FÜR DOPPELKLICK & LANGES DRÜCKEN ======
+
+        // ====== START: Standardprofile je Wochentag ======
+        // userDefaults/{uid} = { version: 2, profiles: [{ id, name, isDefault, days: [0..6], data: {...} }] }
+        // days nutzt JS-Wochentage (0 = So, 1 = Mo, …). "Standard" gilt für alle Tage ohne eigenes Profil.
+        const PROFILE_WEEKDAYS = [
+            { d: 1, s: 'Mo' }, { d: 2, s: 'Di' }, { d: 3, s: 'Mi' }, { d: 4, s: 'Do' },
+            { d: 5, s: 'Fr' }, { d: 6, s: 'Sa' }, { d: 0, s: 'So' }
+        ];
+        const FALLBACK_DEFAULTS = {
+            bedTime: '22:10', wakeUpTime: '06:00', sportId: 'sportGym',
+            stretchingId: 'stretchingNotDone', glutenId: 'glutenNo', milkId: 'milkNo',
+            painmedId: 'painmedEto60',
+            ratings: { moodRating: 8, neckPainRating: 7, shoulderPainRating: 8, upperBodyPainRating: 8, lowerBodyPainRating: 8, movementFlowPainRating: 5, immunesystemRating: 9, digestionRating: 8 },
+            morningStiffness: '45',
+            noteTags: ['Zeh links', 'Zeh rechts', 'Haut offen', 'Omega3', 'Mouthtape']
+        };
+        let defaultProfiles = null;
+        let profileSaveSelection = null;   // Profil-ID oder 'new'
+        let profileSaveDays = [];
+
+        function escProfile(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function profileDocRef() {
+            return db.collection("userDefaults").doc(auth.currentUser.uid);
+        }
+
+        async function loadDefaultProfiles(force = false) {
+            if (defaultProfiles && !force) return defaultProfiles;
+            const doc = await profileDocRef().get();
+            let profiles;
+            if (doc.exists && Array.isArray(doc.data().profiles) && doc.data().profiles.length) {
+                profiles = doc.data().profiles;
+            } else if (doc.exists) {
+                // Umstellung: bisherige Standardwerte werden zum Profil "Standard"
+                const { profiles: _p, version: _v, ...legacy } = doc.data();
+                profiles = [{ id: 'standard', name: 'Standard', isDefault: true, days: [], data: legacy }];
+            } else {
+                profiles = [{ id: 'standard', name: 'Standard', isDefault: true, days: [], data: FALLBACK_DEFAULTS }];
+            }
+            if (!profiles.some(p => p.isDefault)) profiles[0].isDefault = true;
+            profiles.forEach(p => {
+                if (!Array.isArray(p.days) || p.isDefault) p.days = [];
+                if (!p.data) p.data = {};
+            });
+            defaultProfiles = profiles;
+            return profiles;
+        }
+
+        async function saveDefaultProfiles() {
+            await profileDocRef().set({ version: 2, profiles: defaultProfiles });
+        }
+
+        const standardProfile = () => defaultProfiles.find(p => p.isDefault);
+        function profileForDate(date) {
+            const wd = date.getDay();
+            return defaultProfiles.find(p => !p.isDefault && p.days.includes(wd)) || standardProfile();
+        }
+        function profileOfDay(wd) {
+            return defaultProfiles.find(p => !p.isDefault && p.days.includes(wd)) || null;
+        }
+        function profileDaysLabel(days) {
+            const list = PROFILE_WEEKDAYS.filter(w => days.includes(w.d)).map(w => w.s);
+            return list.length ? list.join(', ') : 'keine Tage';
+        }
+        function unassignedWeekdays() {
+            const used = new Set(defaultProfiles.filter(p => !p.isDefault).flatMap(p => p.days));
+            return PROFILE_WEEKDAYS.filter(w => !used.has(w.d)).map(w => w.d);
+        }
+        // Ein Tag gehört immer nur zu einem Profil: zugewiesene Tage bei den anderen entfernen
+        function assignProfileDays(profile, days) {
+            if (profile.isDefault) return;
+            defaultProfiles.forEach(p => {
+                if (p !== profile && !p.isDefault) p.days = p.days.filter(d => !days.includes(d));
+            });
+            profile.days = [...new Set(days)];
+        }
+
+        // Felder leeren, die ein Profil abdeckt
+        function clearProfileFields() {
+            document.getElementById('bedTime').value = '';
+            document.getElementById('wakeUpTime').value = '';
+            document.getElementById('sleepDurationDisplay').textContent = '';
+            document.getElementById('morningStiffness').value = '';
+            document.querySelectorAll('.sport-checkbox input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.sport-checkbox')?.classList.remove('selected');
+            });
+            document.querySelectorAll('.rating-box').forEach(box => box.classList.remove('selected'));
+            document.getElementById('overallAverageDisplay').textContent = '--';
+            document.querySelectorAll('.notes-tag-button').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        let miniToastTimer = null;
+        function showMiniToast(text) {
+            const el = document.getElementById('miniToast');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.add('visible');
+            clearTimeout(miniToastTimer);
+            miniToastTimer = setTimeout(() => el.classList.remove('visible'), 2600);
+        }
+
+        // --- Fenster "Als Profil speichern" ---
+        function openProfileSaveSheet() {
+            const current = profileForDate(currentEditingDate);
+            profileSaveSelection = current.id;
+            profileSaveDays = current.isDefault ? [] : [...current.days];
+            const dateLabel = currentEditingDate.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+            document.getElementById('profileSaveSub').textContent = `Aktuelle Eingaben vom ${dateLabel} · bisher Profil „${current.name}“`;
+            document.getElementById('profileNewName').value = '';
+            renderProfileSaveSheet();
+            document.getElementById('profileSaveOverlay').style.display = 'flex';
+        }
+
+        function renderProfileSaveSheet() {
+            const list = document.getElementById('profileSaveList');
+            const sorted = [...defaultProfiles].sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0));
+            const options = sorted.map(p => ({
+                id: p.id,
+                name: p.name,
+                days: p.isDefault ? `alle anderen Tage (${profileDaysLabel(unassignedWeekdays())})` : profileDaysLabel(p.days)
+            }));
+            options.push({ id: 'new', name: '+ Neues Profil', days: '' });
+            list.innerHTML = options.map(o => `
+                <label class="profile-choice ${o.id === profileSaveSelection ? 'is-selected' : ''}">
+                    <input type="radio" name="profileSaveChoice" value="${escProfile(o.id)}" ${o.id === profileSaveSelection ? 'checked' : ''}>
+                    <span class="profile-choice-name">${escProfile(o.name)}</span>
+                    <span class="profile-choice-days">${escProfile(o.days)}</span>
+                </label>`).join('');
+
+            const selected = defaultProfiles.find(p => p.id === profileSaveSelection);
+            const isNew = profileSaveSelection === 'new';
+            const isStandard = selected && selected.isDefault;
+            document.getElementById('profileNewNameField').style.display = isNew ? 'flex' : 'none';
+            document.getElementById('profileSaveDaysTitle').style.display = isStandard ? 'none' : 'block';
+            const daysBox = document.getElementById('profileSaveDays');
+            daysBox.style.display = isStandard ? 'none' : 'grid';
+            daysBox.innerHTML = PROFILE_WEEKDAYS.map(w => {
+                const owner = profileOfDay(w.d);
+                const active = profileSaveDays.includes(w.d);
+                const other = !active && owner && owner.id !== profileSaveSelection;
+                return `<button type="button" class="profile-day ${active ? 'is-active' : ''} ${other ? 'is-other' : ''}" data-day="${w.d}" aria-pressed="${active}" title="${other ? 'bisher: ' + escProfile(owner.name) : ''}">${w.s}</button>`;
+            }).join('');
+
+            const hint = document.getElementById('profileSaveHint');
+            if (isStandard) {
+                hint.textContent = 'Das Standardprofil gilt automatisch für alle Tage ohne eigenes Profil.';
+            } else {
+                const moved = profileSaveDays
+                    .map(d => ({ d, owner: profileOfDay(d) }))
+                    .filter(x => x.owner && x.owner.id !== profileSaveSelection);
+                hint.textContent = moved.length
+                    ? 'Wechselt hierher: ' + moved.map(x => `${PROFILE_WEEKDAYS.find(w => w.d === x.d).s} (bisher „${x.owner.name}“)`).join(', ')
+                    : (profileSaveDays.length ? '' : 'Ohne Wochentag wird das Profil gespeichert, aber nicht automatisch genutzt.');
+            }
+        }
+
+        document.getElementById('profileSaveList').addEventListener('change', (e) => {
+            if (e.target.name !== 'profileSaveChoice') return;
+            profileSaveSelection = e.target.value;
+            if (profileSaveSelection === 'new') {
+                profileSaveDays = [currentEditingDate.getDay()];
+            } else {
+                const p = defaultProfiles.find(x => x.id === profileSaveSelection);
+                profileSaveDays = p && !p.isDefault ? [...p.days] : [];
+            }
+            renderProfileSaveSheet();
+            if (profileSaveSelection === 'new') document.getElementById('profileNewName').focus();
+        });
+
+        document.getElementById('profileSaveDays').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-day]');
+            if (!btn) return;
+            const d = parseInt(btn.dataset.day);
+            profileSaveDays = profileSaveDays.includes(d) ? profileSaveDays.filter(x => x !== d) : [...profileSaveDays, d];
+            renderProfileSaveSheet();
+        });
+
+        function closeProfileSaveSheet() {
+            document.getElementById('profileSaveOverlay').style.display = 'none';
+        }
+        document.getElementById('closeProfileSaveBtn').addEventListener('click', closeProfileSaveSheet);
+        document.getElementById('profileSaveOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'profileSaveOverlay') closeProfileSaveSheet();
+        });
+
+        document.getElementById('profileSaveConfirmBtn').addEventListener('click', async () => {
+            const data = getCurrentFormData();
+            let profile;
+            if (profileSaveSelection === 'new') {
+                const name = document.getElementById('profileNewName').value.trim();
+                if (!name) { alert('✒️ Bitte einen Namen für das neue Profil eingeben.'); return; }
+                profile = { id: 'p' + Date.now().toString(36), name, isDefault: false, days: [], data };
+                defaultProfiles.push(profile);
+            } else {
+                profile = defaultProfiles.find(p => p.id === profileSaveSelection);
+                if (!profile) return;
+                profile.data = data;
+            }
+            assignProfileDays(profile, profileSaveDays);
+            try {
+                await saveDefaultProfiles();
+                closeProfileSaveSheet();
+                renderProfileManage();
+                showMiniToast(`💾 Profil „${profile.name}“ gespeichert`);
+            } catch (error) {
+                console.error("Fehler beim Speichern des Profils: ", error);
+                alert("❌ Das Profil konnte nicht gespeichert werden: " + error.message);
+            }
+        });
+
+        // --- Verwaltung im Einstellungen-Popup ---
+        function renderProfileManage() {
+            const box = document.getElementById('profileManageList');
+            if (!box) return;
+            if (!defaultProfiles) {
+                box.innerHTML = '<p style="color: #87879e; font-size: 0.85em; margin: 0;">Lade Profile …</p>';
+                return;
+            }
+            const sorted = [...defaultProfiles].sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0));
+            box.innerHTML = sorted.map(p => {
+                let body;
+                if (p.isDefault) {
+                    const free = unassignedWeekdays();
+                    body = `<span class="reminder-meta">${free.length ? 'Gilt für: ' + profileDaysLabel(free) : 'Alle Wochentage haben ein eigenes Profil.'}</span>`;
+                } else {
+                    body = `<div class="profile-days">${PROFILE_WEEKDAYS.map(w => {
+                        const owner = profileOfDay(w.d);
+                        const active = p.days.includes(w.d);
+                        const other = !active && owner;
+                        return `<button type="button" class="profile-day ${active ? 'is-active' : ''} ${other ? 'is-other' : ''}" data-profile-day="${w.d}" data-profile-id="${escProfile(p.id)}" aria-pressed="${active}" title="${other ? 'bisher: ' + escProfile(owner.name) : ''}">${w.s}</button>`;
+                    }).join('')}</div>`;
+                }
+                return `
+                    <div class="profile-card">
+                        <div class="profile-card-head">
+                            <span class="profile-name">${escProfile(p.name)}</span>
+                            ${p.isDefault ? '<span class="profile-badge">Standard</span>' : ''}
+                            <button type="button" class="fitness-btn-icon" data-profile-rename="${escProfile(p.id)}" aria-label="Profil umbenennen">✎</button>
+                            ${p.isDefault ? '' : `<button type="button" class="fitness-btn-icon delete-btn" data-profile-delete="${escProfile(p.id)}" aria-label="Profil löschen">✕</button>`}
+                        </div>
+                        ${body}
+                    </div>`;
+            }).join('');
+        }
+
+        async function refreshProfileManage() {
+            defaultProfiles = null;
+            renderProfileManage();
+            try {
+                await loadDefaultProfiles(true);
+            } catch (error) {
+                console.error("Fehler beim Laden der Profile: ", error);
+                document.getElementById('profileManageList').innerHTML = '<p style="color: #ff6b6b; font-size: 0.85em; margin: 0;">Profile konnten nicht geladen werden.</p>';
+                return;
+            }
+            renderProfileManage();
+        }
+
+        document.getElementById('profileManageList').addEventListener('click', async (e) => {
+            const dayBtn = e.target.closest('[data-profile-day]');
+            const renameBtn = e.target.closest('[data-profile-rename]');
+            const deleteBtn = e.target.closest('[data-profile-delete]');
+            let changed = false;
+
+            if (dayBtn) {
+                const p = defaultProfiles.find(x => x.id === dayBtn.dataset.profileId);
+                const d = parseInt(dayBtn.dataset.profileDay);
+                if (!p) return;
+                assignProfileDays(p, p.days.includes(d) ? p.days.filter(x => x !== d) : [...p.days, d]);
+                changed = true;
+            }
+            if (renameBtn) {
+                const p = defaultProfiles.find(x => x.id === renameBtn.dataset.profileRename);
+                if (!p) return;
+                const name = prompt('Neuer Name für das Profil:', p.name);
+                if (name && name.trim()) { p.name = name.trim().slice(0, 30); changed = true; }
+            }
+            if (deleteBtn) {
+                const p = defaultProfiles.find(x => x.id === deleteBtn.dataset.profileDelete);
+                if (!p || p.isDefault) return;
+                if (!confirm(`Profil „${p.name}“ löschen?\n\nSeine Wochentage nutzen danach das Standardprofil.`)) return;
+                defaultProfiles = defaultProfiles.filter(x => x !== p);
+                changed = true;
+            }
+            if (!changed) return;
+            renderProfileManage();
+            try {
+                await saveDefaultProfiles();
+            } catch (error) {
+                console.error("Fehler beim Speichern der Profile: ", error);
+                alert("❌ Änderung konnte nicht gespeichert werden: " + error.message);
+            }
+        });
+        // ====== ENDE: Standardprofile je Wochentag ======
+
+        // ====== START: Fortlaufendes Speichern ======
+        // Erst nach dem ersten vollständigen Speichern (oder beim Laden eines vollständigen Tages)
+        // wird jede Änderung nach kurzer Pause automatisch gespeichert.
+        const AUTO_SAVE_DELAY = 1500;
+        let autoSaveArmed = false;
+        let autoSaveTimer = null;
+        let lastSavedSnapshot = null;
+
+        function isEntryWriter(user) {
+            return !!user && (user.uid === "VgrOSS05xEPvvFUXQdybgQTCbX52" || user.uid === "16043jOK8qdUYviqmoWi2NaBOPo1");
+        }
+        function entrySnapshot(data) {
+            const { userId, ...rest } = data;
+            return JSON.stringify(rest);
+        }
+        function setAutoSaveStatus(text, kind) {
+            const el = document.getElementById('autoSaveStatus');
+            if (!el) return;
+            el.textContent = text || '';
+            el.className = 'autosave-status' + (kind ? ' is-' + kind : '');
+        }
+        function clockNow() {
+            const d = new Date();
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Aktiviert das fortlaufende Speichern, wenn der geöffnete Eintrag vollständig ist
+        function armAutoSave(statusText) {
+            const user = auth.currentUser;
+            if (!isEntryWriter(user) || !currentEntryId) { disarmAutoSave(); return; }
+            const { dataToSave, missingFields } = buildEntryData(user);
+            if (missingFields.length) { disarmAutoSave(); return; }
+            autoSaveArmed = true;
+            lastSavedSnapshot = entrySnapshot(dataToSave);
+            setAutoSaveStatus(statusText || '✓ Automatisches Speichern aktiv', 'ok');
+        }
+        function disarmAutoSave() {
+            autoSaveArmed = false;
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = null;
+            lastSavedSnapshot = null;
+            setAutoSaveStatus('', null);
+        }
+        function scheduleAutoSave() {
+            if (!autoSaveArmed) return;
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => { autoSaveTimer = null; runAutoSave(); }, AUTO_SAVE_DELAY);
+        }
+        async function runAutoSave() {
+            const user = auth.currentUser;
+            if (!autoSaveArmed || !currentEntryId || !isEntryWriter(user)) return;
+            const entryId = currentEntryId;
+            // Daten sofort (synchron) einsammeln – auch wenn danach das Datum gewechselt wird
+            const { dataToSave, missingFields } = buildEntryData(user);
+            if (missingFields.length) {
+                setAutoSaveStatus(`⚠ Nicht gespeichert – fehlt: ${missingFields.join(', ')}`, 'warn');
+                return;
+            }
+            const snap = entrySnapshot(dataToSave);
+            if (snap === lastSavedSnapshot) {
+                if (document.getElementById('autoSaveStatus').classList.contains('is-warn')) setAutoSaveStatus(`✓ Gespeichert ${clockNow()}`, 'ok');
+                return;
+            }
+            try {
+                await db.collection("dailyEntries").doc(entryId).set(dataToSave, { merge: true });
+                if (entryId === currentEntryId) {
+                    lastSavedSnapshot = snap;
+                    setAutoSaveStatus(`✓ Gespeichert ${clockNow()}`, 'ok');
+                }
+            } catch (error) {
+                console.error("Fehler beim automatischen Speichern: ", error);
+                setAutoSaveStatus('⚠ Speichern fehlgeschlagen – bitte „Speichern“ drücken', 'warn');
+            }
+        }
+        // Ausstehende Änderung sofort speichern (vor Datumswechsel / beim Schließen)
+        function flushAutoSave() {
+            if (!autoSaveTimer) return;
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = null;
+            runAutoSave();
+        }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) flushAutoSave(); });
+        window.addEventListener('pagehide', flushAutoSave);
+        // ====== ENDE: Fortlaufendes Speichern ======
+
+        // Sammelt alle Formularwerte und prüft die Pflichtfelder (für Speichern-Button & Auto-Speichern)
+        function buildEntryData(user) {
+                let missingFields = [];
+                const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
+                const morningStiffnessValue = document.getElementById('morningStiffness').value;
+
+                // Blutwerte-Cluster
+                const crpValue = document.getElementById('crpInput').value ? parseFloat(document.getElementById('crpInput').value) : null;
+                const bsgValue = document.getElementById('bsgInput').value ? parseFloat(document.getElementById('bsgInput').value) : null;
+                const tzValue = document.getElementById('tzInput').value ? parseFloat(document.getElementById('tzInput').value) : null;
+
+                const lzValue = document.getElementById('lzInput').value ? parseFloat(document.getElementById('lzInput').value) : null;
+                const npValue = document.getElementById('npInput').value ? parseFloat(document.getElementById('npInput').value) : null;
+                const alatValue = document.getElementById('alatInput').value ? parseFloat(document.getElementById('alatInput').value) : null;
+
+                const hbValue = document.getElementById('hbInput').value ? parseFloat(document.getElementById('hbInput').value) : null;
+                const d3Value = document.getElementById('d3Input').value ? parseFloat(document.getElementById('d3Input').value) : null;
+
+                let selectedSports = [];
+                const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
+                const noSport = document.getElementById('sportNone');
+                if (noSport.checked) { selectedSports.push(noSport.dataset.sportName); } else if (activeSports.length > 0) { selectedSports = activeSports.map(cb => cb.dataset.sportName); }
+                const stretchingStatus = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.stretchingName || null;
+                const glutenStatus = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.glutenName || null;
+                const milkStatus = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.milkName || null;
+                const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked')).map(cb => cb.dataset.painmedName);
+                const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
+                const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
+                const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
+                const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
+                const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
+                const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
+                const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
+                const digestionRating = document.querySelector('#digestion .rating-box.selected')?.dataset.value || null;
+                const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
+                const overallAverage = document.getElementById('overallAverageDisplay').textContent;
+                const notes = document.getElementById('notes').value;
+                
+                if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
+                if (selectedSports.length === 0) missingFields.push('Sportart');
+                if (!stretchingStatus) missingFields.push('Dehnübungen');
+                if (!glutenStatus) missingFields.push('Gluten');
+                if (!milkStatus) missingFields.push('Milch');
+                if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
+                if (!moodRating) missingFields.push('Stimmung');
+                if (!neckPainRating) missingFields.push('Schmerzen Nacken');
+                if (!shoulderPainRating) missingFields.push('Schmerzen Schultern');
+                if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
+                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
+                if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
+                if (!immunesystemRating) missingFields.push('Immunsystem');
+                if (!digestionRating) missingFields.push('Verdauung');
+                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
+
+
+                const dataToSave = { 
+                    userId: user.uid, wakeUpTime, bedTime,
+                    sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
+                    selectedSports, stretchingStatus, glutenStatus, milkStatus, selectedPainmeds,
+                    morningStiffness: morningStiffnessValue !== "" ? parseInt(morningStiffnessValue) : null,
+
+                    crpValue,
+                    bsgValue,
+                    tzValue,
+
+                    lzValue,
+                    npValue,
+                    alatValue,
+
+                    hbValue,
+                    d3Value,
+
+                    moodRating: moodRating ? parseInt(moodRating) : null,
+                    neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
+                    shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
+                    upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
+                    lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
+                    movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
+                    immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
+                    digestionRating: digestionRating ? parseInt(digestionRating) : null,
+                    overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
+                    notes, selectedNotesTags,
+                    painMap: painMapData
+                };
+
+
+            return { dataToSave, missingFields };
+        }
+
 
         function fillFormWithData(data) {
             document.getElementById('bedTime').value = data.bedTime || '';
@@ -4574,6 +5154,8 @@
         }
 
         function resetForm() {
+            flushAutoSave();      // ausstehende Änderung des bisherigen Tages noch speichern
+            disarmAutoSave();
             document.getElementById('bedTime').value = '';
             document.getElementById('wakeUpTime').value = '';
             document.getElementById('sleepDurationDisplay').textContent = '';
@@ -4653,6 +5235,7 @@
                     const data = doc.data();
                     currentEntryId = doc.id; 
                     fillFormWithData(data);
+                    armAutoSave();
                     
                     // NEU: Schmerzkarte für das geladene Datum sofort aktualisieren
                     await refreshPainMapState();
@@ -5462,90 +6045,10 @@
                 const BOSCH_ID = "16043jOK8qdUYviqmoWi2NaBOPo1";
                 if (user.uid !== YOUR_UID && user.uid !== BOSCH_ID) { alert('❌ Sie sind nicht berechtigt, Daten zu speichern.'); return; }
 
-                let missingFields = [];
-                const wakeUpTime = document.getElementById('wakeUpTime').value, bedTime = document.getElementById('bedTime').value;
-                const morningStiffnessValue = document.getElementById('morningStiffness').value;
-
-                // Blutwerte-Cluster
-                const crpValue = document.getElementById('crpInput').value ? parseFloat(document.getElementById('crpInput').value) : null;
-                const bsgValue = document.getElementById('bsgInput').value ? parseFloat(document.getElementById('bsgInput').value) : null;
-                const tzValue = document.getElementById('tzInput').value ? parseFloat(document.getElementById('tzInput').value) : null;
-
-                const lzValue = document.getElementById('lzInput').value ? parseFloat(document.getElementById('lzInput').value) : null;
-                const npValue = document.getElementById('npInput').value ? parseFloat(document.getElementById('npInput').value) : null;
-                const alatValue = document.getElementById('alatInput').value ? parseFloat(document.getElementById('alatInput').value) : null;
-
-                const hbValue = document.getElementById('hbInput').value ? parseFloat(document.getElementById('hbInput').value) : null;
-                const d3Value = document.getElementById('d3Input').value ? parseFloat(document.getElementById('d3Input').value) : null;
-
-                let selectedSports = [];
-                const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
-                const noSport = document.getElementById('sportNone');
-                if (noSport.checked) { selectedSports.push(noSport.dataset.sportName); } else if (activeSports.length > 0) { selectedSports = activeSports.map(cb => cb.dataset.sportName); }
-                const stretchingStatus = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.stretchingName || null;
-                const glutenStatus = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.glutenName || null;
-                const milkStatus = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked')?.dataset.milkName || null;
-                const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked')).map(cb => cb.dataset.painmedName);
-                const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
-                const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
-                const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
-                const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
-                const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
-                const movementFlowPainRating = document.querySelector('#movement-flow-pain-rating .rating-box.selected')?.dataset.value || null;
-                const immunesystemRating = document.querySelector('#immunesystem .rating-box.selected')?.dataset.value || null;
-                const digestionRating = document.querySelector('#digestion .rating-box.selected')?.dataset.value || null;
-                const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected')).map(button => button.dataset.tag);
-                const overallAverage = document.getElementById('overallAverageDisplay').textContent;
-                const notes = document.getElementById('notes').value;
-                
-                if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
-                if (selectedSports.length === 0) missingFields.push('Sportart');
-                if (!stretchingStatus) missingFields.push('Dehnübungen');
-                if (!glutenStatus) missingFields.push('Gluten');
-                if (!milkStatus) missingFields.push('Milch');
-                if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
-                if (!moodRating) missingFields.push('Stimmung');
-                if (!neckPainRating) missingFields.push('Schmerzen Nacken');
-                if (!shoulderPainRating) missingFields.push('Schmerzen Schultern');
-                if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
-                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
-                if (!movementFlowPainRating) missingFields.push('Bewegungsöffnung / Flow');
-                if (!immunesystemRating) missingFields.push('Immunsystem');
-                if (!digestionRating) missingFields.push('Verdauung');
-                if (morningStiffnessValue === "") { missingFields.push('Morgensteifigkeit'); }
+                const { dataToSave, missingFields } = buildEntryData(user);
 
                 if (missingFields.length > 0) { alert(`✒️ Bitte füllen Sie die folgenden Kategorien aus:\n\n- ${missingFields.join('\n- ')}`); return; }
                 
-                const dataToSave = { 
-                    userId: user.uid, wakeUpTime, bedTime,
-                    sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
-                    selectedSports, stretchingStatus, glutenStatus, milkStatus, selectedPainmeds,
-                    morningStiffness: morningStiffnessValue !== "" ? parseInt(morningStiffnessValue) : null,
-
-                    crpValue,
-                    bsgValue,
-                    tzValue,
-
-                    lzValue,
-                    npValue,
-                    alatValue,
-
-                    hbValue,
-                    d3Value,
-
-                    moodRating: moodRating ? parseInt(moodRating) : null,
-                    neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
-                    shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
-                    upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
-                    lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
-                    movementFlowPainRating: movementFlowPainRating ? parseInt(movementFlowPainRating) : null,
-                    immunesystemRating: immunesystemRating ? parseInt(immunesystemRating) : null,
-                    digestionRating: digestionRating ? parseInt(digestionRating) : null,
-                    overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
-                    notes, selectedNotesTags,
-                    painMap: painMapData
-                };
-
                 try {
                     // NEU: Sicherheitsprüfung! Falls in der Zwischenzeit (z.B. durch den Kalorientracker) 
                     // heimlich ein Eintrag für heute erstellt wurde, fangen wir das hier ab.
@@ -5569,6 +6072,7 @@
                         // Das ist sicherer und fasst die neuen Daten sauber mit den Makros zusammen, ohne sie zu löschen.
                         await db.collection("dailyEntries").doc(currentEntryId).set(dataToSave, { merge: true });
                         alert("💾 Eintrag erfolgreich aktualisiert!");
+                        armAutoSave(`✓ Gespeichert ${clockNow()}`);
                     } else {
                         dataToSave.date = firebase.firestore.Timestamp.fromDate(currentEditingDate);
                         
@@ -5583,6 +6087,7 @@
                         const submitBtn = document.getElementById('submitBtn');
                         submitBtn.textContent = "Eintrag aktualisieren";
                         submitBtn.style.background = "linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)";
+                        armAutoSave(`✓ Gespeichert ${clockNow()}`);
                     }
 
                     // Historie leeren und Karte neu laden, damit die Pfeiltasten aktuell bleiben
@@ -5595,6 +6100,16 @@
                 }
 
             });
+
+            // Fortlaufendes Speichern: jede Änderung im Hauptformular merkt ein Speichern vor
+            const entryFormArea = document.querySelector('.main-content-wrapper');
+            const onEntryFormEdit = (e) => {
+                if (!autoSaveArmed) return;
+                if (e.target.closest('#submitBtn, #searchDate, #searchBtn, #desktop-datepicker-container, .overlay')) return;
+                scheduleAutoSave();
+            };
+            ['click', 'input', 'change'].forEach(evt => entryFormArea.addEventListener(evt, onEntryFormEdit));
+            document.getElementById('painMapSaveAndClose').addEventListener('click', () => scheduleAutoSave());
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
             document.getElementById('popupOverlay').addEventListener('click', (event) => { if (event.target.id === 'popupOverlay') closePopup(); });
@@ -7873,6 +8388,7 @@
                 toggleBloodInputs();
                 resetReminderForm();
                 renderReminderList();
+                refreshProfileManage();
                 settingsOverlay.style.display = 'flex';
             }
 
@@ -9516,6 +10032,7 @@
                             const doc = snapshot.docs[0];
                             currentEntryId = doc.id;
                             fillFormWithData(doc.data());
+                            armAutoSave();
                         } else {
                             resetForm(); 
                         }
