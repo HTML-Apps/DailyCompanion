@@ -16,5 +16,60 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "scope": "./",
+  "shortcuts": [
+    {
+      "name": "Heute eintragen",
+      "short_name": "Heute",
+      "description": "Heutigen Tag öffnen und Profil des Wochentags ausfüllen",
+      "url": "./index.html?shortcut=heute",
+      "icons": [
+        {
+          "src": "icons/shortcut-heute.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kalorientracker",
+      "short_name": "Kalorien",
+      "description": "Kalorientracker öffnen",
+      "url": "./index.html?shortcut=kalorien",
+      "icons": [
+        {
+          "src": "icons/shortcut-kalorien.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ausgabentracker",
+      "short_name": "Ausgaben",
+      "description": "Ausgabentracker öffnen",
+      "url": "./index.html?shortcut=ausgaben",
+      "icons": [
+        {
+          "src": "icons/shortcut-ausgaben.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Rheuma-Bericht",
+      "short_name": "Rheuma",
+      "description": "Rheuma-Bericht erstellen",
+      "url": "./index.html?shortcut=rheuma",
+      "icons": [
+        {
+          "src": "icons/shortcut-rheuma.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

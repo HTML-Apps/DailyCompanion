@@ -10112,6 +10112,44 @@
             });
             // ====== ENDE: Einstellungen & Erinnerungen Logik ======
 
+            // ====== START: App-Shortcuts (manifest.json → "shortcuts") ======
+            // ?shortcut=heute | kalorien | ausgaben | rheuma
+            function handleShortcutLaunch() {
+                const params = new URLSearchParams(window.location.search);
+                const shortcut = params.get('shortcut');
+                if (!shortcut) return;
+                // Parameter entfernen, damit ein Neuladen das Menü nicht erneut öffnet
+                params.delete('shortcut');
+                const rest = params.toString();
+                history.replaceState(null, '', window.location.pathname + (rest ? '?' + rest : '') + window.location.hash);
+
+                const clickQuickMenu = (overlayId) => {
+                    const btn = document.querySelector(`.quick-menu-btn[data-overlay="${overlayId}"]`);
+                    if (btn) btn.click();
+                };
+                switch (shortcut) {
+                    case 'heute':
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // Ist der heutige Tag schon vollständig gespeichert, nichts überschreiben
+                        if (autoSaveArmed) {
+                            showMiniToast('✅ Heute ist schon vollständig eingetragen');
+                        } else {
+                            applyDefaults();
+                        }
+                        break;
+                    case 'kalorien':
+                        clickQuickMenu('nutritionOverlay');
+                        break;
+                    case 'ausgaben':
+                        clickQuickMenu('expenseOverlay');
+                        break;
+                    case 'rheuma':
+                        document.getElementById('openRheumaReportBtn').click();
+                        break;
+                }
+            }
+            // ====== ENDE: App-Shortcuts ======
+
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     if (signInButton) signInButton.style.display = 'none';
@@ -10147,6 +10185,9 @@
 
                         // NEU: Einstellungen (Sidebar-Werte) & Erinnerungen laden
                         await loadUserSettings();
+
+                        // NEU: App-Shortcut (langes Drücken auf das App-Icon) ausführen
+                        handleShortcutLaunch();
 
                         setTimeout(() => {
                             updateBiologikaCountdown();
