@@ -3466,6 +3466,35 @@
                     </div>
                 </div>
 
+                <div class="settings-section-title">Rheuma-Termine</div>
+                <div class="reminder-form" style="gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="reminder-form-title" style="flex: 1; text-align: left;">Nächster Termin</span>
+                        <button type="button" class="fitness-btn-icon delete-btn" id="rheumaNextClear" aria-label="Nächsten Termin entfernen" style="width: 32px; height: 32px; padding: 0; font-size: 13px;">✕</button>
+                    </div>
+                    <div class="reminder-form-grid">
+                        <div class="settings-field">
+                            <label for="rheumaNextDate">Datum</label>
+                            <input type="date" id="rheumaNextDate" class="styled-input">
+                        </div>
+                        <div class="settings-field">
+                            <label for="rheumaNextTime">Uhrzeit (optional)</label>
+                            <input type="time" id="rheumaNextTime" class="styled-input">
+                        </div>
+                    </div>
+                    <label class="settings-check">
+                        <input type="checkbox" id="rheumaNextReminder" checked>
+                        Am Vortag um 18:00 erinnern (mit Knopf „Bericht“)
+                    </label>
+                    <span class="reminder-meta" id="rheumaNextInfo"></span>
+                </div>
+                <span style="font-size: 0.8em; color: #aaaaaa;">Bisherige Termine</span>
+                <div id="rheumaVisitList"></div>
+                <div class="rr-question-add">
+                    <input type="date" id="rheumaPastDate" class="styled-input" aria-label="Vergangenen Termin hinzufügen" style="color-scheme: dark;">
+                    <button type="button" class="action-button btn-search" id="rheumaPastAddBtn" aria-label="Vergangenen Termin hinzufügen">+</button>
+                </div>
+
                 <div class="settings-section-title">Standardprofile</div>
                 <div id="profileManageList"></div>
 
@@ -8458,6 +8487,11 @@
                     }
                     updateSidebarStats();
                     await applyAutoBloodValues();
+                    // Rheuma-Termine: alten "letzten Termin" übernehmen, vergangenen "nächsten Termin" archivieren
+                    if (normalizeRheumaData()) {
+                        syncRheumaReminder();
+                        await saveRheumaData();
+                    }
                     startReminderChecks();
                 } catch (e) {
                     console.error('Fehler beim Laden der Einstellungen:', e);
@@ -8488,6 +8522,7 @@
                 resetReminderForm();
                 renderReminderList();
                 refreshProfileManage();
+                renderRheumaVisits();
                 settingsOverlay.style.display = 'flex';
             }
 
@@ -9468,12 +9503,15 @@
                 const hint = document.getElementById('rrPresetHint');
                 hint.textContent = '';
                 if (preset === 'lastVisit') {
-                    if (userSettings.lastRheumaVisit) {
-                        document.getElementById('rrFrom').value = userSettings.lastRheumaVisit;
-                        hint.textContent = `Letzter Termin: ${deLong(userSettings.lastRheumaVisit)}`;
+                    const last = getLastRheumaVisit();
+                    const next = userSettings.nextRheumaVisit;
+                    const nextTxt = next && next.date ? ` · nächster: ${deLong(next.date)}${next.time ? ' um ' + next.time : ''}` : '';
+                    if (last) {
+                        document.getElementById('rrFrom').value = last;
+                        hint.textContent = `Letzter Termin: ${deLong(last)}${nextTxt}`;
                     } else {
                         document.getElementById('rrFrom').value = addMonthsIso(today, -3);
-                        hint.textContent = 'Noch kein Termin gespeichert – nach dem Termin im Arzt-Modus „Termin abschließen“ tippen. Bis dahin: letzte 3 Monate.';
+                        hint.textContent = `Noch kein Termin hinterlegt – in den Einstellungen unter „Rheuma-Termine“ eintragen. Bis dahin: letzte 3 Monate.${nextTxt}`;
                     }
                     document.getElementById('rrTo').value = today;
                 } else if (preset === '3m' || preset === '6m') {
@@ -9671,6 +9709,8 @@
                 const worst = r.summary.find(s => s.kind === 'worst');
                 const crp = r.latestCrpEntry;
                 const qs = (userSettings.doctorQuestions || []).filter(q => !q.done || q.checkedInVisit);
+                const nv = userSettings.nextRheumaVisit;
+                const dmNextVisit = (nv && nv.date && nv.date > todayIso()) ? { date: nv.date, time: nv.time || '' } : { date: '', time: '' };
 
                 const page1 = `
                     <div class="dm-card">
@@ -9692,7 +9732,12 @@
                         <b style="font-weight:600;">Meine Fragen</b>
                         ${qs.length ? qs.map(q => `<label class="dm-question ${q.checkedInVisit ? 'is-done' : ''}"><input type="checkbox" data-dm-question="${q.id}" ${q.checkedInVisit ? 'checked' : ''}><span>${escapeHtml(q.text)}</span></label>`).join('') : '<span class="dm-sub">Keine offenen Fragen.</span>'}
                         <label for="dmNote" style="font-size:0.75em;color:#00f2fe;margin-top:2px;">Antwort / Notiz vom Termin</label>
-                        <textarea id="dmNote" class="styled-input" rows="3" placeholder="z. B. Dosis angepasst, nächster Termin …" style="box-sizing:border-box;resize:vertical;font-family:'Poppins',sans-serif;">${escapeHtml(userSettings.rheumaVisitDraft || '')}</textarea>
+                        <textarea id="dmNote" class="styled-input" rows="3" placeholder="z. B. Dosis angepasst …" style="box-sizing:border-box;resize:vertical;font-family:'Poppins',sans-serif;">${escapeHtml(userSettings.rheumaVisitDraft || '')}</textarea>
+                        <label for="dmNextVisit" style="font-size:0.75em;color:#00f2fe;margin-top:2px;">Nächster Termin</label>
+                        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+                            <input type="date" id="dmNextVisit" class="styled-input" aria-label="Datum nächster Termin" value="${dmNextVisit.date}" style="box-sizing:border-box;color-scheme:dark;min-width:0;">
+                            <input type="time" id="dmNextVisitTime" class="styled-input" aria-label="Uhrzeit nächster Termin" value="${dmNextVisit.time}" style="box-sizing:border-box;color-scheme:dark;min-width:0;">
+                        </div>
                     </div>`;
 
                 const page2 = `
@@ -9803,14 +9848,30 @@
                     note: note.trim(),
                     questions: qs.filter(q => q.checkedInVisit).map(q => q.text)
                 };
-                userSettings.rheumaVisits = [...(userSettings.rheumaVisits || []), visit];
-                userSettings.lastRheumaVisit = visit.date;
+                const visits = userSettings.rheumaVisits || [];
+                const sameDay = visits.find(v => v.date === visit.date);
+                if (sameDay) Object.assign(sameDay, visit); else visits.push(visit);
+                visits.sort((a, b) => a.date.localeCompare(b.date));
+                userSettings.rheumaVisits = visits;
+                userSettings.lastRheumaVisit = getLastRheumaVisit();
+                // Nächster Termin aus dem Arzt-Modus
+                const nextDate = (document.getElementById('dmNextVisit') || {}).value || '';
+                const nextTime = (document.getElementById('dmNextVisitTime') || {}).value || '';
+                const prevNext = userSettings.nextRheumaVisit;
+                if (nextDate && nextDate > visit.date) {
+                    userSettings.nextRheumaVisit = { date: nextDate, time: nextTime || null, remind: prevNext ? prevNext.remind !== false : true };
+                } else if (prevNext && prevNext.date && prevNext.date <= visit.date) {
+                    userSettings.nextRheumaVisit = null;   // der heutige Termin war der "nächste"
+                }
+                syncRheumaReminder();
                 userSettings.doctorQuestions = qs.filter(q => !q.checkedInVisit).map(q => ({ id: q.id, text: q.text, done: false }));
                 userSettings.rheumaVisitDraft = '';
                 try {
                     await settingsDocRef().set({
                         rheumaVisits: userSettings.rheumaVisits,
                         lastRheumaVisit: userSettings.lastRheumaVisit,
+                        nextRheumaVisit: userSettings.nextRheumaVisit || null,
+                        reminders: userSettings.reminders || [],
                         doctorQuestions: userSettings.doctorQuestions,
                         rheumaVisitDraft: ''
                     }, { merge: true });
@@ -9823,6 +9884,155 @@
                     alert('❌ Termin konnte nicht gespeichert werden: ' + e.message);
                 }
             });
+            // ====== START: Rheuma-Termine ======
+            // userSettings.rheumaVisits = [{ date: "YYYY-MM-DD", note?, from?, to?, questions? }]
+            // userSettings.nextRheumaVisit = { date: "YYYY-MM-DD", time: "HH:MM" | null, remind: bool } | null
+            const RHEUMA_REMINDER_ID = 'rheuma-next';
+
+            function getLastRheumaVisit() {
+                const t = todayIso();
+                const past = (userSettings.rheumaVisits || []).map(v => v.date).filter(d => d && d <= t).sort();
+                return past.length ? past[past.length - 1] : null;
+            }
+
+            function normalizeRheumaData() {
+                let changed = false;
+                const visits = Array.isArray(userSettings.rheumaVisits) ? userSettings.rheumaVisits : [];
+                // Früher nur als "lastRheumaVisit" gespeichert → in die Liste übernehmen
+                if (userSettings.lastRheumaVisit && !visits.some(v => v.date === userSettings.lastRheumaVisit)) {
+                    visits.push({ date: userSettings.lastRheumaVisit });
+                    changed = true;
+                }
+                // Ein "nächster Termin" in der Vergangenheit wird automatisch zum besuchten Termin
+                const next = userSettings.nextRheumaVisit;
+                if (next && next.date && next.date < todayIso()) {
+                    if (!visits.some(v => v.date === next.date)) visits.push({ date: next.date });
+                    userSettings.nextRheumaVisit = null;
+                    changed = true;
+                }
+                visits.sort((a, b) => a.date.localeCompare(b.date));
+                userSettings.rheumaVisits = visits;
+                const last = getLastRheumaVisit();
+                if (last !== (userSettings.lastRheumaVisit || null)) {
+                    userSettings.lastRheumaVisit = last;
+                    changed = true;
+                }
+                return changed;
+            }
+
+            // Erinnerung am Vortag 18:00 (Titel enthält "Rheuma" → Banner zeigt den Knopf "Bericht")
+            function syncRheumaReminder() {
+                userSettings.reminders = (userSettings.reminders || []).filter(r => r.id !== RHEUMA_REMINDER_ID);
+                const next = userSettings.nextRheumaVisit;
+                if (next && next.date && next.remind !== false) {
+                    userSettings.reminders.push({
+                        id: RHEUMA_REMINDER_ID,
+                        title: `Rheuma-Termin morgen${next.time ? ' um ' + next.time : ''} – Bericht vorbereiten`,
+                        due: `${addDaysIso(next.date, -1)}T18:00`,
+                        repeat: 'once', interval: null, anchorDay: null,
+                        done: false, doneAt: null, snoozeUntil: null
+                    });
+                }
+                refreshReminderToast();
+                if (settingsOverlay.style.display === 'flex') renderReminderList();
+            }
+
+            async function saveRheumaData() {
+                userSettings.lastRheumaVisit = getLastRheumaVisit();
+                try {
+                    await settingsDocRef().set({
+                        rheumaVisits: userSettings.rheumaVisits || [],
+                        lastRheumaVisit: userSettings.lastRheumaVisit || null,
+                        nextRheumaVisit: userSettings.nextRheumaVisit || null,
+                        reminders: userSettings.reminders || []
+                    }, { merge: true });
+                } catch (e) {
+                    console.error('Fehler beim Speichern der Rheuma-Termine:', e);
+                    alert('❌ Rheuma-Termine konnten nicht gespeichert werden: ' + e.message);
+                }
+            }
+
+            function daysBetweenIso(a, b) {
+                return Math.round((isoToDate(b) - isoToDate(a)) / 86400000);
+            }
+
+            function renderRheumaVisits() {
+                const next = userSettings.nextRheumaVisit;
+                document.getElementById('rheumaNextDate').value = next && next.date ? next.date : '';
+                document.getElementById('rheumaNextTime').value = next && next.time ? next.time : '';
+                document.getElementById('rheumaNextReminder').checked = next ? next.remind !== false : true;
+                document.getElementById('rheumaNextClear').style.visibility = next ? 'visible' : 'hidden';
+
+                const today = todayIso();
+                const last = getLastRheumaVisit();
+                const parts = [];
+                if (next && next.date) {
+                    const d = daysBetweenIso(today, next.date);
+                    parts.push(d === 0 ? 'Termin ist heute' : d === 1 ? 'Termin ist morgen' : `in ${d} Tagen`);
+                }
+                if (last) parts.push(`Bericht-Zeitraum ab letztem Termin: ${daysBetweenIso(last, today) + 1} Tage`);
+                document.getElementById('rheumaNextInfo').textContent = parts.join(' · ');
+
+                const list = document.getElementById('rheumaVisitList');
+                const visits = [...(userSettings.rheumaVisits || [])].sort((a, b) => b.date.localeCompare(a.date));
+                list.innerHTML = visits.length
+                    ? visits.map(v => `
+                        <div class="reminder-card">
+                            <div class="reminder-info">
+                                <span class="reminder-title">${formatDateDe(v.date)}</span>
+                                <span class="reminder-meta">${v.note ? 'mit Notiz aus dem Arzt-Modus' : (v.from ? 'Bericht im Arzt-Modus abgeschlossen' : 'eingetragen')}${v.date === last ? ' · <span class="next">letzter Termin</span>' : ''}</span>
+                            </div>
+                            <button type="button" class="fitness-btn-icon delete-btn" data-visit-delete="${v.date}" aria-label="Termin vom ${formatDateDe(v.date)} löschen">✕</button>
+                        </div>`).join('')
+                    : '<p style="color: #87879e; font-size: 0.82em; margin: 0 0 6px;">Noch keine Termine eingetragen.</p>';
+            }
+
+            async function updateNextRheumaVisit() {
+                const date = document.getElementById('rheumaNextDate').value;
+                const time = document.getElementById('rheumaNextTime').value;
+                const remind = document.getElementById('rheumaNextReminder').checked;
+                userSettings.nextRheumaVisit = date ? { date, time: time || null, remind } : null;
+                normalizeRheumaData();          // falls ein vergangenes Datum gewählt wurde
+                syncRheumaReminder();
+                renderRheumaVisits();
+                await saveRheumaData();
+            }
+            ['rheumaNextDate', 'rheumaNextTime', 'rheumaNextReminder'].forEach(id =>
+                document.getElementById(id).addEventListener('change', updateNextRheumaVisit));
+            document.getElementById('rheumaNextClear').addEventListener('click', async () => {
+                if (!userSettings.nextRheumaVisit) return;
+                userSettings.nextRheumaVisit = null;
+                syncRheumaReminder();
+                renderRheumaVisits();
+                await saveRheumaData();
+            });
+
+            document.getElementById('rheumaPastAddBtn').addEventListener('click', async () => {
+                const input = document.getElementById('rheumaPastDate');
+                const date = input.value;
+                if (!date) { alert('✒️ Bitte ein Datum wählen.'); return; }
+                if (date > todayIso()) { alert('ℹ️ Das Datum liegt in der Zukunft – bitte oben als „Nächster Termin“ eintragen.'); return; }
+                const visits = userSettings.rheumaVisits || [];
+                if (!visits.some(v => v.date === date)) visits.push({ date });
+                visits.sort((a, b) => a.date.localeCompare(b.date));
+                userSettings.rheumaVisits = visits;
+                input.value = '';
+                renderRheumaVisits();
+                await saveRheumaData();
+            });
+
+            document.getElementById('rheumaVisitList').addEventListener('click', async (e) => {
+                const btn = e.target.closest('[data-visit-delete]');
+                if (!btn) return;
+                const date = btn.dataset.visitDelete;
+                const v = (userSettings.rheumaVisits || []).find(x => x.date === date);
+                if (!v) return;
+                if (!confirm(`Termin vom ${formatDateDe(date)} löschen?${v.note ? '\n\nDie Notiz aus dem Arzt-Modus wird ebenfalls gelöscht.' : ''}`)) return;
+                userSettings.rheumaVisits = userSettings.rheumaVisits.filter(x => x.date !== date);
+                renderRheumaVisits();
+                await saveRheumaData();
+            });
+            // ====== ENDE: Rheuma-Termine ======
             // ====== ENDE: Rheuma-Bericht ======
 
             // Nach dem Speichern neuer Blutwerte die Sidebar ggf. mitziehen
