@@ -2275,7 +2275,10 @@
             @page { size: A4; margin: 14mm 14mm 12mm; }
             html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
             body > *:not(#rheumaPrintArea) { display: none !important; }
-            #rheumaPrintArea { display: block !important; }
+            html, body { width: auto !important; min-width: 0 !important; display: block !important; }
+            /* App ist „dark only“ – beim Drucken heller Seitenrand statt dunklem */
+            :root, html { color-scheme: light only !important; background: #ffffff !important; }
+            #rheumaPrintArea { display: block !important; width: 180mm !important; max-width: 100% !important; box-sizing: border-box; overflow: hidden; }
         }
         #rheumaPrintArea, #rheumaPrintArea * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         #rheumaPrintArea { font-family: 'Poppins', sans-serif; color: #19192d; background: #ffffff; font-size: 11px; line-height: 1.45; }
@@ -2324,6 +2327,29 @@
         .rp-q { margin-bottom: 10px; }
         .rp-q-line { border-bottom: 1px solid #b9b9cc; height: 14px; }
         .rp-footer { border-top: 1px solid #d6d6e2; padding-top: 6px; margin-top: 10px; font-size: 9px; color: #5c5c78; }
+        /* One-Pager (Ampel-Cockpit) */
+        .op-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; border-bottom: 3px solid #19192d; padding-bottom: 8px; margin-bottom: 12px; }
+        .op-head h1 { margin: 0; font-size: 20px; font-weight: 700; line-height: 1.2; color: #19192d; }
+        .op-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .op-tile { border: 1.5px solid #d6d6e2; border-radius: 9px; padding: 10px 12px; display: flex; flex-direction: column; gap: 1px; break-inside: avoid; }
+        .op-tile-label { display: flex; align-items: center; gap: 6px; font-size: 9.5px; color: #45456a; font-weight: 600; }
+        .op-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .op-tile-value { font-size: 22px; font-weight: 700; line-height: 1.25; }
+        .op-tile-value small { font-size: 10px; font-weight: 500; color: #5c5c78; }
+        .op-tile-sub { font-size: 9.5px; font-weight: 600; color: #5c5c78; }
+        .op-legend { display: flex; gap: 14px; font-size: 9px; color: #5c5c78; margin: 4px 0 10px; flex-wrap: wrap; }
+        .op-legend span { display: inline-flex; align-items: center; gap: 5px; }
+        .op-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+        .op-section-head h2 { margin: 0; font-size: 13px; font-weight: 700; color: #19192d; }
+        .op-infects { font-size: 10px; margin: 2px 0 10px; }
+        .op-cols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+        .op-cols h2 { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #19192d; }
+        .op-region { display: grid; grid-template-columns: 104px minmax(0, 1fr) 24px; gap: 6px; align-items: center; font-size: 10px; margin-bottom: 5px; }
+        .op-region-bar { height: 9px; background: #ebebf2; border-radius: 3px; overflow: hidden; }
+        .op-region-bar div { height: 100%; background: #000ca1; border-radius: 3px; }
+        .op-questions { background: #f2f2f7; border-radius: 9px; padding: 9px 11px; }
+        .op-q { margin-bottom: 12px; font-size: 11px; }
+        .op-q-line { border-bottom: 1px solid #b9b9cc; height: 14px; }
         /* ====== ENDE: Rheuma-Bericht Styles ====== */
 
         /* ====== START: Standardprofile & Auto-Speichern Styles ====== */
@@ -3602,6 +3628,13 @@
                 </div>
                 <p class="rr-hint" id="rrPresetHint"></p>
                 <div class="rr-coverage" id="rrCoverage">Lade Daten …</div>
+
+                <div class="settings-section-title">Format</div>
+                <div class="rr-presets" id="rrFormat">
+                    <button type="button" data-format="onepager">One-Pager</button>
+                    <button type="button" data-format="full">Ausführlich</button>
+                </div>
+                <p class="rr-hint" id="rrFormatHint"></p>
 
                 <div class="settings-section-title">Inhalt</div>
                 <div class="rr-sections" id="rrSections"></div>
@@ -8872,6 +8905,9 @@
             ];
             const SYMPTOM_TAGS = ['Fatigue', 'Kopfweh', 'Kopfweh von Nackenenge', 'Brainfog'];
             const INJECTION_TAG = 'Rötung Spritze / Schmerzen';
+            // Knopf „Infekt“ speichert den Tag „Erkältung“; mehrere Tage am Stück = Infekt-Phase
+            const INFECT_TAG = 'Erkältung';
+            const FEVER_TAG = 'Fieber';
             const REPORT_SECTIONS = [
                 { key: 'summary', label: 'Kurzfazit & Trend', def: true },
                 { key: 'pain', label: 'Schmerzverlauf', def: true },
@@ -8999,6 +9035,38 @@
                     byDay.set(dateKey(dt), { ...d, dateObj: dt, dayKey: dateKey(dt) });
                 });
                 return [...byDay.values()].sort((a, b) => a.dateObj - b.dateObj);
+            }
+
+            // --- Infekt-Phasen: zusammenhängende Tage mit dem Tag „Infekt“ ---
+            // Tage ohne jeden Eintrag (max. 2) dazwischen unterbrechen eine Phase nicht.
+            function findInfections(all) {
+                const recorded = new Set(all.map(e => e.dayKey));
+                const days = all.filter(e => hasTag(e, INFECT_TAG)).map(e => e.dayKey).sort();
+                const episodes = [];
+                days.forEach(d => {
+                    const last = episodes[episodes.length - 1];
+                    if (last) {
+                        const gap = Math.round((isoToDate(d) - isoToDate(last.end)) / 86400000);
+                        let bridge = gap === 1;
+                        if (!bridge && gap > 1 && gap <= 3) {
+                            bridge = true;
+                            for (let k = 1; k < gap; k++) if (recorded.has(addDaysIso(last.end, k))) bridge = false;
+                        }
+                        if (bridge) { last.end = d; last.tagged++; return; }
+                    }
+                    episodes.push({ start: d, end: d, tagged: 1 });
+                });
+                const byDay = new Map(all.map(e => [e.dayKey, e]));
+                episodes.forEach(ep => {
+                    ep.days = Math.round((isoToDate(ep.end) - isoToDate(ep.start)) / 86400000) + 1;
+                    let fever = 0;
+                    for (let k = 0; k < ep.days; k++) {
+                        const e = byDay.get(addDaysIso(ep.start, k));
+                        if (e && hasTag(e, FEVER_TAG)) fever++;
+                    }
+                    ep.fever = fever;
+                });
+                return episodes;
             }
 
             // --- Bericht berechnen ---
@@ -9151,6 +9219,7 @@
                         if (hasMed(e, 'Biologika')) medList.push('Biologika-Gabe');
                         if (medList.length) parts.push(medList.join(', '));
                         const tags = SYMPTOM_TAGS.filter(t => hasTag(e, t));
+                        if (hasTag(e, INFECT_TAG)) tags.unshift('Infekt');
                         if (tags.length) parts.push(tags.join(', '));
                         if (hasTag(e, INJECTION_TAG)) parts.push('Rötung / Schmerz an der Einstichstelle');
                         let worst = null;
@@ -9189,6 +9258,14 @@
                 }));
                 if (outLabs.length) summary.push({ kind: 'labs', outLabs });
 
+                // Infekte im Zeitraum (Phasen = mind. 2 Tage; einzelne Tage separat)
+                const allInfections = findInfections(all).filter(ep => ep.end >= fromIso && ep.start <= toIso);
+                const infections = allInfections.filter(ep => ep.days >= 2);
+                const infectionSingles = allInfections.filter(ep => ep.days < 2).length;
+                if (infections.length) summary.push({ kind: 'infections', infections });
+                // Fiel ein Laborwert / eine verschobene Biologika-Gabe in eine Infekt-Phase?
+                const inInfection = (iso, slackAfter = 0) => infections.find(ep => iso >= ep.start && iso <= addDaysIso(ep.end, slackAfter));
+
                 return {
                     fromIso, toIso, days, entries, cur, before,
                     // Vergleich nur, wenn der Vorzeitraum genug Einträge hat
@@ -9197,7 +9274,8 @@
                     labCols: labCols.map(e => e.dayKey), labs, latestCrpEntry, crpPeak,
                     symptoms, wellbeing, front, back, mapDays,
                     sportDays, stretchDays, weight, sleep, notable, notes, summary,
-                    labCount: labEntries.length
+                    labCount: labEntries.length,
+                    infections, infectionSingles, inInfection, prevN: prev.length
                 };
             }
 
@@ -9320,6 +9398,7 @@
                         if (s.kind === 'trend') return `<li>Schmerz im Zeitraum ${s.word} (Ø erste Hälfte ${fmt1(painShow(s.a, conv))} → zweite Hälfte ${fmt1(painShow(s.b, conv))}).</li>`;
                         if (s.kind === 'worst') return `<li>Schlechteste Woche: KW ${s.week.kw} (Ø ${fmt1(painShow(s.week.pain, conv))}${s.week.stiff !== null ? `, Morgensteifigkeit Ø ${Math.round(s.week.stiff)} Min` : ''}).</li>`;
                         if (s.kind === 'regions') return `<li>Am stärksten betroffen: ${escapeHtml(s.ranked[0].label)} (Ø ${fmt1(painShow(s.ranked[0].avg, conv))})${s.ranked[1] ? `, gefolgt von ${escapeHtml(s.ranked[1].label)} (Ø ${fmt1(painShow(s.ranked[1].avg, conv))})` : ''}.</li>`;
+                        if (s.kind === 'infections') return `<li>Infekt${s.infections.length > 1 ? 'e' : ''}: ${s.infections.map(ep => `${deShort(ep.start)}–${deShort(ep.end)} (${ep.days} Tage${ep.fever ? ', Fieber an ' + ep.fever : ''})`).join(', ')}.</li>`;
                         if (s.kind === 'labs') return `<li>Laborwerte außerhalb der Norm: ${s.outLabs.slice(0, 4).map(o => `${o.p.label.split(' (')[0]} ${fmtLab(o.v)} am ${deShort(o.dayKey)}`).join(', ')}.</li>`;
                         return '';
                     }).join('');
@@ -9476,12 +9555,265 @@
                 return h;
             }
 
+            // --- One-Pager (Ampel-Cockpit) ---
+            const OP_COLORS = { good: '#1e7e47', warn: '#c98a14', bad: '#b3261e', none: '#b9b9cc' };
+
+            function onePagerChartSvg(r, conv) {
+                const W = 706, left = 36, right = 696, top = 10, bottom = 190, barBase = 236;
+                const firstMon = mondayOf(isoToDate(r.fromIso));
+                const lastMon = mondayOf(isoToDate(r.toIso));
+                const mondays = [];
+                for (let d = new Date(firstMon); d <= lastMon; d.setDate(d.getDate() + 7)) mondays.push(new Date(d));
+                const n = mondays.length;
+                const step = (right - left) / n;
+                const xs = (i) => left + step * (i + 0.5);
+                const xDate = (iso) => left + (Math.round((isoToDate(iso) - firstMon) / 86400000) / 7) * step;
+                const ys = (nrs) => bottom - painShow(nrs, conv) * (bottom - top) / 10;
+                const wk = new Map(r.weeks.map(w => [w.key, w]));
+                const weeks = mondays.map(m => {
+                    const w = wk.get(dateKey(m));
+                    return {
+                        kw: isoWeek(m),
+                        pain: w ? w.pain : null,
+                        neck: w ? w.neck : null,
+                        nsar: w ? w.entries.filter(isNsarDay).length : 0
+                    };
+                });
+                let svg = `<svg width="100%" viewBox="0 0 ${W} 258" role="img" aria-label="Wochenverlauf Schmerz, Schmerzmitteltage, Biologika und Infekte">`;
+                // Infekt-Phasen als Band
+                r.infections.forEach(ep => {
+                    const a = Math.max(left, xDate(ep.start)), b = Math.min(right, xDate(addDaysIso(ep.end, 1)));
+                    if (b > a) {
+                        svg += `<rect x="${a.toFixed(1)}" y="${top}" width="${(b - a).toFixed(1)}" height="${barBase - top}" fill="#fdecea"></rect>`;
+                        svg += `<text x="${((a + b) / 2).toFixed(1)}" y="${top + 9}" font-size="8.5" font-weight="600" fill="#b3261e" text-anchor="middle" font-family="Poppins, sans-serif">Infekt</text>`;
+                    }
+                });
+                [0, 5, 10].forEach(v => {
+                    const y = bottom - v * (bottom - top) / 10;
+                    svg += `<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="#ebebf2" stroke-width="1"></line>`;
+                    svg += `<text x="${left - 8}" y="${y + 3.5}" font-size="9" fill="#5c5c78" text-anchor="end" font-family="Poppins, sans-serif">${v}</text>`;
+                });
+                // NSAR-Tage pro Woche
+                svg += `<text x="${left - 8}" y="${barBase - 4}" font-size="8.5" fill="#5c5c78" text-anchor="end" font-family="Poppins, sans-serif">NSAR</text>`;
+                weeks.forEach((w, i) => {
+                    if (w.nsar) svg += `<rect x="${(xs(i) - 6).toFixed(1)}" y="${barBase - w.nsar * 4}" width="12" height="${w.nsar * 4}" rx="2" fill="#c9cbe0"></rect><text x="${xs(i).toFixed(1)}" y="${barBase - w.nsar * 4 - 3}" font-size="8" fill="#5c5c78" text-anchor="middle" font-family="Poppins, sans-serif">${w.nsar}</text>`;
+                });
+                // Linien (Lücken bei Wochen ohne Daten)
+                const line = (key, attrs) => {
+                    let seg = [], out = '';
+                    const flush = () => { if (seg.length > 1) out += `<polyline points="${seg.join(' ')}" fill="none" ${attrs}></polyline>`; seg = []; };
+                    weeks.forEach((w, i) => { if (w[key] === null) flush(); else seg.push(`${xs(i).toFixed(1)},${ys(w[key]).toFixed(1)}`); });
+                    flush();
+                    return out;
+                };
+                svg += line('neck', 'stroke="#00838a" stroke-width="2" stroke-dasharray="5 4"');
+                svg += line('pain', 'stroke="#000ca1" stroke-width="2.5" stroke-linejoin="round"');
+                const withPain = weeks.map((w, i) => ({ w, i })).filter(x => x.w.pain !== null);
+                withPain.forEach(({ w, i }) => { svg += `<circle cx="${xs(i).toFixed(1)}" cy="${ys(w.pain).toFixed(1)}" r="3" fill="#000ca1"></circle>`; });
+                if (withPain.length) {
+                    const worst = withPain.reduce((a, b) => (b.w.pain > a.w.pain ? b : a));
+                    svg += `<text x="${xs(worst.i).toFixed(1)}" y="${(ys(worst.w.pain) - 8).toFixed(1)}" font-size="9.5" font-weight="700" fill="#19192d" text-anchor="middle" font-family="Poppins, sans-serif">${fmt1(painShow(worst.w.pain, conv))}</text>`;
+                }
+                // Biologika
+                r.meds.bioDates.forEach(iso => {
+                    const x = xDate(iso) + step / 14;
+                    if (x >= left && x <= right) svg += `<text x="${x.toFixed(1)}" y="${bottom + 13}" font-size="10" fill="#b3261e" text-anchor="middle">▲</text>`;
+                });
+                const lab = Math.max(1, Math.ceil(n / 7));
+                weeks.forEach((w, i) => {
+                    if (i % lab === 0 || i === n - 1) svg += `<text x="${xs(i).toFixed(1)}" y="253" font-size="9" fill="#5c5c78" text-anchor="middle" font-family="Poppins, sans-serif">KW ${w.kw}</text>`;
+                });
+                return svg + '</svg>';
+            }
+
+            function renderOnePagerHtml(r, conv) {
+                const name = (auth.currentUser && auth.currentUser.displayName) || 'Hendrik';
+                const coverage = r.days ? Math.round(r.entries.length / r.days * 100) : 0;
+                const last = getLastRheumaVisit();
+                const periodLabel = (last && last === r.fromIso) ? 'Seit letztem Termin' : 'Zeitraum';
+                const next = userSettings.nextRheumaVisit;
+                const visitLine = next && next.date && next.date >= todayIso() ? `Termin am ${deLong(next.date)}${next.time ? ' um ' + next.time : ''}` : `Erstellt am ${deLong(todayIso())}`;
+                const cmp = r.comparable;
+                const tiles = [];
+                const tile = (status, label, value, sub, subCls) => tiles.push(`
+                    <div class="op-tile">
+                        <span class="op-tile-label"><span class="op-dot" style="background:${OP_COLORS[status]};"></span>${label}</span>
+                        <span class="op-tile-value">${value}</span>
+                        <span class="op-tile-sub ${subCls || ''}">${sub}</span>
+                    </div>`);
+
+                // 1 Schmerz
+                {
+                    const d = cmp && r.cur.pain !== null && r.before.pain !== null ? r.cur.pain - r.before.pain : null;
+                    const info = painDiffInfo(d, conv);
+                    const status = r.cur.pain === null ? 'none' : d === null ? 'none' : d < 0.3 ? 'good' : d <= 1 ? 'warn' : 'bad';
+                    const trend = r.summary.find(x => x.kind === 'trend');
+                    tile(status, 'Schmerz', `${fmt1(painShow(r.cur.pain, conv))} <small>Ø ${conv ? 'NRS' : '1–10'}</small>`,
+                        `${info ? info.text + ' ggü. Vorzeitraum' : 'kein Vorzeitraum'}${trend ? ' · ' + trend.word : ''}`,
+                        info ? (info.good ? 'rp-good' : info.bad ? 'rp-bad' : '') : '');
+                }
+                // 2 Morgensteifigkeit
+                {
+                    const d = cmp && r.cur.stiff !== null && r.before.stiff !== null ? r.cur.stiff - r.before.stiff : null;
+                    const over30 = r.stiffBuckets[3].count + r.stiffBuckets[4].count;
+                    const status = r.cur.stiff === null ? 'none' : d === null ? 'none' : d <= 5 ? 'good' : d <= 15 ? 'warn' : 'bad';
+                    tile(status, 'Morgensteifigkeit', `${r.cur.stiff !== null ? Math.round(r.cur.stiff) : '–'} <small>Min Ø</small>`,
+                        `${d !== null ? `${d < 0 ? '▼' : d > 0 ? '▲' : '●'} ${Math.abs(Math.round(d))} Min · ` : ''}&gt; 30 Min an ${over30} Tagen`,
+                        d !== null ? (d < -0.5 ? 'rp-good' : d > 0.5 ? 'rp-bad' : '') : '');
+                }
+                // 3 Entzündung
+                {
+                    const c = r.latestCrpEntry;
+                    const peak = r.crpPeak;
+                    const status = !c ? 'none' : c.crpValue > 5 ? 'bad' : (peak && peak.crpValue > 5) ? 'warn' : 'good';
+                    const bsg = r.labs.find(x => x.key === 'bsgValue');
+                    let sub = c ? (c.crpValue > 5 ? 'erhöht (Norm &lt; 5)' : 'im Normbereich') : 'kein Wert im Zeitraum';
+                    if (peak && c && peak !== c) {
+                        const ep = r.inInfection(peak.dayKey, 7);
+                        sub = `Spitze ${fmtLab(peak.crpValue)} am ${deShort(peak.dayKey)}${ep ? ' (Infekt)' : ''}`;
+                    }
+                    if (bsg && bsg.latest !== null) sub += ` · BSG ${fmtLab(bsg.latest)}`;
+                    tile(status, 'Entzündung', c ? `${fmtLab(c.crpValue)} <small>CRP mg/l (${deShort(c.dayKey)})</small>` : '–', sub);
+                }
+                // 4 Schmerzmittel
+                {
+                    const share = r.cur.n ? Math.round(r.cur.nsar / r.cur.n * 100) : 0;
+                    const nc = nsarCompare(r);
+                    const before = r.before.n ? Math.round(r.before.nsar / r.before.n * 100) : null;
+                    const dp = nc && before !== null ? share - before : null;
+                    const status = dp === null ? 'none' : dp <= 5 ? 'good' : dp <= 15 ? 'warn' : 'bad';
+                    const eto120 = r.meds.nsar.find(x => x.label === 'Etoricoxib 120 mg');
+                    tile(status, 'Schmerzmittel (NSAR)', `${share} % <small>der Tage (${r.cur.nsar} / ${r.cur.n})</small>`,
+                        `${dp !== null ? `${dp > 0 ? '▲' : dp < 0 ? '▼' : '●'} von ${before} %` : 'kein Vorzeitraum'}${eto120 && eto120.days ? ' · Eto 120 mg ' + eto120.days + '×' : ''}`,
+                        dp !== null ? (dp < 0 ? 'rp-good' : dp > 5 ? 'rp-bad' : '') : '');
+                }
+                // 5 Biologika
+                {
+                    const m = r.meds;
+                    let status = m.bioDates.length ? 'good' : 'none';
+                    let sub = m.bioDates.length ? `längster Abstand ${m.bioMaxGap ?? '–'} Tage` : 'keine Gabe eingetragen';
+                    if (m.bioDates.length >= 3) {
+                        const gaps = [];
+                        for (let i = 1; i < m.bioDates.length; i++) gaps.push({ g: Math.round((isoToDate(m.bioDates[i]) - isoToDate(m.bioDates[i - 1])) / 86400000), at: m.bioDates[i] });
+                        const sorted = gaps.map(x => x.g).sort((a, b) => a - b);
+                        const median = sorted[Math.floor(sorted.length / 2)];
+                        const late = gaps.filter(x => x.g > median * 1.25);
+                        if (late.length) {
+                            status = 'warn';
+                            const ep = late.map(x => r.inInfection(addDaysIso(x.at, -(x.g - median)), 3)).find(Boolean);
+                            sub = `${late.length}× später als üblich (+${late[0].g - median} Tage)${ep ? ' – während Infekt' : ''}`;
+                        }
+                    }
+                    tile(status, 'Biologika', `${m.bioDates.length} <small>Gaben${m.bioAvgGap !== null ? ' · Ø alle ' + Math.round(m.bioAvgGap) + ' Tage' : ''}</small>`, sub);
+                }
+                // 6 Verträglichkeit
+                {
+                    const m = r.meds;
+                    const status = m.injectionSite === 0 ? 'good' : m.injectionSite <= 2 ? 'warn' : 'bad';
+                    const eff = m.effect.stark + m.effect.mittel + m.effect.schwach;
+                    tile(status, 'Verträglichkeit', `${m.injectionSite}× <small>Rötung / Schmerz Einstichstelle</small>`,
+                        eff ? `Wirkung: stark ${m.effect.stark} · mittel ${m.effect.mittel} · schwach ${m.effect.schwach}` : 'keine Wirkungs-Einschätzung eingetragen');
+                }
+
+                // Labor (letzter Wert + Trend)
+                const short = { crpValue: 'CRP mg/l', bsgValue: 'BSG mm/h', lzValue: 'Leukozyten', tzValue: 'Thrombozyten', npValue: 'Neutrophile %', alatValue: 'ALAT U/l', hbValue: 'Hb g/dl', d3Value: 'Vitamin D3 µg/l' };
+                const lastLabDate = r.labCols.length ? r.labCols[r.labCols.length - 1] : null;
+                const outCount = r.labs.filter(pp => pp.latest !== null && (pp.latest < pp.min || pp.latest > pp.max)).length;
+                const labHtml = r.labs.length ? `
+                    <table class="rp-table" style="font-size:10px;">
+                        <thead><tr><th>Wert</th><th class="num">${lastLabDate ? deShort(lastLabDate) : ''}</th><th>Trend</th></tr></thead>
+                        <tbody>${r.labs.map(pp => {
+                            const out = pp.latest !== null && (pp.latest < pp.min || pp.latest > pp.max);
+                            const t = pp.trend === 'up' ? '▲' : pp.trend === 'down' ? '▼' : pp.trend === 'stable' ? '●' : '–';
+                            const tc = pp.inflammation && pp.trend === 'down' ? 'rp-good' : pp.inflammation && pp.trend === 'up' ? 'rp-bad' : '';
+                            return `<tr><td>${short[pp.key] || pp.label}</td><td class="num ${out ? 'rp-bad' : ''}" style="${out ? 'font-weight:700;' : ''}">${fmtLab(pp.latest)}</td><td class="${tc}" style="font-weight:600;${tc ? '' : 'color:#5c5c78;'}">${t}</td></tr>`;
+                        }).join('')}</tbody>
+                    </table>
+                    <p class="rp-muted">${outCount ? `${outCount} Wert${outCount > 1 ? 'e' : ''} außerhalb der Norm (rot).` : 'Alle letzten Werte im Normbereich.'} ${r.labCount} Messung${r.labCount === 1 ? '' : 'en'} im Zeitraum.</p>`
+                    : '<p class="rp-muted">Keine Blutwerte im Zeitraum.</p>';
+
+                // Regionen
+                const ranked = r.regions.filter(x => x.avg !== null).sort((a, b) => b.avg - a.avg);
+                const regionHtml = ranked.map(g => `<div class="op-region"><span>${escapeHtml(g.label)}</span><div class="op-region-bar"><div style="width:${Math.min(100, painShow(g.avg, conv) * 10)}%;"></div></div><span style="text-align:right;">${fmt1(painShow(g.avg, conv))}</span></div>`).join('');
+                const better = ranked.filter(g => g.trend && g.trend.dir === 'down').length;
+                const worse = ranked.filter(g => g.trend && g.trend.dir === 'up').length;
+                const regionNote = worse ? `${worse} Region${worse > 1 ? 'en' : ''} schlechter, ${better} besser.` : better ? (better === ranked.length ? 'Alle Regionen rückläufig.' : `${better} Region${better > 1 ? 'en' : ''} rückläufig, Rest stabil.`) : 'Alle Regionen stabil.';
+                const symp = r.symptoms.filter(x => x.days).map(x => `${escapeHtml(x.label)} ${x.days}`).join(' · ');
+
+                // Fragen
+                const qs = (userSettings.doctorQuestions || []).filter(q => !q.done);
+                const shownQs = qs.slice(0, 5);
+                const qHtml = shownQs.length
+                    ? shownQs.map(q => `<div class="op-q">☐ ${escapeHtml(q.text)}<div class="op-q-line"></div></div>`).join('') + (qs.length > 5 ? `<p class="rp-muted">+ ${qs.length - 5} weitere Fragen</p>` : '')
+                    : '<div class="op-q">Notizen<div class="op-q-line"></div></div><div class="op-q"><div class="op-q-line"></div></div><div class="op-q"><div class="op-q-line"></div></div>';
+
+                // Infekte
+                const infectHtml = r.infections.length
+                    ? `<p class="op-infects"><b style="color:#b3261e;">Infekt${r.infections.length > 1 ? 'e' : ''}:</b> ${r.infections.map(ep => `${deShort(ep.start)}–${deShort(ep.end)} (${ep.days} Tage${ep.fever ? ', Fieber an ' + ep.fever : ''})`).join(' · ')}${r.infectionSingles ? ` · zusätzlich ${r.infectionSingles} einzelne${r.infectionSingles > 1 ? '' : 'r'} Infekt-Tag${r.infectionSingles > 1 ? 'e' : ''}` : ''}</p>`
+                    : (r.infectionSingles ? `<p class="op-infects">Kein mehrtägiger Infekt · ${r.infectionSingles} einzelne${r.infectionSingles > 1 ? '' : 'r'} Infekt-Tag${r.infectionSingles > 1 ? 'e' : ''}</p>` : '<p class="op-infects" style="color:#5c5c78;">Kein Infekt im Zeitraum eingetragen.</p>');
+
+                return `
+                    <div class="op-head">
+                        <div>
+                            <div class="rp-kicker">Daily Companion · Selbstaufzeichnung</div>
+                            <h1>Rheuma-Verlauf auf einen Blick</h1>
+                            <div class="rp-period">${periodLabel}: ${deLong(r.fromIso)} – ${deLong(r.toIso)} · ${r.days} Tage · ${r.entries.length} Tage erfasst (${coverage} %)</div>
+                        </div>
+                        <div class="rp-meta">
+                            <b>${escapeHtml(name)}</b>
+                            <span>${visitLine}</span>
+                            <span>${conv ? 'Schmerz als NRS 0–10 (0 = schmerzfrei)' : 'Eigene Skala 1–10 (10 = beschwerdefrei)'}</span>
+                        </div>
+                    </div>
+                    <div class="op-tiles">${tiles.join('')}</div>
+                    <div class="op-legend">
+                        <span><span class="op-dot" style="background:${OP_COLORS.good};"></span>stabil / besser</span>
+                        <span><span class="op-dot" style="background:${OP_COLORS.warn};"></span>beobachten</span>
+                        <span><span class="op-dot" style="background:${OP_COLORS.bad};"></span>verschlechtert</span>
+                        <span><span class="op-dot" style="background:${OP_COLORS.none};"></span>kein Vergleich möglich</span>
+                    </div>
+                    <div class="op-section-head">
+                        <h2>Verlauf je Woche</h2>
+                        <div class="rp-legend" style="margin:0;">
+                            <span><span style="width:14px;height:3px;background:#000ca1;display:inline-block;"></span>Schmerz gesamt</span>
+                            <span><span style="width:14px;border-top:2px dashed #00838a;display:inline-block;"></span>Nacken</span>
+                            <span><span style="width:8px;height:8px;background:#c9cbe0;display:inline-block;"></span>Tage mit NSAR</span>
+                            <span><span style="color:#b3261e;">▲</span>Biologika</span>
+                            <span><span style="width:10px;height:8px;background:#fdecea;display:inline-block;border:1px solid #f0c9c6;"></span>Infekt</span>
+                        </div>
+                    </div>
+                    ${onePagerChartSvg(r, conv)}
+                    ${infectHtml}
+                    <div class="op-cols">
+                        <div><h2>Labor</h2>${labHtml}</div>
+                        <div><h2>Schmerz je Region</h2>${regionHtml || '<p class="rp-muted">Keine Bewertungen.</p>'}
+                            <p class="rp-muted">Ø ${conv ? 'NRS' : '1–10'} im Zeitraum. ${regionNote}</p>
+                            ${symp ? `<p style="font-size:10px;margin:6px 0 0;"><b>Begleitend:</b> ${symp} Tage</p>` : ''}
+                        </div>
+                        <div class="op-questions"><h2>Meine Fragen</h2>${qHtml}</div>
+                    </div>
+                    <div class="rp-footer">Selbst erfasste Daten – ersetzt keine ärztliche Untersuchung.${conv ? ' NRS = 10 − eigene Bewertung (10 = top, 1 = mies).' : ''} Infekt-Phasen = mehrere Tage am Stück mit dem Tag „Infekt“.</div>`;
+            }
+
             // --- Popup: Einstellungen des Berichts ---
             function reportPrefs() {
                 const p = userSettings.reportPrefs || {};
                 const sections = {};
                 REPORT_SECTIONS.forEach(s => { sections[s.key] = p.sections && typeof p.sections[s.key] === 'boolean' ? p.sections[s.key] : s.def; });
-                return { sections, convert: typeof p.convert === 'boolean' ? p.convert : true };
+                return { sections, convert: typeof p.convert === 'boolean' ? p.convert : true, format: p.format === 'full' ? 'full' : 'onepager' };
+            }
+            function rrFormat() {
+                const active = document.querySelector('#rrFormat button.active');
+                return active ? active.dataset.format : 'onepager';
+            }
+            function applyFormatUi(format) {
+                document.querySelectorAll('#rrFormat button').forEach(b => b.classList.toggle('active', b.dataset.format === format));
+                const onePager = format === 'onepager';
+                document.querySelectorAll('#rrSections input').forEach(cb => { cb.disabled = onePager; });
+                document.getElementById('rrSections').style.opacity = onePager ? '0.45' : '1';
+                document.getElementById('rrFormatHint').textContent = onePager
+                    ? 'Eine A4-Seite: Ampel-Übersicht, Wochenverlauf mit Infekten, Labor, Regionen und Fragen. Die Inhalt-Auswahl gilt nur für „Ausführlich“.'
+                    : 'Mehrere Seiten mit allen gewählten Abschnitten.';
             }
             function readSections() {
                 const sections = {};
@@ -9489,7 +9821,7 @@
                 return sections;
             }
             async function saveReportPrefs() {
-                userSettings.reportPrefs = { sections: readSections(), convert: rrConvert() };
+                userSettings.reportPrefs = { sections: readSections(), convert: rrConvert(), format: rrFormat() };
                 try {
                     await settingsDocRef().set({ reportPrefs: userSettings.reportPrefs }, { merge: true });
                 } catch (e) {
@@ -9553,7 +9885,14 @@
                     `<label><input type="checkbox" data-section="${s.key}" ${prefs.sections[s.key] ? 'checked' : ''}>${escapeHtml(s.label)}</label>`
                 ).join('');
                 document.getElementById('rrConvert').checked = prefs.convert;
+                applyFormatUi(prefs.format);
             }
+            document.getElementById('rrFormat').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-format]');
+                if (!btn) return;
+                applyFormatUi(btn.dataset.format);
+                saveReportPrefs();
+            });
 
             // --- Fragen ---
             function renderQuestions() {
@@ -9649,7 +9988,7 @@
             // --- PDF (über den Druckdialog: „Als PDF speichern“) ---
             function printReport(r, sections, conv) {
                 const area = document.getElementById('rheumaPrintArea');
-                area.innerHTML = renderReportHtml(r, sections, conv);
+                area.innerHTML = rrFormat() === 'onepager' ? renderOnePagerHtml(r, conv) : renderReportHtml(r, sections, conv);
                 const imgs = [...area.querySelectorAll('img')];
                 Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })))
                     .then(() => {
