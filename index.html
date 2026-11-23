@@ -521,12 +521,28 @@
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 8px;
+            right: 10px;
+            width: 44px;                 /* große Tippfläche, damit man das ✕ sicher trifft */
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
             font-size: 1.8em;
             color: #bbb;
             cursor: pointer;
             transition: color 0.2s ease;
+            z-index: 5;                  /* liegt immer über Überschriften und Inhalt */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Überschrift des Kalorientrackers öffnet den Ausgabentracker:
+           nur der Text selbst ist klickbar, nicht die ganze Zeile unter dem ✕ */
+        #nutritionHeader {
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .close-btn:hover {
