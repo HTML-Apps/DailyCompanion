@@ -2372,24 +2372,33 @@
             gap: 12px;
             padding: 22px 18px;
         }
-        #profileSavePopup h2 { margin: 0 !important; }
+        #profileSavePopup h2 { margin: 0 !important; font-size: 1.45em; padding-right: 40px; }
         .profile-sub { margin: -6px 0 0; font-size: 0.8em; color: #87879e; }
-        .profile-choice-list { display: flex; flex-direction: column; gap: 6px; }
+        /* Kompaktes Raster: passt auch mit 7 Wochentags-Profilen ohne Scrollen auf kleine Handys */
+        .profile-choice-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 6px; }
         .profile-choice {
+            position: relative;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 1px;
+            min-height: 44px;
             background: #2a2a4a;
             border: 1px solid #45456a;
             border-radius: 12px;
-            padding: 10px 12px;
+            padding: 6px 6px;
             cursor: pointer;
             font-size: 0.9em;
+            text-align: center;
         }
-        .profile-choice.is-selected { border-color: #00f2fe; box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
-        .profile-choice input { width: 18px; height: 18px; accent-color: #00f2fe; margin: 0; flex-shrink: 0; }
-        .profile-choice-name { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow-wrap: break-word; }
-        .profile-choice-days { flex: 0 1 auto; max-width: 55%; font-size: 0.78em; color: #aaaaaa; text-align: right; }
+        .profile-choice.is-wide { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; padding: 6px 12px; }
+        .profile-choice.is-new { color: #00f2fe; border-style: dashed; }
+        .profile-choice.is-selected { border-color: #00f2fe; background: rgba(0, 242, 254, 0.12); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+        .profile-choice:focus-within { outline: 2px solid #00f2fe; outline-offset: 1px; }
+        .profile-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+        .profile-choice-name { min-width: 0; font-weight: 600; overflow-wrap: anywhere; line-height: 1.2; }
+        .profile-choice-days { font-size: 0.72em; color: #aaaaaa; line-height: 1.2; }
         .profile-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
         .profile-day {
             min-height: 40px;
@@ -4532,18 +4541,30 @@
 
         function renderProfileSaveSheet() {
             const list = document.getElementById('profileSaveList');
-            const sorted = [...defaultProfiles].sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0));
-            const options = sorted.map(p => ({
-                id: p.id,
-                name: p.name,
-                days: p.isDefault ? `alle anderen Tage (${profileDaysLabel(unassignedWeekdays())})` : profileDaysLabel(p.days)
-            }));
-            options.push({ id: 'new', name: '+ Neues Profil', days: '' });
+            // Reihenfolge: Standard, dann nach erstem Wochentag (Mo → So), Profile ohne Tag zuletzt
+            const dayOrder = (p) => {
+                const idx = PROFILE_WEEKDAYS.findIndex(w => p.days.includes(w.d));
+                return idx === -1 ? 99 : idx;
+            };
+            const sorted = [...defaultProfiles].sort((a, b) =>
+                (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0) || dayOrder(a) - dayOrder(b));
+            const options = sorted.map(p => {
+                let days;
+                if (p.isDefault) {
+                    const free = unassignedWeekdays();
+                    days = free.length ? `gilt für ${profileDaysLabel(free)}` : 'alle Tage haben ein eigenes Profil';
+                } else {
+                    days = profileDaysLabel(p.days);
+                    if (days === p.name) days = '';          // „Mi … Mi“ nicht doppelt zeigen
+                }
+                return { id: p.id, name: p.name, days, wide: !!p.isDefault };
+            });
+            options.push({ id: 'new', name: '+ Neu', days: '', isNew: true });
             list.innerHTML = options.map(o => `
-                <label class="profile-choice ${o.id === profileSaveSelection ? 'is-selected' : ''}">
-                    <input type="radio" name="profileSaveChoice" value="${escProfile(o.id)}" ${o.id === profileSaveSelection ? 'checked' : ''}>
+                <label class="profile-choice ${o.wide ? 'is-wide' : ''} ${o.isNew ? 'is-new' : ''} ${o.id === profileSaveSelection ? 'is-selected' : ''}">
+                    <input type="radio" name="profileSaveChoice" value="${escProfile(o.id)}" ${o.id === profileSaveSelection ? 'checked' : ''} aria-label="${escProfile(o.isNew ? 'Neues Profil' : o.name)}">
                     <span class="profile-choice-name">${escProfile(o.name)}</span>
-                    <span class="profile-choice-days">${escProfile(o.days)}</span>
+                    ${o.days ? `<span class="profile-choice-days">${escProfile(o.days)}</span>` : ''}
                 </label>`).join('');
 
             const selected = defaultProfiles.find(p => p.id === profileSaveSelection);
